@@ -32,6 +32,7 @@ def check_python_version_from_file(fname):
  
 def repo_install_ubuntu():
     print "installing from ubuntu pkg repo..."
+    os.system('apt-get update')
     os.system('apt-get -y install zlib1g-dev')
     os.system('apt-get -y install libssl-dev')
     os.system('apt-get -y install texinfo')
