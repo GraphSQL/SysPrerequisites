@@ -35,6 +35,7 @@ def repo_install_ubuntu():
     os.system('apt-get -y install zlib1g-dev')
     os.system('apt-get -y install libssl-dev')
     os.system('apt-get -y install texinfo')
+    os.system('apt-get -y install build-essential')
     os.system('apt-get -y install python-setuptools')
     os.system('easy_install pip')
     os.system('pip install fabric')      
