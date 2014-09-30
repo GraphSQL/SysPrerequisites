@@ -25,7 +25,7 @@ then
     echo "----- Install Python 2.7 ------"
     echo "----- Install Prerequisites for Python  ------"
     yum update
-    yum -y install zlib-devel readline-devel tk gdbm-devel sqlite-devel autoconf
+    yum -y install zlib-devel readline-devel tk gdbm-devel sqlite-devel autoconf libtool
     yum -y install openssl-devel
     yum -y install texinfo
     yum -y groupinstall "Development Tools"
