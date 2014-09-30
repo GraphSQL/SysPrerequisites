@@ -76,7 +76,10 @@ cd ../gperftools-2.2.1
 ./configure
 make
 make install
-
+# copy the *.so file to /usr/lib
+cp /usr/local/lib/libtcmalloc* /usr/lib/
+cp /usr/local/lib/libprofiler* /usr/lib/
+cp /usr/local/lib/libunwind* /usr/lib/
 
 
 
