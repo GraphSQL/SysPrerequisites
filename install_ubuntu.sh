@@ -25,10 +25,11 @@ then
     echo "----- Install Python 2.7 ------"
     echo "----- Install Prerequisites for Python  ------"
     apt-get update
-    apt-get -y install build-essential zlib1g-dev libbz2-dev libreadline-dev libreadline-gplv2-dev libncursesw5-dev tk-dev libgdbm-dev libc6-dev g++
+    apt-get -y install build-essential zlib1g-dev libbz2-dev libreadline-dev libreadline-gplv2-dev libncursesw5-dev tk-dev libgdbm-dev libc6-dev
     apt-get -y install make autoconf libtool
     apt-get -y install sqlite3 libsqlite3-dev
     apt-get -y install libssl-dev
+    apt-get -y install g++
     cd Python-2.7.5
     ./configure
     touch Include/Python-ast.h
