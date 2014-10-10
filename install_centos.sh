@@ -65,6 +65,10 @@ python setup.py install
 cd ../Fabric-1.8.2 
 python setup.py install
 
+echo "----- Install Kazoo ------"
+cd ../kazoo-2.0.1
+python setup.py install
+
 #now we need to install tcmalloc
 echo "----- Install TCMalloc ------"
 cd ../libunwind-1.1
