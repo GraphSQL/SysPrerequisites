@@ -104,6 +104,12 @@ free -h >> $report_f 2>&1
 
 print_and_save "------ Check Disk ------" $report_f
 df -h >> $report_f 2>&1
+mount >> $report_f 2>&1
+
+print_and_save "------ Check Network Interface ------" $report_f
+ifconfig  >> $report_f 2>&1
+
+
 
 echo -e "\n"
 echo "Please check \"report.txt\" for more details."
