@@ -96,6 +96,13 @@ echo "----- Install Kazoo ------"
 cd ../kazoo-2.0.1
 python setup.py install
 
+echo "----- Install Redis ------"
+cd ../
+tar xvfz redis-stable.tar.gz
+cd redis-stable 
+make
+cp src/redis-server  /usr/bin/
+
 #now we need to install tcmalloc
 echo "----- Install TCMalloc ------"
 cd ../libunwind-1.1
