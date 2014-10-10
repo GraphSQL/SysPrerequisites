@@ -100,7 +100,7 @@ print_and_save "------ Check CPU ------" $report_f
 cat /proc/cpuinfo >> $report_f 2>&1
 
 print_and_save "------ Check Memory ------" $report_f
-free -h >> $report_f 2>&1
+free >> $report_f 2>&1
 
 print_and_save "------ Check Disk ------" $report_f
 df -h >> $report_f 2>&1
