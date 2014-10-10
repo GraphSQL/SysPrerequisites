@@ -6,3 +6,4 @@ Run ./check_sys_config.sh will generate a "report.txt" which contains the compre
 Run ./install_ubuntu.sh to install all the prerequisites on ubuntu machines.
 
 Run ./install_centos.sh to install all the prerequisites on centos/redhat machines.
+(*you need sudo privilege to run install* scripts)
