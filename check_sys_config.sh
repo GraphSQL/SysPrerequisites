@@ -109,7 +109,11 @@ mount >> $report_f 2>&1
 print_and_save "------ Check Network Interface ------" $report_f
 ifconfig  >> $report_f 2>&1
 
+print_and_save "------ Check Installed Libs ------" $report_f
+ldconfig -p >> $report_f 2>&1
 
+print_and_save "------ Check Installed Packages ------" $report_f
+dpkg --get-selections >> $report_f 2>&1
 
 echo -e "\n"
 echo "Please check \"report.txt\" for more details."
