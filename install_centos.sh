@@ -1,4 +1,29 @@
 #!/bin/bash
+# first check JAVA, GCC/G++, etc.
+echo "----- Install JAVA ------"
+if which java; then
+    echo "Java has been installed already."
+else
+   yum -y install java-1.7.0-openjdk
+fi
+
+echo "----- Install GCC/G++ ------"
+if which gcc; then
+    echo "gcc has been installed already."
+else
+   yum -y groupinstall "Development Tools"
+fi
+
+if which g++; then
+    echo "g++ has been installed already."
+else
+   yum -y groupinstall "Development Tools"
+fi
+
+echo "----- Install Some Other libs ------"
+yum -y install libtool autoconf
+
+
 # first check if python is installed and its version
 python -V > install.dump 2>&1
 python_stat=0
