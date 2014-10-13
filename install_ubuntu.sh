@@ -1,4 +1,5 @@
 #!/bin/bash
+apt-get update
 # first check JAVA, GCC/G++, etc.
 echo "----- Install JAVA ------"
 if which java; then
