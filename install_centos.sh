@@ -74,6 +74,9 @@ then
     fi
 fi
 
+echo "----- Install Other Libs/Pkgs ------"
+yum -y install unzip
+
 # Now we need to install fabric
 echo "----- Install Fabric ------"
 cd pycrypto-2.6
