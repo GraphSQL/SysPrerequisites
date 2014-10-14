@@ -10,4 +10,8 @@ sh -c "echo deb https://get.docker.io/ubuntu docker main\
 apt-get update
 apt-get -y install lxc-docker
 
+apt-get -y install lxc wget bsdtar curl
+apt-get -y install linux-image-extra-$(uname -r)
+modprobe aufs
+
 
