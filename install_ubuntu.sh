@@ -103,6 +103,7 @@ tar xvfz redis-stable.tar.gz
 cd redis-stable 
 make
 cp src/redis-server  /usr/bin/
+cp src/redis-cli  /usr/bin/
 
 #now we need to install tcmalloc
 echo "----- Install TCMalloc ------"
