@@ -96,6 +96,14 @@ else
     print_and_save "*g++ is not installed." $report_f
 fi
 
+print_and_save "------ Check Redis ------" $report_f
+if which redis-server; then
+    redis-server -v >> $report_f
+    print_and_save "*redis is installed." $report_f
+else
+    print_and_save "*redis is not installed." $report_f
+fi
+
 print_and_save "------ Check CPU ------" $report_f
 cat /proc/cpuinfo >> $report_f 2>&1
 
