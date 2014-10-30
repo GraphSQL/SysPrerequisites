@@ -101,7 +101,11 @@ python setup.py install
 echo "----- Install Redis ------"
 cd ../
 tar xvfz redis-stable.tar.gz
-cd redis-stable 
+cd redis-stable
+# the following three are found needed on a AMAZON Linux....
+cd deps
+make hiredis  jemalloc  linenoise  lua
+cd ../
 make
 cp src/redis-server  /usr/bin/
 cp src/redis-cli  /usr/bin/
