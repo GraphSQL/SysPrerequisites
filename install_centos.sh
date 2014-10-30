@@ -122,6 +122,9 @@ cp /usr/local/lib/libtcmalloc* /usr/lib/
 cp /usr/local/lib/libprofiler* /usr/lib/
 cp /usr/local/lib/libunwind* /usr/lib/
 
+# change open file limit
+echo "* hard nofile 1000000" >> /etc/security/limits.conf
+echo "* soft nofile 1000000" >> /etc/security/limits.conf
 
 
 
