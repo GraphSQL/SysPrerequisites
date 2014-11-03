@@ -23,7 +23,7 @@ else
 fi
 
 echo "----- Install Some Other libs ------"
-apt-get -y install libtool autoconf unzip
+apt-get -y install libtool autoconf unzip zlib1g-dev
 
 # first check if python is installed and its version
 python -V > install.dump 2>&1
