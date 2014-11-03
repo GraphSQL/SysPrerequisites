@@ -22,7 +22,7 @@ else
 fi
 
 echo "----- Install Some Other libs ------"
-yum -y install libtool autoconf
+yum -y install libtool autoconf zlib-devel
 
 
 # first check if python is installed and its version
