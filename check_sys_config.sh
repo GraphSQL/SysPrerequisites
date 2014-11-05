@@ -5,25 +5,18 @@ function print_and_save {
     echo $1 >> $2 
 }  
 
-
-report_f="report.txt"
+THISHOST=$(hostname)
+report_f="${THISHOST}_report.txt"
 rm -rf $report_f
 
 print_and_save "------ Host ------" $report_f
 hostname >> $report_f
 hostname
 
-# check OS familu
+# check OS family
 print_and_save "------ Check OS Family ------" $report_f
-if lsb_release -a | grep Ubuntu; then
-    lsb_release -a >> $report_f 2>&1
-    print_and_save "*OS is Ubuntu." $report_f
-elif cat /etc/redhat-release | grep CentOS; then
-    cat /etc/redhat-release >> $report_f 2>&1
-    print_and_save "*OS is CentOS." $report_f
-else
-    print_and_save "*Unknown OS." $report_f
-fi
+cat /etc/issue >> $report_f
+cat /etc/redhat-release >> $report_f 2>&1
 
 
 # check if python is installed and its version
@@ -121,7 +114,8 @@ print_and_save "------ Check Installed Libs ------" $report_f
 ldconfig -p >> $report_f 2>&1
 
 print_and_save "------ Check Installed Packages ------" $report_f
+rpm -qa >> $report_f 2>&1
 dpkg --get-selections >> $report_f 2>&1
 
 echo -e "\n"
-echo "Please check \"report.txt\" for more details."
+echo "Please check ${report_f} for more details."
