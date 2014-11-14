@@ -67,7 +67,7 @@ else
 fi
 
 print_and_save "------ Check make ------" $report_f
-if which scp; then
+if which make; then
     print_and_save "*make is installed." $report_f
 else
     print_and_save "*make is not installed." $report_f
