@@ -97,6 +97,10 @@ echo "----- Install Kazoo ------"
 cd ../kazoo-2.0.1
 python setup.py install
 
+echo "---- Install psutil ------"
+cd ../psutil-2.1.3
+python setup.py install
+
 echo "----- Install Redis ------"
 cd ../
 tar xvfz redis-stable.tar.gz
