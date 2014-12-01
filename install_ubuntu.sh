@@ -56,6 +56,7 @@ then
     apt-get -y install sqlite3 libsqlite3-dev
     apt-get -y install libssl-dev
     apt-get -y install g++
+    apt-get -y install python-dev
     cd Python-2.7.5
     ./configure
     touch Include/Python-ast.h
