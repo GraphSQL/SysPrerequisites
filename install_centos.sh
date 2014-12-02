@@ -75,7 +75,7 @@ then
 fi
 
 echo "----- Install Other Libs/Pkgs ------"
-yum -y install unzip python-devel
+yum -y install unzip python-devel gmp-devel
 
 # Now we need to install fabric
 echo "----- Install Fabric ------"
