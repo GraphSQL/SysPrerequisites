@@ -122,7 +122,7 @@ autoreconf -i
 make
 make install
 cd ../gperftools-2.2.1
-./configure
+./configure --enable-frame-pointers
 make
 make install
 # copy the *.so file to /usr/lib
