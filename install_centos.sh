@@ -60,7 +60,7 @@ then
     touch Include/Python-ast.h
     touch Python/Python-ast.c
     make
-    make install
+    make altinstall
     echo "----- Python 2.7 installed ------\n" 
     # check if we need to install virtualenv
     if [ $python_stat -eq 3 ]
