@@ -29,7 +29,7 @@ yum -y install libtool autoconf zlib-devel
 python -V > install.dump 2>&1
 python_stat=0
 if grep Python install.dump; then
-    if grep "Python 2.[7-9]" install.dump; then
+    if grep "Python 2.[6-9]" install.dump; then
         echo "Python version OK."
         python_stat=1
     elif grep "Python 3.*" install.dump; then
@@ -133,6 +133,8 @@ cp /usr/local/lib/libunwind* /usr/lib/
 # change open file limit
 echo "* hard nofile 1000000" >> /etc/security/limits.conf
 echo "* soft nofile 1000000" >> /etc/security/limits.conf
+
+echo "kill -HUP 1  and logoff and logon to make limit take effect"
 
 
 
