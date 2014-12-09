@@ -24,12 +24,13 @@ fi
 
 echo "----- Install Some Other libs ------"
 apt-get -y install libtool autoconf unzip zlib1g-dev lsof
+apt-get -y install python-dev
 
 # first check if python is installed and its version
 python -V > install.dump 2>&1
 python_stat=0
 if grep Python install.dump; then
-    if grep "Python 2.[7-9]" install.dump; then
+    if grep "Python 2.[6-9]" install.dump; then
         echo "Python version OK."
         python_stat=1
     elif grep "Python 3.*" install.dump; then
@@ -56,7 +57,6 @@ then
     apt-get -y install sqlite3 libsqlite3-dev
     apt-get -y install libssl-dev
     apt-get -y install g++
-    apt-get -y install python-dev
     cd Python-2.7.5
     ./configure
     touch Include/Python-ast.h
