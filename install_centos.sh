@@ -134,6 +134,14 @@ cp /usr/local/lib/libunwind* /usr/lib/
 echo "* hard nofile 1000000" >> /etc/security/limits.conf
 echo "* soft nofile 1000000" >> /etc/security/limits.conf
 
+if [ "$#" -ne 0 ]
+then
+  echo "----- Install Build/Compile Tools ------"
+  yum -y install cmake
+  yum -y install java-1.7.0-openjdk-devel
+  echo "Go to http://www.scons.org/download.php to download and install scons"
+fi
+
 echo "kill -HUP 1  and logoff and logon to make limit take effect"
 
 
