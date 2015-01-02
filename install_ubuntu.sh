@@ -131,3 +131,13 @@ cp /usr/local/lib/libunwind* /usr/lib/
 echo "* hard nofile 1000000" >> /etc/security/limits.conf
 echo "* soft nofile 1000000" >> /etc/security/limits.conf
 
+
+if [ "$#" -ne 0 ]
+then
+  echo "----- Install Build/Compile Tools ------"
+  apt-get -y install cmake
+  apt-get -y install openjdk-7-jdk
+  apt-get -y install scons
+fi
+
+
