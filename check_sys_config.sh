@@ -1,121 +1,125 @@
 #!/bin/bash
 
-function print_and_save {
-    echo $1
-    echo $1 >> $2 
-}  
-
-THISHOST=$(hostname)
-report_f="${THISHOST}_report.txt"
-rm -rf $report_f
-
-print_and_save "------ Host ------" $report_f
-hostname >> $report_f
-hostname
-
-# check OS family
-print_and_save "------ Check OS Family ------" $report_f
-cat /etc/issue >> $report_f
-cat /etc/redhat-release >> $report_f 2>&1
-
-
-# check if python is installed and its version
-print_and_save "------ Check Python ------" $report_f
-python -V > report.dump 2>&1
-python_stat=0
-if grep Python report.dump; then
-    cat report.dump >> $report_f
-    if grep "Python 2.[7-9]" report.dump; then
-        print_and_save "*Python version OK." $report_f
-        python_stat=1
-    elif grep "Python 3.*" report.dump; then
-        print_and_save "*Python version OK." $report_f
-        python_stat=2
-    else 
-        print_and_save "*Old Python version, need to update." $report_f
-        python_stat=3
-    fi
+if which dpkg > /dev/null 2>&1
+then
+  OS=UBUNTU
+  PKGMGR=`which dpkg`
+  PKGMGROPT='-S'
+  CMDOPT='-S'
+elif which rpm >/dev/null 2>&1 
+then
+  OS=RHEL
+  PKGMGR=`which rpm`
+  PKGMGROPT='-q'
+  CMDOPT='-qf'
 else
-    print_and_save "*No Python installed" $report_f
-    python_stat=4
+  echo "Unsupported OS."
+  exit 1
 fi
 
-# check if Java is installed and its version
-print_and_save "------ Check Java ------"  $report_f
-java -version > report.dump 2>&1
-java_stat=0
-if grep java report.dump; then
-    cat report.dump >> $report_f
-    if grep "1.[7-8].*" report.dump; then
-        echo "*Java version OK."
-        print_and_save "*Java version OK."  $report_f
-        java_stat=1
+report="report4GraphSQL_`hostname`.txt"
+(
+#for cmd in gse_canonnical_loader gse_loader ids_worker redis-benchmark redis-check-aof redis-check-dump redis-cli redis-sentinel redis-server ; do  ldd $cmd ; done | sort | awk '{print $1}'|uniq | xargs locate| grep -v debug|sort | xargs rpm -qf |sort |uniq
+
+  echo "=== Checking Prerequisites ==="
+  echo "**checking required system libraries ..."
+  LIBS="glibc libgcc libstdc++ zlib"
+  LIBS_MISSING=''
+  for lib in $LIBS
+  do
+    if $PKGMGR $PKGMGROPT $lib > /dev/null
+    then
+      echo "  $lib found"
     else
-        print_and_save "*Old Java version, need to update." $report_f 
-        java_stat=2
+      echo "  $lib not found"
+      LIBS_MISSING=$LIBS_MISSING $lib
     fi
-else
-    print_and_save "*No Java installed" $report_f
-    java_stat=3
-fi
+  done
 
-print_and_save "------ Check scp ------" $report_f
-if which scp; then
-    print_and_save "*scp is installed." $report_f
-else
-    print_and_save "*scp is not installed." $report_f
-fi
+  echo
+  echo "**checking required commands ..."
+  CMDS="java lsof unzip scp"
+  CMDS_MISSING=''
+  for cmd in $CMDS
+  do
+    if which $cmd >/dev/null 2>&1
+    then
+      if [ "j$cmd" = 'jjava' ]
+      then
+        echo "  $(java -version 2>&1|head -1) found"
+      else
+        pkg=$( $PKGMGR $CMDOPT "$(which $cmd)")
+        echo "  $cmd found in $pkg"
+      fi
+    else
+      echo "  $cmd not found"
+      CMDS_MISSING="$CMDS_MISSING $cmd"
+    fi
+  done  
 
-print_and_save "------ Check make ------" $report_f
-if which make; then
-    print_and_save "*make is installed." $report_f
-else
-    print_and_save "*make is not installed." $report_f
-fi
+  if [ "l$LIBS_MISSING" != 'l' -o "c$CMDS_MISSING" != 'c' ]
+  then
+    if [ "l$LIBS_MISSING" != 'l' ]
+    then
+      echo "The following system libaries are missing: $LIBS_MISSING"
+    fi
 
-print_and_save "------ Check gcc ------" $report_f
-if which gcc; then
-    gcc --version >> $report_f
-    print_and_save "*gcc is installed." $report_f
-else
-    print_and_save "*gcc is not installed." $report_f
-fi
+    if [ "l$CMDS_MISSING" != 'l' ]
+    then
+      echo "The following comands are missing: $CMDS_MISSING"
+    fi
+    
+    echo "Please install the missing items above and run test check again"
+    exit 2
+  fi
 
-print_and_save "------ Check g++ ------" $report_f
-if which g++; then
-    g++ --version >> $report_f
-    print_and_save "*g++ is installed." $report_f
-else
-    print_and_save "*g++ is not installed." $report_f
-fi
+  # not required, but good to know  
+  CMDS="python ip netstat make gcc g++"
+  for cmd in $CMDS
+  do
+    if which $cmd >/dev/null 2>&1
+    then
+      if [ $cmd = 'python' ]
+      then
+        echo "  $(python -V 2>&1) found"
+      else
+        pkg=$( $PKGMGR $CMDOPT $(which $cmd))
+        echo "  $cmd found in $pkg"
+      fi
+    else
+      echo "  $cmd not found"
+    fi
+  done 
 
-print_and_save "------ Check Redis ------" $report_f
-if which redis-server; then
-    redis-server -v >> $report_f
-    print_and_save "*redis is installed." $report_f
-else
-    print_and_save "*redis is not installed." $report_f
-fi
+  /bin/echo -e "\n= Gathering System information ="
+  /bin/echo -e "\n---Host name: " `hostname`
+  /bin/echo -e "\n---Arch:" `uname -a`
 
-print_and_save "------ Check CPU ------" $report_f
-cat /proc/cpuinfo >> $report_f 2>&1
+  if [ $OS = 'RHEL' ]
+  then
+    /bin/echo -e "\n---OS Family: `cat /etc/redhat-release`"
+  else
+    /bin/echo -e "\n---OS Family: `grep VERSION= /etc/os-release`"
+  fi
 
-print_and_save "------ Check Memory ------" $report_f
-free >> $report_f 2>&1
+  /bin/echo -e "\n---CPU:" 
+    lscpu
+  /bin/echo -e "\n---Memory:" 
+    grep Mem /proc/meminfo 
 
-print_and_save "------ Check Disk ------" $report_f
-df -h >> $report_f 2>&1
-mount >> $report_f 2>&1
+  /bin/echo -e "\n---Disk space:" 
+    df -h
 
-print_and_save "------ Check Network Interface ------" $report_f
-ifconfig  >> $report_f 2>&1
+  /bin/echo -e "\n---NIC and IP" 
+    if which ifconfig >/dev/null 2>&1
+    then
+      ifconfig -a|grep -v '127\|lo' | grep -B1 'inet '
+    else 
+      ip addr|grep -B1 'inet '
+    fi
 
-print_and_save "------ Check Installed Libs ------" $report_f
-ldconfig -p >> $report_f 2>&1
-
-print_and_save "------ Check Installed Packages ------" $report_f
-rpm -qa >> $report_f 2>&1
-dpkg --get-selections >> $report_f 2>&1
-
-echo -e "\n"
-echo "Please check ${report_f} for more details."
+  /bin/echo -e "\n---Outside Connection"
+    ping -c 3 -W 3 www.cisco.com
+  /bin/echo 
+  /bin/echo -e "Please review $report and send it to GraphSQL. Thank you!"
+) 2>&1 | tee $report 
