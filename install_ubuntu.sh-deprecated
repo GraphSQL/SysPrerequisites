@@ -1,0 +1,93 @@
+#!/bin/bash
+apt-get update
+# first check JAVA, GCC/G++, etc.
+echo "----- Install JAVA ------"
+if which java; then
+    echo "Java has been installed already."
+else
+   apt-get -y install openjdk-7-jre-headless
+fi
+
+echo "----- Install GCC/G++ ------"
+if which gcc; then
+    echo "gcc has been installed already."
+else
+   apt-get -y install build-essential
+fi
+
+if which g++; then
+    echo "g++ has been installed already."
+else
+   apt-get -y install build-essential
+   apt-get -y install g++
+fi
+
+echo "----- Install Some Other libs ------"
+apt-get -y install libtool autoconf unzip zlib1g-dev lsof
+apt-get -y install python-dev
+
+# Now we need to install fabric
+echo "----- Install Fabric ------"
+cd pycrypto-2.6
+python setup.py install
+cd ../ecdsa-0.11
+python setup.py install
+cd ../paramiko-1.14.0
+python setup.py install
+cd ../nose-1.3.4
+python setup.py install
+cd ../PyYAML-3.10
+python setup.py install
+cd ../setuptools-5.4.1
+python setup.py install
+cd ../Fabric-1.8.2 
+python setup.py install
+
+
+echo "----- Install Kazoo ------"
+cd ../kazoo-2.0.1
+python setup.py install
+
+echo "---- Install psutil ------"
+cd ../psutil-2.1.3
+python setup.py install
+
+echo "----- Install Redis ------"
+cd ../
+tar xvfz redis-stable.tar.gz
+cd redis-stable 
+make
+cp src/redis-server  /usr/bin/
+cp src/redis-cli  /usr/bin/
+
+#now we need to install tcmalloc
+echo "----- Install TCMalloc ------"
+cd ../libunwind-1.1
+autoreconf -i 
+./configure
+make
+make install
+cd ../gperftools-2.2.1
+./configure
+make
+make install
+
+# copy the *.so file to /usr/lib
+cp /usr/local/lib/libtcmalloc* /usr/lib/
+cp /usr/local/lib/libprofiler* /usr/lib/
+cp /usr/local/lib/libunwind* /usr/lib/
+
+# change open file limit
+echo "* hard nofile 1000000" >> /etc/security/limits.conf
+echo "* soft nofile 1000000" >> /etc/security/limits.conf
+
+
+if [ "$#" -ne 0 ]
+then
+  echo "----- Install Build/Compile Tools ------"
+  apt-get -y install cmake
+  apt-get -y install openjdk-7-jdk
+  apt-get -y install scons
+fi
+
+

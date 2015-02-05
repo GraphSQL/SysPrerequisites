@@ -1,0 +1,99 @@
+#!/bin/bash
+# first check JAVA, GCC/G++, etc.
+echo "----- Install JAVA ------"
+if which java; then
+    echo "Java has been installed already."
+else
+   yum -y install java-1.7.0-openjdk
+fi
+
+echo "----- Install GCC/G++ ------"
+if which gcc; then
+    echo "gcc has been installed already."
+else
+   yum -y groupinstall "Development Tools"
+fi
+
+if which g++; then
+    echo "g++ has been installed already."
+else
+   yum -y groupinstall "Development Tools"
+fi
+
+echo "----- Install Some Other libs ------"
+yum -y install libtool autoconf zlib-devel
+
+
+echo "----- Install Other Libs/Pkgs ------"
+yum -y install unzip python-devel gmp-devel lsof
+
+# Now we need to install fabric
+echo "----- Install Fabric ------"
+cd pycrypto-2.6
+python setup.py install
+cd ../ecdsa-0.11
+python setup.py install
+cd ../paramiko-1.14.0
+python setup.py install
+cd ../nose-1.3.4
+python setup.py install
+cd ../PyYAML-3.10
+python setup.py install
+cd ../setuptools-5.4.1
+python setup.py install
+cd ../Fabric-1.8.2 
+python setup.py install
+
+echo "----- Install Kazoo ------"
+cd ../kazoo-2.0.1
+python setup.py install
+
+echo "---- Install psutil ------"
+cd ../psutil-2.1.3
+python setup.py install
+
+echo "----- Install Redis ------"
+cd ../
+tar xvfz redis-stable.tar.gz
+cd redis-stable
+# the following three are found needed on a AMAZON Linux....
+cd deps
+make hiredis  jemalloc  linenoise  lua
+cd ../
+make
+cp src/redis-server  /usr/bin/
+cp src/redis-cli  /usr/bin/
+
+#now we need to install tcmalloc
+echo "----- Install TCMalloc ------"
+cd ../libunwind-1.1
+autoreconf -i 
+./configure
+make
+make install
+cd ../gperftools-2.2.1
+./configure --enable-frame-pointers
+make
+make install
+# copy the *.so file to /usr/lib
+cp /usr/local/lib/libtcmalloc* /usr/lib/
+cp /usr/local/lib/libprofiler* /usr/lib/
+cp /usr/local/lib/libunwind* /usr/lib/
+
+# change open file limit
+echo "* hard nofile 1000000" >> /etc/security/limits.conf
+echo "* soft nofile 1000000" >> /etc/security/limits.conf
+
+if [ "$#" -ne 0 ]
+then
+  echo "----- Install Build/Compile Tools ------"
+  yum -y install cmake
+  yum -y install java-1.7.0-openjdk-devel
+  echo "Go to http://www.scons.org/download.php to download and install scons"
+fi
+
+echo "kill -HUP 1  and logoff and logon to make limit take effect"
+
+
+
+
