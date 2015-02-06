@@ -70,7 +70,8 @@ PKGS="$JavaPkg unzip lsof"
 $PKGMGR -y install $PKGS
 
 echo "Downloading System Prerequisite package ..."
-if [ ! -f SysPrerequisites-master.tar ]
+systar=`eval echo ~${GSQL_USER}/SysPrerequisites-master.tar`
+if [ ! -f $systar ]
 then
   su - ${GSQL_USER} -c "curl  -L https://github.com/GraphSQL/SysPrerequisites/archive/master.tar.gz -o SysPrerequisites-master.tar"
 else
@@ -79,7 +80,7 @@ fi
 
 su - ${GSQL_USER} -c "tar -xf SysPrerequisites-master.tar"
 
-cd  ~${GSQL_USER}/SysPrerequisites-master
+eval cd ~${GSQL_USER}/SysPrerequisites-master
 for pymod in 'pycrypto-2.6' \
 		'ecdsa-0.11' \
 		'paramiko-1.14.0' \
@@ -126,7 +127,8 @@ cp /usr/local/lib/libprofiler* /usr/lib/
 cp /usr/local/lib/libunwind* /usr/lib/
 
 echo "Downloading GIUM package ..."
-if [ ! -f gium.tar ]
+giumtar=`eval ~${GSQL_USER}/gium.tar`
+if [ ! -f giumtar ]
 then
   su - ${GSQL_USER} -c "curl -H 'Authorization: token 910a68cc2ae0dba5ca9c3f17be3b7add588d0d02' -L https://api.github.com/repos/GraphSQL/gium/tarball -o gium.tar"
 else

@@ -37,7 +37,7 @@ report="report4GraphSQL_`hostname`.txt"
 
   echo
   echo "**checking required commands ..."
-  CMDS="java lsof unzip scp"
+  CMDS="java unzip scp"
   CMDS_MISSING=''
   for cmd in $CMDS
   do
@@ -83,7 +83,7 @@ report="report4GraphSQL_`hostname`.txt"
   # not required, but good to know  
   echo
   echo "**checking optional commands ..."
-  CMDS="python ip netstat make gcc g++"
+  CMDS="python lsof make gcc g++"
   for cmd in $CMDS
   do
     if which $cmd >/dev/null 2>&1
