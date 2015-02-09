@@ -1,8 +1,6 @@
 #!/bin/bash
 
-#yum -y install libtool autoconf zlib-devel
-
-#yum -y install unzip python-devel gmp-devel lsof
+yum -y install unzip python-devel gmp-devel
 
 # Now we need to install fabric
 echo "----- Install Fabric ------"
@@ -28,8 +26,8 @@ python setup.py install
 
 
 # change open file limit
-#echo "* hard nofile 1000000" >> /etc/security/limits.conf
-#echo "* soft nofile 1000000" >> /etc/security/limits.conf
+echo "* hard nofile 1000000" >> /etc/security/limits.conf
+echo "* soft nofile 1000000" >> /etc/security/limits.conf
 
 
 
