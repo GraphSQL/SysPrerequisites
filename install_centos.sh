@@ -1,5 +1,5 @@
 #!/bin/bash
-yum update
+#yum update
 # first check JAVA, GCC/G++, etc.
 echo "----- Install JAVA ------"
 if which java; then
@@ -50,7 +50,7 @@ if [ $python_stat -eq 3 ] || [ $python_stat -eq 4 ]
 then
     echo "----- Install Python 2.7 ------"
     echo "----- Install Prerequisites for Python  ------"
-    yum update
+#    yum update
     yum -y install zlib-devel readline-devel tk gdbm-devel sqlite-devel autoconf libtool
     yum -y install openssl-devel
     yum -y install texinfo
