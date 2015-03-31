@@ -158,7 +158,7 @@ echo "Operating System is $OS"
  	  if has_internet
  	  then
  	    echo "---- Downloading GIUM package ----"
- 	    su - ${GSQL_USER} -c "curl -H 'Authorization: token db37d7d9c7803c6a58b86f90a7fb489ac6e84358' -L https://api.github.com/repos/GraphSQL/gium/tarball -o gium.tar"
+ 	    su - ${GSQL_USER} -c "curl -H 'Authorization: token 58050f86349caff1f0865d25f9ba16d793514530' -L https://api.github.com/repos/GraphSQL/gium/tarball -o gium.tar"
  	  else
  	    echo "No Internet connection. Please copy GIUM package to $giumtar and rerun the program"
  	    exit 4 
