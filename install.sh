@@ -95,7 +95,7 @@ echo "Operating System is $OS"
  	if [ $OS = 'RHEL' ]
  	then
  	  #$PKGMGR -y groupinstall "development tools"
- 	  PKGS="java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof redis cmake"
+ 	  PKGS="java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof redis cmake openssh-clients"
  	  $PKGMGR -y install $PKGS
  	else
  	  #$PKGMGR -y install "build-essential"
