@@ -165,6 +165,7 @@ echo "Operating System is $OS"
  	  fi
  	fi
  	
+
  	echo
  	echo "----- Installing IUM for user \"${GSQL_USER}\" ------"
  	su - ${GSQL_USER} -c "tar xf gium.tar; GraphSQL-gium-*/install.sh; rm -rf GraphSQL-gium-*"
