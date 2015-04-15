@@ -53,30 +53,26 @@ echo "Operating System is $OS"
  	  passwd ${GSQL_USER}
  	fi
  	
- 	read -p "Do you need a folder to store original data? (y/N)" FOLDER
- 	if [ "y$FOLDER" = 'yY' -o "y$FOLDER" = 'yy' ]
+ 	if [ $# -gt 1 ]
  	then
- 	  if [ $# -gt 1 ]
- 	  then
  	    DATA_PATH=$2
       echo "Use command line argument $2 for folder path"
- 	  fi
+ 	fi
  	
- 	  while [ "D$DATA_PATH" = 'D' ] 
- 	  do
- 	    read -p "Enter the absolute path for the folder to store original data:" DATA_PATH
- 	  done
+ 	while [ "D$DATA_PATH" = 'D' ] 
+ 	do
+ 	  read -p 'Enter the absolute path for "graphsql.root.dir":' DATA_PATH
+ 	done
  	
- 	  if [ -d ${DATA_PATH} ]
- 	  then
+ 	if [ -d ${DATA_PATH} ]
+ 	then
  	    echo "Folder ${DATA_PATH} already exists"
  	    echo "You may need to run command \"chown -R ${GSQL_USER} ${DATA_PATH}\" "
 	    sleep 3
- 	  else
+ 	else
  	    echo "Creating folder ${DATA_PATH} to hold original data ..."
  	    mkdir -p ${DATA_PATH}
  	    chown -R ${GSQL_USER} ${DATA_PATH}
- 	  fi
  	fi
  	
  	echo "Changing file handler limits in /etc/security/limits.conf"
@@ -168,7 +164,7 @@ echo "Operating System is $OS"
 
  	echo
  	echo "----- Installing IUM for user \"${GSQL_USER}\" ------"
- 	su - ${GSQL_USER} -c "tar xf gium.tar; GraphSQL-gium-*/install.sh; rm -rf GraphSQL-gium-*"
+ 	su - ${GSQL_USER} -c "tar xf gium.tar; GraphSQL-gium-*/install.sh; rm -rf GraphSQL-gium-*; rm -f gium.tar"
  ) 2>&1 | tee ${HOME}/install-gsql.log
 
 echo 
