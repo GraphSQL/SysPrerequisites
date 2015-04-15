@@ -137,14 +137,14 @@ echo "Operating System is $OS"
  	  cd ..
  	done  
  	  
- 	echo "----- Install Redis ------"
- 	tar xfz redis-stable.tar.gz
- 	cd redis-stable
- 	  make
- 	  echo "Copying redis server and client binary to /usr/bin"
- 	  cp src/redis-server  /usr/bin/
- 	  cp src/redis-cli  /usr/bin/
- 	cd ..
+# 	echo "----- Install Redis ------"
+# 	tar xfz redis-stable.tar.gz
+# 	cd redis-stable
+# 	  make
+# 	  echo "Copying redis server and client binary to /usr/bin"
+# 	  cp src/redis-server  /usr/bin/
+# 	  cp src/redis-cli  /usr/bin/
+# 	cd ..
  	
 	#rm -rf SysPrerequisites-master
  	echo
