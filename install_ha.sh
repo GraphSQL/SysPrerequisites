@@ -48,8 +48,8 @@ else
   sysctl -p
 fi
 
-$PKGMGR install haproxy
-$PKGMGR install keepalived
+$PKGMGR -y install haproxy
+$PKGMGR -y install keepalived
 chkconfig keepalived on
 chkconfig haproxy on
 
