@@ -40,7 +40,19 @@ echo "Operating System is $OS"
  	
  	while [ "U$GSQL_USER" = 'U' ] 
  	do
- 	  read -p "Enter the username who will own and run GSQL software:" GSQL_USER
+ 	  read -p "Enter the user who will own and run GraphSQL software:" GSQL_USER
+    if [ "${GSQL_USER}" = "root" ]
+    then
+      echo
+      echo "Warning!!! Running GraphSQL software as \"${GSQL_USER}\" is not recommended."
+ 	    read -p "Continue with user \"${GSQL_USER}\" (y/N): " USER_ROOT
+      if [ "y${USER_ROOT}" = "yy" -o "y${USER_ROOT}" = "yY" ]
+      then
+        break
+      else
+        GSQL_USER=''
+      fi
+    fi
  	done
  	
  	if id ${GSQL_USER} >/dev/null 2>&1
@@ -91,7 +103,7 @@ echo "Operating System is $OS"
  	if [ $OS = 'RHEL' ]
  	then
  	  #$PKGMGR -y groupinstall "development tools"
- 	  PKGS="java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof redis cmake openssh-clients"
+ 	  PKGS="java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof redis cmake openssh-clients nmap-ncat"
  	  $PKGMGR -y install $PKGS
  	else
  	  #$PKGMGR -y install "build-essential"
@@ -129,6 +141,9 @@ echo "Operating System is $OS"
  			'PyYAML-3.10' \
  			'setuptools-5.4.1' \
  			'Fabric-1.8.2' \
+      'kazoo-2.0.1' \
+      'elasticsearch-py' \
+      'requests-2.7.0' \
  			'psutil-2.1.3'
  	do
  	  echo "----- Install Python Module $pymod ------"
