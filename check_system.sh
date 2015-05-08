@@ -32,7 +32,7 @@ report="report4GraphSQL_`hostname`.txt"
         pkglib=$( $PKGMGR $PKGMGROPT $lib)
         echo "  \"$lib\" found in $pkglib"
       else
-        echo "  \"$lib\" not found"
+        echo "  \"$lib\" NOT FOUND"
         LIBS_MISSING="$LIBS_MISSING $lib"
       fi
     else 
@@ -41,7 +41,7 @@ report="report4GraphSQL_`hostname`.txt"
         pkglib=$( $PKGMGR $PKGMGROPT ${lib}*|grep $lib |head -1|awk '{print $2}')
         echo "  \"$lib\" found: $pkglib"
       else
-        echo "  \"$lib\" not found"
+        echo "  \"$lib\" NOT FOUND"
         LIBS_MISSING="$LIBS_MISSING $lib"
       fi
     fi
@@ -49,7 +49,7 @@ report="report4GraphSQL_`hostname`.txt"
 
   echo
   echo "**checking required commands ..."
-  CMDS="java unzip scp"
+  CMDS="java unzip scp nc"
   CMDS_MISSING=''
   for cmd in $CMDS
   do
@@ -76,7 +76,7 @@ report="report4GraphSQL_`hostname`.txt"
         fi
       fi
     else
-      echo "  $cmd not found"
+      echo "  $cmd NOT FOUND"
       CMDS_MISSING="$CMDS_MISSING $cmd"
     fi
   done  
@@ -122,9 +122,33 @@ report="report4GraphSQL_`hostname`.txt"
         fi
       fi
     else
-      echo "  $cmd not found"
+      echo "  $cmd: NOT FOUND"
     fi
   done 
+
+  echo
+  echo "**checking required python modules ..."
+  PyMod="Crypto ecdsa paramiko nose yaml setuptools fabric psutil kazoo"
+  for pymod in $PyMod
+  do
+    if [ -d /usr/lib/python*/site-packages/$pymod -o -d /usr/lib64/python*/site-packages/$pymod ]
+    then
+      echo "  $pymod: found"
+    else
+      echo "  $pymod: NOT FOUND"
+    fi
+  done  
+
+  PyMod="elasticsearch requests"
+  for pymod in $PyMod
+  do
+    if [ -d /usr/lib/python*/site-packages/$pymod -o -e /usr/lib/python*/site-packages/${pymod}-*egg ]
+    then
+      echo "  $pymod: found"
+    else
+      echo "  $pymod: NOT FOUND"
+    fi
+  done
 
   /bin/echo -e "\n= Gathering System information ="
   /bin/echo -e "\n---Host name: " `hostname`
