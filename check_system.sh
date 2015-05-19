@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [[ $EUID -ne 0 ]]
+then
+  echo "Please log in as root, or 'sudo' run the command if you have sudo privileges."
+  exit 1
+fi
+
 if which dpkg > /dev/null 2>&1
 then
   OS=UBUNTU
@@ -128,21 +134,10 @@ report="report4GraphSQL_`hostname`.txt"
 
   echo
   echo "**checking required python modules ..."
-  PyMod="Crypto ecdsa paramiko nose yaml setuptools fabric psutil kazoo"
+  PyMod="Crypto ecdsa paramiko nose yaml setuptools fabric psutil kazoo elasticsearch requests"
   for pymod in $PyMod
   do
-    if [ -d /usr/lib/python*/site-packages/$pymod -o -d /usr/lib64/python*/site-packages/$pymod ]
-    then
-      echo "  $pymod: found"
-    else
-      echo "  $pymod: NOT FOUND"
-    fi
-  done  
-
-  PyMod="elasticsearch requests"
-  for pymod in $PyMod
-  do
-    if [ -d /usr/lib/python*/site-packages/$pymod -o -e /usr/lib/python*/site-packages/${pymod}-*egg ]
+    if python -c "import $pymod" >/dev/null 2>&1
     then
       echo "  $pymod: found"
     else
@@ -163,6 +158,7 @@ report="report4GraphSQL_`hostname`.txt"
 
   /bin/echo -e "\n---CPU:" 
     lscpu
+    grep flags /proc/cpuinfo|head -1
   /bin/echo -e "\n---Memory:" 
     grep Mem /proc/meminfo 
 
@@ -177,8 +173,42 @@ report="report4GraphSQL_`hostname`.txt"
       ip addr|grep -B1 'inet '
     fi
 
+  /bin/echo -e "\n---NTP service:"
+    if pgrep ntpd >/dev/null 2>&1
+    then
+      echo "NTP service is running."
+    else 
+      echo "NTP service is NOT running."
+    fi
+
+  /bin/echo -e "\n---Firewall Configuration:"
+    if [ -f /etc/sysconfig/iptables ]
+    then
+      if which firewall-cmd >/dev/null 2>&1
+      then
+        echo -n Status: 
+        firewall-cmd --state
+        echo Rules:
+        egrep -v '^#' /etc/sysconfig/iptables
+      else
+        iptables -L
+      fi
+    else
+      ufw status verbose
+      egrep -v '^#' /lib/ufw/user.rules
+    fi
+
+  if grep -v '^#' /etc/hosts.deny|grep -v '^ *$' > /dev/null 2>&1
+  then
+    /bin/echo -e "\n---TCP Wrapper Configuration:"
+    egrep -v '^#' /etc/hosts.allow
+  fi
+
+  /bin/echo -e "\n---SSH Port Configuration:"
+    grep 'Port ' /etc/ssh/sshd_config
+
   /bin/echo -e "\n---Outside Connection:"
-    ping -c 3 -W 3 www.cisco.com
+    ping -c 3 -W 3 www.github.com | grep 'of data\|transmitted\|avg'
   /bin/echo 
   /bin/echo -e "Please review $report and send it to GraphSQL. Thank you!"
 ) 2>&1 | tee $report 
