@@ -151,7 +151,11 @@ echo "Operating System is $OS"
  	    python setup.py install
  	  cd ..
  	done  
- 	  
+
+    if ! hash jq 2>/dev/null; then
+       cp bin/jq /usr/bin
+    fi
+
 # 	echo "----- Install Redis ------"
 # 	tar xfz redis-stable.tar.gz
 # 	cd redis-stable
