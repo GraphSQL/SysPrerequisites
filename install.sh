@@ -172,8 +172,8 @@ echo "Operating System is $OS"
  	then
  	  if has_internet
  	  then
- 	    echo "---- Downloading GIUM package ----"
- 	    su - ${GSQL_USER} -c "curl -H 'Authorization: token void1111111' -L https://api.github.com/repos/GraphSQL/gium/tarball -o gium.tar"
+ 	    echo "---- Please download GIUM package ----"
+ 	    echo "su - ${GSQL_USER} -c" "curl -H 'Authorization: token ??????' -L https://api.github.com/repos/GraphSQL/gium/tarball -o gium.tar"
  	  else
  	    echo "No Internet connection. Please copy GIUM package to $giumtar and rerun the program"
  	    exit 4 
@@ -182,8 +182,8 @@ echo "Operating System is $OS"
  	
 
  	echo
- 	echo "----- Installing IUM for user \"${GSQL_USER}\" ------"
- 	su - ${GSQL_USER} -c "tar xf gium.tar; GraphSQL-gium-*/install.sh; rm -rf GraphSQL-gium-*; rm -f gium.tar"
+ 	echo "----- Please install IUM for user \"${GSQL_USER}\" ------"
+ 	echo "su - ${GSQL_USER} -c" "tar xf gium.tar; GraphSQL-gium-*/install.sh; rm -rf GraphSQL-gium-*; rm -f gium.tar"
  ) 2>&1 | tee ${HOME}/install-gsql.log
 
 echo 
