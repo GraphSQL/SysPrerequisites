@@ -98,18 +98,32 @@ echo "Operating System is $OS"
  	  echo "* soft nofile 1000000" >> /etc/security/limits.conf
  	fi
  	
+	echo "UPdating /etc/hosts"
+	IPS=$(ip addr|grep 'inet '|awk '{print $2}'|egrep -o "[0-9]{1,}.[0-9]{1,}.[0-9]{1,}.[0-9]{1,}"|xargs echo)
+	for ip in $IPS
+	do
+		if ! grep $ip /etc/hosts >/dev/null 2>&1
+		then
+			echo "$ip	`hostname`" >> /etc/hosts
+		fi
+	done
+
  	echo "Install/Upgrade required tools and libraries ..."
  	
  	if [ $OS = 'RHEL' ]
  	then
  	  #$PKGMGR -y groupinstall "development tools"
- 	  PKGS="java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof redis cmake openssh-clients nmap-ncat"
+ 	  PKGS="java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof redis cmake openssh-clients nmap-ncat nc ntp postfix"
  	  $PKGMGR -y install $PKGS
+	  chkconfig --level 345 ntpd on
+	  service ntpd start
  	else
  	  #$PKGMGR -y install "build-essential"
     $PKGMGR update >/dev/null 2>&1 # this only updates source.lst, not packages
- 	  PKGS="openjdk-7-jdk wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof redis-server cmake"
+ 	  PKGS="openjdk-7-jdk wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof redis-server cmake ntp postfix"
  	  $PKGMGR -y install $PKGS
+	  update-rc.d ntp enable
+	  service ntp start 
  	fi
  	
 	if [ -f ./SysPrerequisites-master.tar ] #already downloaded
@@ -134,17 +148,17 @@ echo "Operating System is $OS"
 	fi
  	
  	for pymod in \
- 	    'pycrypto-2.6' \
- 			'ecdsa-0.11' \
- 			'paramiko-1.14.0' \
- 			'nose-1.3.4' \
- 			'PyYAML-3.10' \
- 			'setuptools-5.4.1' \
- 			'Fabric-1.8.2' \
-      'kazoo-2.0.1' \
-      'elasticsearch-py' \
-      'requests-2.7.0' \
- 			'psutil-2.1.3'
+ 	    	'pycrypto-2.6' \
+ 		'ecdsa-0.11' \
+ 		'paramiko-1.14.0' \
+ 		'nose-1.3.4' \
+ 		'PyYAML-3.10' \
+ 		'setuptools-5.4.1' \
+ 		'Fabric-1.8.2' \
+      		'kazoo-2.0.1' \
+      		'elasticsearch-py' \
+      		'requests-2.7.0' \
+ 		'psutil-2.1.3'
  	do
  	  echo "----- Install Python Module $pymod ------"
  	  cd $pymod
@@ -184,9 +198,32 @@ echo "Operating System is $OS"
  	echo
  	echo "----- Please install IUM for user \"${GSQL_USER}\" ------"
  	echo "su - ${GSQL_USER} -c" "tar xf gium.tar; GraphSQL-gium-*/install.sh; rm -rf GraphSQL-gium-*; rm -f gium.tar"
+
+	## Install gsql_monitor service
+	[ -x ./install-monitor-service.sh ] && ./install-monitor-service.sh $GSQL_USER
  ) 2>&1 | tee ${HOME}/install-gsql.log
 
 echo 
+echo "System prerequisites installation completed"
 echo "Please check ${HOME}/install-gsql.log for installation details"
-echo "You may verify system settings by running \"check_system.sh\" script in SysPrerequisites-master folder."
+echo
+
+checkBin=
+if [ -x ./check_system.sh ]
+then
+	checkBin="./check_system.sh"
+else
+	if [ -x ./SysPrerequisites-master/check_system.sh ]
+	then
+		checkBin="./SysPrerequisites-master/check_system.sh"
+	fi
+fi
+	
+if [ -n $checkBin ]
+then		 
+	echo "Running system check post installation ..."
+	bash $checkBin
+fi
+
+echo "You may verify system settings again by running \"check_system.sh\" script in SysPrerequisites-master folder."
  

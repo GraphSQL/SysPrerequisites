@@ -1,0 +1,62 @@
+#! /bin/sh
+# chkconfig: 2345 88 12
+# description: /etc/init.d/gsql_monitor, script to monitor GSQL processes
+
+user='graphsql'
+prog=$(eval echo "~${user}/.gium/gsql_mon")
+
+## check if /proc exists 
+if ! grep -q '/proc' /etc/mtab
+then
+  echo "This system is not supported."
+  exit 1
+fi
+
+
+startDaemon() 
+{
+  if [ -x $prog ]
+  then
+    su - $user -c "$prog start"
+  fi
+}
+
+stopDaemon() 
+{
+  if [ -x $prog ] 
+  then
+    su - $user -c "$prog stop"
+  fi
+}
+
+loadConfig() 
+{
+  if [ -x $prog ] 
+  then
+    su - $user -c "$prog config reload"
+  fi
+}
+
+
+case "$1" in
+  start)
+    startDaemon
+    ;;
+  stop)
+    stopDaemon
+    ;;
+  restart)
+    stopDaemon
+    startDaemon
+    ;;
+  reload)
+    echo "Reloading GSQL monitor configuration file"
+    reloadConfig
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|reload}"
+    exit 1
+    ;;
+esac
+
+exit 0

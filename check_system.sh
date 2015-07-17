@@ -55,7 +55,7 @@ report="report4GraphSQL_`hostname`.txt"
 
   echo
   echo "**checking required commands ..."
-  CMDS="java unzip scp nc"
+  CMDS="java unzip scp"
   CMDS_MISSING=''
   for cmd in $CMDS
   do
@@ -182,8 +182,8 @@ report="report4GraphSQL_`hostname`.txt"
     fi
 
   /bin/echo -e "\n---Firewall Configuration:"
-    if [ -f /etc/sysconfig/iptables ]
-    then
+  if [ $OS = 'RHEL' ]
+  then
       if which firewall-cmd >/dev/null 2>&1
       then
         echo -n Status: 
@@ -193,9 +193,12 @@ report="report4GraphSQL_`hostname`.txt"
       else
         iptables -L
       fi
-    else
-      ufw status verbose
-      egrep -v '^#' /lib/ufw/user.rules
+  fi
+
+    if [ $OS = 'UBUNTU' ]
+    then
+        ufw status verbose
+        egrep -v '^#' /lib/ufw/user.rules
     fi
 
   if grep -v '^#' /etc/hosts.deny|grep -v '^ *$' > /dev/null 2>&1
