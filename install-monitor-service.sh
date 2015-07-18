@@ -64,14 +64,12 @@ fi
 
 $sudo $sed -i -e "s#user=.*#user=${user}#" /etc/init.d/gsql_monitor
 
-CHKCONFIG="/usr/sbin/chkconfig"
-UPDATERC="/usr/sbin/update-rc.d"
-if [ "Q$OS" = "QRHEL" ] && [ -x $CHKCONFIG ]  # Redhat or CentOS
+if [ "Q$OS" = "QRHEL" ]  # Redhat or CentOS
 then
-  $sudo $CHKCONFIG --level 345 gsql_monitor on
-elif [ "Q$OS" = "QUBUNTU" ] && [ -x $UPDATERC ]  #Ubuntu or Debian
+  $sudo chkconfig --level 345 gsql_monitor on
+elif [ "Q$OS" = "QUBUNTU" ]  #Ubuntu or Debian
 then
-  $sudo $UPDATERC gsql_monitor defaults 88 12 
+  $sudo update-rc.d gsql_monitor defaults 88 12 
 else
   echo "Please follow your system manual to install GSQL monitor service: $SRC"
 fi

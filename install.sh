@@ -179,7 +179,6 @@ echo "Operating System is $OS"
 # 	  cp src/redis-cli  /usr/bin/
 # 	cd ..
  	
-	#rm -rf SysPrerequisites-master
  	echo
  	giumtar=$(eval "echo ~${GSQL_USER}/gium.tar")
  	if [ ! -f $giumtar ]
@@ -200,13 +199,18 @@ echo "Operating System is $OS"
  	echo "su - ${GSQL_USER} -c" "tar xf gium.tar; GraphSQL-gium-*/install.sh; rm -rf GraphSQL-gium-*; rm -f gium.tar"
 
 	## Install gsql_monitor service
+	echo "Installing GSQL monitoring service"
 	[ -x ./install-monitor-service.sh ] && ./install-monitor-service.sh $GSQL_USER
+        [ -x ./SysPrerequisites-master/install-monitor-service.sh ] && (cd ./SysPrerequisites-master; ./install-monitor-service.sh $GSQL_USER)
+	#rm -rf SysPrerequisites-master
+
  ) 2>&1 | tee ${HOME}/install-gsql.log
 
-echo 
+echo
 echo "System prerequisites installation completed"
 echo "Please check ${HOME}/install-gsql.log for installation details"
 echo
+sleep 8 
 
 checkBin=
 if [ -x ./check_system.sh ]
@@ -226,4 +230,4 @@ then
 fi
 
 echo "You may verify system settings again by running \"check_system.sh\" script in SysPrerequisites-master folder."
- 
+
