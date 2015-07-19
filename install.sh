@@ -87,6 +87,8 @@ echo "Operating System is $OS"
  	    chown -R ${GSQL_USER} ${DATA_PATH}
  	fi
  	
+  read -p "Github token to download GIUM (Enter if don't know): " GIT_TOKEN
+
  	echo "Changing file handler limits in /etc/security/limits.conf"
  	if ! grep -q '* hard nofile 1000000' /etc/security/limits.conf
  	then 
@@ -148,16 +150,16 @@ echo "Operating System is $OS"
 	fi
  	
  	for pymod in \
- 	    	'pycrypto-2.6' \
+   	'pycrypto-2.6' \
  		'ecdsa-0.11' \
  		'paramiko-1.14.0' \
  		'nose-1.3.4' \
  		'PyYAML-3.10' \
  		'setuptools-5.4.1' \
  		'Fabric-1.8.2' \
-      		'kazoo-2.0.1' \
-      		'elasticsearch-py' \
-      		'requests-2.7.0' \
+ 		'kazoo-2.0.1' \
+ 		'elasticsearch-py' \
+ 		'requests-2.7.0' \
  		'psutil-2.1.3'
  	do
  	  echo "----- Install Python Module $pymod ------"
@@ -180,25 +182,26 @@ echo "Operating System is $OS"
 # 	cd ..
  	
  	echo
- 	giumtar=$(eval "echo ~${GSQL_USER}/gium.tar")
- 	if [ ! -f $giumtar ]
+ 	if [ ${#GIT_TOKEN} -eq 40 ]
  	then
  	  if has_internet
  	  then
- 	    echo "---- Please download GIUM package ----"
- 	    echo "su - ${GSQL_USER} -c" "curl -H 'Authorization: token ??????' -L https://api.github.com/repos/GraphSQL/gium/tarball -o gium.tar"
- 	  else
- 	    echo "No Internet connection. Please copy GIUM package to $giumtar and rerun the program"
- 	    exit 4 
+ 	    echo "---- Downloading GIUM package ----"
+ 	    su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball -o gium.tar"
  	  fi
  	fi
  	
-
- 	echo
- 	echo "----- Please install IUM for user \"${GSQL_USER}\" ------"
- 	echo "su - ${GSQL_USER} -c" "tar xf gium.tar; GraphSQL-gium-*/install.sh; rm -rf GraphSQL-gium-*; rm -f gium.tar"
+ 	giumtar=$(eval "echo ~${GSQL_USER}/gium.tar")
+  if [ -f $giumtar ]
+  then
+ 	  echo "---- Installing GIUM package for ${GSQL_USER} ----"
+    su - ${GSQL_USER} -c "tar xf gium.tar; GraphSQL-gium-*/install.sh; rm -rf GraphSQL-gium-*; rm -f gium.tar"
+  else
+ 	  echo "!!! You need to manually install IUM for user \"${GSQL_USER}\" !!!"
+  fi
 
 	## Install gsql_monitor service
+  echo
 	echo "Installing GSQL monitoring service"
 	[ -x ./install-monitor-service.sh ] && ./install-monitor-service.sh $GSQL_USER
         [ -x ./SysPrerequisites-master/install-monitor-service.sh ] && (cd ./SysPrerequisites-master; ./install-monitor-service.sh $GSQL_USER)
