@@ -87,8 +87,6 @@ echo "Operating System is $OS"
  	    chown -R ${GSQL_USER} ${DATA_PATH}
  	fi
  	
-  read -p "Github token to download GIUM (Enter if don't know): " GIT_TOKEN
-
  	echo "Changing file handler limits in /etc/security/limits.conf"
  	if ! grep -q '* hard nofile 1000000' /etc/security/limits.conf
  	then 
@@ -182,12 +180,20 @@ echo "Operating System is $OS"
 # 	cd ..
  	
  	echo
+
+  read -p "Github token to download GIUM (Press \"Enter\" if do not want to install): " GIT_TOKEN
  	if [ ${#GIT_TOKEN} -eq 40 ]
  	then
  	  if has_internet
  	  then
  	    echo "---- Downloading GIUM package ----"
- 	    su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball -o gium.tar"
+      read -p "Do you need GIUM 4.3 (y/N):" GIUM_VER
+      if [ "$GIUM_VER" = 'y' ]
+      then
+ 	      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/4.3 -o gium.tar"
+      else
+ 	      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball -o gium.tar"
+      fi
  	  fi
  	fi
  	
