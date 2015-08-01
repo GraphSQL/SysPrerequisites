@@ -87,7 +87,7 @@ echo "Operating System is $OS"
  	    chown -R ${GSQL_USER} ${DATA_PATH}
  	fi
  	
- 	echo "Changing file handler limits in /etc/security/limits.conf"
+ 	echo "Changing file handle limits in /etc/security/limits.conf"
  	if ! grep -q '* hard nofile 1000000' /etc/security/limits.conf
  	then 
  	  echo "* hard nofile 1000000" >> /etc/security/limits.conf
@@ -186,10 +186,15 @@ echo "Operating System is $OS"
  	then
  	  if has_internet
  	  then
+      read -p "Is this for engine version 4.3 (y/N):" GIUM_VER
  	    echo "---- Downloading GIUM package ----"
-      read -p "Do you need GIUM 4.3 (y/N):" GIUM_VER
       if [ "$GIUM_VER" = 'y' ]
       then
+        if ! grep -q 'net.core.somaxconn' /etc/sysctl.conf
+        then 
+          echo "net.core.somaxconn = 10240" >> /etc/sysctl.conf
+          sysctl -p
+        fi
  	      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/4.3 -o gium.tar"
       else
  	      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball -o gium.tar"
