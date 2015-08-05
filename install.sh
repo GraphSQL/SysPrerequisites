@@ -87,17 +87,29 @@ echo "Operating System is $OS"
  	    chown -R ${GSQL_USER} ${DATA_PATH}
  	fi
  	
- 	echo "Changing file handle limits in /etc/security/limits.conf"
- 	if ! grep -q '* hard nofile 1000000' /etc/security/limits.conf
+ 	echo "Changing file handle and process limits in /etc/security/limits.conf"
+  noFile=1000000
+ 	if ! grep -q "$GSQL_USER hard nofile $noFile" /etc/security/limits.conf
  	then 
- 	  echo "* hard nofile 1000000" >> /etc/security/limits.conf
+ 	  echo "$GSQL_USER hard nofile $noFile" >> /etc/security/limits.conf
  	fi
  	
- 	if ! grep -q '* soft nofile 1000000' /etc/security/limits.conf
+ 	if ! grep -q "$GSQL_USER hard nofile $noFile" /etc/security/limits.conf
  	then 
- 	  echo "* soft nofile 1000000" >> /etc/security/limits.conf
+ 	  echo "$GSQL_USER soft nofile $noFile" >> /etc/security/limits.conf
  	fi
  	
+  noProc=102400
+  if ! grep -q "$GSQL_USER hard nproc $noProc" /etc/security/limits.conf
+  then 
+    echo "$GSQL_USER hard nproc $noProc" >> /etc/security/limits.conf
+  fi
+  
+  if ! grep -q "$GSQL_USER hard nproc $noProc" /etc/security/limits.conf
+  then 
+    echo "$GSQL_USER soft nproc $noProc" >> /etc/security/limits.conf
+  fi
+
 	echo "UPdating /etc/hosts"
 	IPS=$(ip addr|grep 'inet '|awk '{print $2}'|egrep -o "[0-9]{1,}.[0-9]{1,}.[0-9]{1,}.[0-9]{1,}"|xargs echo)
 	for ip in $IPS
