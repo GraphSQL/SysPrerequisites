@@ -1,9 +1,8 @@
 #!/bin/bash
 
-# use "echo <token> |tr 'abcdef'  'FEDCBA'|tr '13579' '97531' to get a fake token 
-#TOKEN='37C91EF8EAA053C2279D041C36056C72136C3F91'
-#GIT_TOKEN=$(echo $TOKEN |tr '97531' '13579' |tr 'FEDCBA' 'abcdef')
-GIT_TOKEN='d00c7a4e668ea5f7c96aa40ceb22fe53b56b2b53'
+# use "echo <token> |tr 'abcdef'  'FEDCBA'|tr '13579' '97531' to get a fake token and put it below
+TOKEN='84C73D474150B3B54771053B17FA32CB31328EF3'
+GIT_TOKEN=$(echo $TOKEN |tr '97531' '13579' |tr 'FEDCBA' 'abcdef')
 usage(){
   echo "Usage: $0 [username] [path_for_user_original_data]"
   exit 1
@@ -98,7 +97,7 @@ echo "Operating System is $OS"
  	  echo "$GSQL_USER hard nofile $noFile" >> /etc/security/limits.conf
  	fi
  	
- 	if ! grep -q "$GSQL_USER hard nofile $noFile" /etc/security/limits.conf
+ 	if ! grep -q "$GSQL_USER soft nofile $noFile" /etc/security/limits.conf
  	then 
  	  echo "$GSQL_USER soft nofile $noFile" >> /etc/security/limits.conf
  	fi
@@ -109,7 +108,7 @@ echo "Operating System is $OS"
     echo "$GSQL_USER hard nproc $noProc" >> /etc/security/limits.conf
   fi
   
-  if ! grep -q "$GSQL_USER hard nproc $noProc" /etc/security/limits.conf
+  if ! grep -q "$GSQL_USER soft nproc $noProc" /etc/security/limits.conf
   then 
     echo "$GSQL_USER soft nproc $noProc" >> /etc/security/limits.conf
   fi
@@ -199,7 +198,7 @@ echo "Operating System is $OS"
         if ! grep -q 'net.core.somaxconn' /etc/sysctl.conf
         then 
           echo "net.core.somaxconn = 10240" >> /etc/sysctl.conf
-          sysctl -p
+          sysctl -p > /dev/null
         fi
  	      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/4.3 -o gium.tar"
       fi
