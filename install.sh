@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # use "echo <token> |tr 'abcdef'  'FEDCBA'|tr '13579' '97531' to get a fake token 
-TOKEN='37C91EF8EAA053C2279D041C36056C72136C3F91'
-GIT_TOKEN=$(echo $TOKEN |tr '97531' '13579' |tr 'FEDCBA' 'abcdef')
+#TOKEN='37C91EF8EAA053C2279D041C36056C72136C3F91'
+#GIT_TOKEN=$(echo $TOKEN |tr '97531' '13579' |tr 'FEDCBA' 'abcdef')
+GIT_TOKEN='d00c7a4e668ea5f7c96aa40ceb22fe53b56b2b53'
 usage(){
   echo "Usage: $0 [username] [path_for_user_original_data]"
   exit 1
