@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# use "echo <token> |tr 'abcdef'  'FEDCBA'|tr '13579' '97531' to get a fake token 
+TOKEN='37C91EF8EAA053C2279D041C36056C72136C3F91'
+GIT_TOKEN=$(echo $TOKEN |tr '97531' '13579' |tr 'FEDCBA' 'abcdef')
 usage(){
   echo "Usage: $0 [username] [path_for_user_original_data]"
   exit 1
@@ -182,38 +185,25 @@ echo "Operating System is $OS"
        cp bin/jq /usr/bin
     fi
 
-# 	echo "----- Install Redis ------"
-# 	tar xfz redis-stable.tar.gz
-# 	cd redis-stable
-# 	  make
-# 	  echo "Copying redis server and client binary to /usr/bin"
-# 	  cp src/redis-server  /usr/bin/
-# 	  cp src/redis-cli  /usr/bin/
-# 	cd ..
- 	
  	echo
-
-  read -p "Github token to download GIUM (Press \"Enter\" if do not want to install): " GIT_TOKEN
- 	if [ ${#GIT_TOKEN} -eq 40 ]
+  
+ 	if has_internet
  	then
- 	  if has_internet
- 	  then
-      read -p "Is this for engine version 4.3 (y/N):" GIUM_VER
+      read -p "Is this for engine version 4.3 (Y/n):" GIUM_VER
  	    echo "---- Downloading GIUM package ----"
-      if [ "$GIUM_VER" = 'y' ]
+      if [ "N$GIUM_VER" = 'Nn' -o "N$GIUM_VER" = 'NN'  ]
       then
+ 	      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball -o gium.tar"
+      else
         if ! grep -q 'net.core.somaxconn' /etc/sysctl.conf
         then 
           echo "net.core.somaxconn = 10240" >> /etc/sysctl.conf
           sysctl -p
         fi
  	      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/4.3 -o gium.tar"
-      else
- 	      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball -o gium.tar"
       fi
- 	  fi
  	fi
- 	
+
  	giumtar=$(eval "echo ~${GSQL_USER}/gium.tar")
   if [ -f $giumtar ]
   then
