@@ -145,8 +145,16 @@ report="report4GraphSQL_`hostname`.txt"
     fi
   done
 
+  allowedLocale='en_US.UTF-8'
+  if ! locale | grep -q "$allowedLocale"
+  then
+    echo "Warning: LOCALE must be set to $allowedLocale"
+    exit 3
+  fi
+
   /bin/echo -e "\n= Gathering System information ="
   /bin/echo -e "\n---Host name: " `hostname`
+  /bin/echo -e "\n---System locale: " `locale`
   /bin/echo -e "\n---Arch:" `uname -a`
 
   if [ $OS = 'RHEL' ]
