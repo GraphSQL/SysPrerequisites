@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# use "echo <token> |tr 'abcdef'  'FEDCBA'|tr '13579' '97531' to get a fake token and put it below
+# TOKEN is a faked one. Run feed_token.sh to change the token below.
 TOKEN='84C73D474150B3B54771053B17FA32CB31328EF3'
 GIT_TOKEN=$(echo $TOKEN |tr '97531' '13579' |tr 'FEDCBA' 'abcdef')
 usage(){
