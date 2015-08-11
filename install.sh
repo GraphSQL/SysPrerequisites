@@ -128,14 +128,14 @@ echo "Operating System is $OS"
  	if [ $OS = 'RHEL' ]
  	then
  	  #$PKGMGR -y groupinstall "development tools"
- 	  PKGS="java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof redis cmake openssh-clients nmap-ncat nc ntp postfix"
+ 	  PKGS="java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof redis cmake openssh-clients nmap-ncat nc ntp postfix sysstat"
  	  $PKGMGR -y install $PKGS
 	  chkconfig --level 345 ntpd on
 	  service ntpd start
  	else
  	  #$PKGMGR -y install "build-essential"
     $PKGMGR update >/dev/null 2>&1 # this only updates source.lst, not packages
- 	  PKGS="openjdk-7-jdk wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof redis-server cmake ntp postfix"
+ 	  PKGS="openjdk-7-jdk wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof redis-server cmake ntp postfix sysstat"
  	  $PKGMGR -y install $PKGS
 	  update-rc.d ntp enable
 	  service ntp start 
