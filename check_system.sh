@@ -23,6 +23,8 @@ else
   exit 1
 fi
 
+GSQL_USER=${1:-root}
+
 report="report4GraphSQL_`hostname`.txt"
 (
   echo "=== Checking Prerequisites ==="
@@ -186,7 +188,53 @@ report="report4GraphSQL_`hostname`.txt"
     then
       echo "NTP service is running."
     else 
-      echo "NTP service is NOT running."
+      echo "WARNING: NTP service is NOT running."
+    fi
+
+  /bin/echo -e "\n---CRON service:"
+    if [ $OS = 'UBUNTU' ]
+    then
+      cronFile="/var/spool/cron/crontabs/$GSQL_USER" 
+    else
+      cronFile="/var/spool/cron/$GSQL_USER" 
+    fi
+
+    cronFileExists='N'
+    if [ -f $cronFile ]
+    then
+      cronFileExists='Y'
+    fi
+
+    TMPFILE="/tmp/cront-test.$$"
+    echo "* * * * * echo graphsql_testing > $TMPFILE" >> $cronFile
+
+    if [ $cronFileExists = 'N' ]
+    then
+      chown $GSQL_USER $cronFile
+      chmod 600 $cronFile
+    fi
+
+    counter=60
+    while [ $counter -gt 0 ]
+    do 
+      [ -f $TMPFILE ] && break
+      sleep 2
+      let "counter -= 2"
+    done
+
+    if [ $cronFileExists = 'Y' ]
+      then
+      sed -i -e '/graphsql_testing/d' $cronFile
+    else
+      rm -f $cronFile
+    fi
+
+    if [ -f $TMPFILE ]
+    then
+      echo "CRON service is running."
+      rm -f $TMPFILE
+    else 
+      echo "WARNING: CRON service is NOT working."
     fi
 
   /bin/echo -e "\n---Firewall Configuration:"
