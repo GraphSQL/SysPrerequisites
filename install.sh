@@ -142,7 +142,7 @@ echo "Operating System is $OS"
  	fi
  	
   # make libjvm.so available to gpath
-  jvm=$(find /usr -name libjvm.so|head -1)
+  jvm=$(find /usr -type f -name libjvm.so|head -1)
   if [ "J$jvm" = 'J' ]
   then
     echo "WARNING: Cannot find libjvm.so. Gpath will not work without this file."
