@@ -142,12 +142,18 @@ echo "Operating System is $OS"
  	fi
  	
   # make libjvm.so available to gpath
-  jvm=$(find /usr -type f -name libjvm.so|head -1)
+  jvm=$(find /usr -type f -name libjvm.so|grep server | head -1)
   if [ "J$jvm" = 'J' ]
   then
     echo "WARNING: Cannot find libjvm.so. Gpath will not work without this file."
   else
-    ln -sf $jvm /usr/lib/libjvm.so
+    if which apt-get >/dev/null 2>&1
+    then
+      ln -sf $jvm /usr/lib/libjvm.so
+    else
+      ln -sf $jvm /lib64/libjvm.so
+    fi
+
   fi
   
 	if [ -f ./SysPrerequisites-master.tar ] #already downloaded
