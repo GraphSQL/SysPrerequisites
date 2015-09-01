@@ -141,6 +141,15 @@ echo "Operating System is $OS"
 	  service ntp start 
  	fi
  	
+  # make libjvm.so available to gpath
+  jvm=$(find /usr -name libjvm.so|head -1)
+  if [ "J$jvm" = 'J' ]
+  then
+    echo "WARNING: Cannot find libjvm.so. Gpath will not work without this file."
+  else
+    ln -sf $jvm /usr/lib/libjvm.so
+  fi
+  
 	if [ -f ./SysPrerequisites-master.tar ] #already downloaded
 	then
  	  tar -xf SysPrerequisites-master.tar
