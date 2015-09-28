@@ -203,20 +203,14 @@ echo "Operating System is $OS"
  	echo
   
  	if has_internet
- 	then
-      read -p "Is this for engine version 4.3 (Y/n):" GIUM_VER
- 	    echo "---- Downloading GIUM package ----"
-      if [ "N$GIUM_VER" = 'Nn' -o "N$GIUM_VER" = 'NN'  ]
+    then
+      echo "---- Downloading GIUM package ----"
+      if ! grep -q 'net.core.somaxconn' /etc/sysctl.conf
       then
- 	      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball -o gium.tar"
-      else
-        if ! grep -q 'net.core.somaxconn' /etc/sysctl.conf
-        then 
-          echo "net.core.somaxconn = 10240" >> /etc/sysctl.conf
-          sysctl -p > /dev/null
-        fi
- 	      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/4.3 -o gium.tar"
+        echo "net.core.somaxconn = 10240" >> /etc/sysctl.conf
+        sysctl -p > /dev/nul
       fi
+      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/prod_0.1 -o gium.tar"
  	fi
 
  	giumtar=$(eval "echo ~${GSQL_USER}/gium.tar")
