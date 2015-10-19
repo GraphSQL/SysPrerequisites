@@ -1,8 +1,36 @@
 #!/bin/bash
 
+txtbld=$(tput bold)             # Bold
+bldred=${txtbld}$(tput setaf 1) # red
+bldgre=${txtbld}$(tput setaf 2) # green
+bldblu=${txtbld}$(tput setaf 4) # blue
+txtrst=$(tput sgr0)             # Reset
+
+warn()
+{
+  echo "${bldred}Warning: $* $txtrst"
+}
+
+checkList()
+{
+  echo
+  echo ${bldblu}** checking "$*" ... $txtrst
+}
+
+collectList()
+{
+  echo
+  echo "${txtbld}--$*-- $txtrst"
+}
+
+found()
+{
+  echo "${bldgre}$* found $txtrst"
+}
+
 if [[ $EUID -ne 0 ]]
 then
-  echo "Please log in as root, or 'sudo' run the command if you have sudo privileges."
+  warn "Please log in as root, or 'sudo' run the command if you have sudo privileges."
   exit 1
 fi
 
@@ -19,16 +47,16 @@ then
   PKGMGROPT='-q'
   CMDOPT='-qf'
 else
-  echo "Unsupported OS."
+  warn "Unsupported OS."
   exit 1
 fi
 
 GSQL_USER=${1:-root}
 
-report="report4GraphSQL_`hostname`.txt"
+report="./report_`hostname`.txt"
 (
-  echo "=== Checking Prerequisites ==="
-  echo "**checking required system libraries ..."
+  echo "==== Checking System Configuration ===="
+  checkList "required system libraries"
   LIBS="glibc libgcc libstdc++ zlib"
   LIBS_MISSING=''
   for lib in $LIBS
@@ -38,25 +66,24 @@ report="report4GraphSQL_`hostname`.txt"
       if $PKGMGR $PKGMGROPT $lib > /dev/null 2>&1
       then
         pkglib=$( $PKGMGR $PKGMGROPT $lib)
-        echo "  \"$lib\" found in $pkglib"
+        echo "${bldgre}\"$lib\" found in $pkglib $txtrst"
       else
-        echo "  \"$lib\" NOT FOUND"
+        warn "\"$lib\" NOT FOUND"
         LIBS_MISSING="$LIBS_MISSING $lib"
       fi
     else 
       if $PKGMGR $PKGMGROPT ${lib}*|grep $lib > /dev/null 2>&1
       then
         pkglib=$( $PKGMGR $PKGMGROPT ${lib}*|grep $lib |head -1|awk '{print $2}')
-        echo "  \"$lib\" found: $pkglib"
+        echo "${bldgre}\"$lib\" found in $pkglib $txtrst"
       else
-        echo "  \"$lib\" NOT FOUND"
+        warn "\"$lib\" NOT FOUND"
         LIBS_MISSING="$LIBS_MISSING $lib"
       fi
     fi
   done
 
-  echo
-  echo "**checking required commands ..."
+  checkList "required commands"
   CMDS="java unzip scp"
   CMDS_MISSING=''
   for cmd in $CMDS
@@ -65,26 +92,26 @@ report="report4GraphSQL_`hostname`.txt"
     then
       if [ "j$cmd" = 'jjava' ]
       then
-        echo "  $(java -version 2>&1|head -1) found"
+        found "$(java -version 2>&1|head -1)"
         JV=$(java -version 2>&1|head -1 | grep -oP "[12]\.\d\d*")
         if [ "$JV" = "1.5" -o "$JV" = "1.6" ]
         then
           CMDS_MISSING="$CMDS_MISSING ${cmd}>=1.7"
-          echo "  Java >= 1.7 required"
+          warn "Java >= 1.7 required"
         fi
       else
         if [ $OS = 'RHEL' ]
         then 
           pkg=$( $PKGMGR $CMDOPT "$(which $cmd)")
-          echo "  $cmd found in $pkg"
+          echo "${bldgre}$cmd found in $pkg $txtrst"
         else
           pkg=$( $PKGMGR $CMDOPT "$(which $cmd)" |awk 'BEGIN { FS = ":" } ; { print $1 }') 
           pkgVer=$( $PKGMGR $PKGMGROPT $pkg|grep $pkg |head -1|awk '{print $3}')
-          echo "  \"$cmd\" version $pkgVer"
+          echo "${bldgre}\"$cmd\" version $pkgVer $txtrst"
         fi
       fi
     else
-      echo "  $cmd NOT FOUND"
+      warn "$cmd NOT FOUND"
       CMDS_MISSING="$CMDS_MISSING $cmd"
     fi
   done  
@@ -94,104 +121,94 @@ report="report4GraphSQL_`hostname`.txt"
     if [ "l$LIBS_MISSING" != 'l' ]
     then
       echo
-      echo "!! Missing system libaries: $LIBS_MISSING"
+      warn " Missing system libaries: $LIBS_MISSING"
     fi
 
     if [ "l$CMDS_MISSING" != 'l' ]
     then
       echo
-      echo "!! Missing comand(s): $CMDS_MISSING"
+      warn " Missing comand(s): $CMDS_MISSING"
     fi
     
-    echo "Please install all missing items and run the check again."
+    warn "Please install all missing items and run the check again."
     exit 2
   fi
 
   # not required, but good to know  
-  echo
-  echo "**checking optional commands ..."
-  CMDS="python lsof make gcc g++ redis-server"
+  checkList  "optional commands"
+  CMDS="python lsof make gcc g++"
   for cmd in $CMDS
   do
     if which $cmd >/dev/null 2>&1
     then
       if [ $cmd = 'python' ]
       then
-        echo "  $(python -V 2>&1) found"
+        found "$(python -V 2>&1)"
       else
         if [ $OS = 'RHEL' ]
         then 
           pkg=$( $PKGMGR $CMDOPT "$(which $cmd)")
-          echo "  $cmd found in $pkg"
+          echo "${bldgre}$cmd found in $pkg $txtrst"
         else
           pkg=$( $PKGMGR $CMDOPT "$(which $cmd)" |awk 'BEGIN { FS = ":" } ; { print $1 }') 
           pkgVer=$( $PKGMGR $PKGMGROPT $pkg|grep $pkg |head -1|awk '{print $3}')
-          echo "  \"$cmd\" version $pkgVer"
+          echo "${bldgre}\"$cmd\" version $pkgVer $txtrst"
         fi
       fi
     else
-      echo "  $cmd: NOT FOUND"
+      warn "$cmd: NOT FOUND"
     fi
   done 
 
-  echo
-  echo "**checking required python modules ..."
+  checkList  "required python modules"
   PyMod="Crypto ecdsa paramiko nose yaml setuptools fabric psutil kazoo elasticsearch requests"
   for pymod in $PyMod
   do
     if python -c "import $pymod" >/dev/null 2>&1
     then
-      echo "  $pymod: found"
+      found "$pymod"
     else
-      echo "  $pymod: NOT FOUND"
+      warn "$pymod: NOT FOUND"
     fi
   done
 
+  checkList  "System Locale"
   allowedLocale='en_US.UTF-8'
   if ! locale | grep -q "$allowedLocale"
   then
-    echo "Warning: LOCALE must be set to $allowedLocale"
+    warn "Locale $allowedLocale is required."
     exit 3
-  fi
-
-  /bin/echo -e "\n= Gathering System information ="
-  /bin/echo -e "\n---Host name: " `hostname`
-  /bin/echo -e "\n---System locale: " `locale`
-  /bin/echo -e "\n---Arch:" `uname -a`
-
-  if [ $OS = 'RHEL' ]
-  then
-    /bin/echo -e "\n---OS Family: `cat /etc/redhat-release`"
   else
-    /bin/echo -e "\n---OS Family: `grep VERSION= /etc/os-release`"
+    found "en_US.UTF-8"
   fi
 
-  /bin/echo -e "\n---CPU:" 
-    lscpu
-    grep flags /proc/cpuinfo|head -1
-  /bin/echo -e "\n---Memory:" 
-    grep Mem /proc/meminfo 
-
-  /bin/echo -e "\n---Disk space:" 
-    df -h
-
-  /bin/echo -e "\n---NIC and IP:" 
-    if which ifconfig >/dev/null 2>&1
-    then
-      ifconfig -a|grep -v '127\|lo' | grep -B1 'inet '
-    else 
-      ip addr|grep -B1 'inet '
-    fi
-
-  /bin/echo -e "\n---NTP service:"
+  checkList "NTP service"
     if pgrep ntpd >/dev/null 2>&1
     then
-      echo "NTP service is running."
+      echo "${bldgre}NTP service is running. $txtrst"
     else 
-      echo "WARNING: NTP service is NOT running."
+      warn  "NTP service is NOT running."
     fi
 
-  /bin/echo -e "\n---CRON service:"
+  checkList "Redis service"
+    if pgrep redis >/dev/null 2>&1
+    then
+      echo "${bldgre}Redis service is running. $txtrst"
+    else 
+      warn  "Redis service is NOT running."
+    fi
+
+  checkList  "Internet Connection"
+    #ping -c 2 -W 3 www.github.com | grep 'of data\|transmitted\|avg'
+    if ping -c 1 -W 2 www.github.com > /dev/null 2>&1
+    then
+      echo "${bldgre}Internet connection -- OK $txtrst"
+    else
+      warn "No Internet connection"
+    fi
+
+  checkList "CRON service"
+  /bin/echo "This may take up to one minute"
     if [ $OS = 'UBUNTU' ]
     then
       cronFile="/var/spool/cron/crontabs/$GSQL_USER" 
@@ -231,13 +248,30 @@ report="report4GraphSQL_`hostname`.txt"
 
     if [ -f $TMPFILE ]
     then
-      echo "CRON service is running."
+      echo "${bldgre}CRON service is running. $txtrst"
       rm -f $TMPFILE
     else 
-      echo "WARNING: CRON service is NOT working."
+      warn "CRON service is NOT working."
     fi
 
-  /bin/echo -e "\n---Firewall Configuration:"
+  /bin/echo -e "\n==== Collecting System information ===="
+  collectList "Host name"
+    hostname
+  collectList "Supported locale"
+    locale
+  collectList "Architecture"
+    uname -a
+  collectList "OS family"
+
+  if [ $OS = 'RHEL' ]
+  then
+    cat /etc/redhat-release
+  else
+    grep VERSION= /etc/os-release
+  fi
+
+
+  collectList "Firewall"
   if [ $OS = 'RHEL' ]
   then
       if which firewall-cmd >/dev/null 2>&1
@@ -259,15 +293,41 @@ report="report4GraphSQL_`hostname`.txt"
 
   if grep -v '^#' /etc/hosts.deny|grep -v '^ *$' > /dev/null 2>&1
   then
-    /bin/echo -e "\n---TCP Wrapper Configuration:"
+    collectList "TCP wrapper"
     egrep -v '^#' /etc/hosts.allow
   fi
 
-  /bin/echo -e "\n---SSH Port Configuration:"
+  collectList "SSH port"
     grep 'Port ' /etc/ssh/sshd_config
 
-  /bin/echo -e "\n---Outside Connection:"
-    ping -c 3 -W 3 www.github.com | grep 'of data\|transmitted\|avg'
-  /bin/echo 
-  /bin/echo -e "Please review $report and send it to GraphSQL. Thank you!"
+  collectList "CPU"
+    lscpu
+    grep flags /proc/cpuinfo|head -1
+  collectList "Memory"
+    grep Mem /proc/meminfo
+
+  collectList "Disk space"
+    df -h
+
+  if which hdparm >/dev/null 2>&1
+  then
+    collectList "Disk speed"
+    disks=$(dmesg | grep -Po '\[.d.\]' | sed -e 's/\[//' -e 's/\]//'|sort|uniq)
+    for disk in $disks
+    do
+        hdparm -t --direct /dev/$disk
+    done
+  fi
+
+  collectList "Network adapter and IP address"
+    if which ifconfig >/dev/null 2>&1
+    then
+      ifconfig -a|grep -v '127\|lo' | grep -B1 'inet '
+    else
+      ip addr|grep -B1 'inet '
+    fi
+
+
 ) 2>&1 | tee $report 
+  /bin/echo
+  /bin/echo -e "Report \"$report\" is generated."
