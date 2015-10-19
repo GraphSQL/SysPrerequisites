@@ -59,7 +59,7 @@ else
     exit 2
 fi
 
-notice "Welcome to GraphSQL System Prerequisite Intaller"
+notice "Welcome to GraphSQL System Prerequisite Installer"
 
 (
   [ $# -gt 0 ] && GSQL_USER=$1
