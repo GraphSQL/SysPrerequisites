@@ -122,8 +122,7 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
     chown -R ${GSQL_USER} ${DATA_PATH}
  	fi
  	
-  read -p "GraphSQL engine version: [4.3] " GIUM_VER
-  GIUM_VER=${GIUM_VER:-4.3}
+  GIUM_VER='4.3'
 
   progress "Changing file handles and process limits in /etc/security/limits.conf"
   noFile=1000000
@@ -271,7 +270,7 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
       progress "Downloading GIUM package"
       if [ "$GIUM_VER" != '4.3' ]
       then
- 	      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball -o gium.tar"
+      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/prod_0.1 -o gium.tar"
       else
         if ! grep -q 'net.core.somaxconn' /etc/sysctl.conf
         then 
