@@ -44,6 +44,9 @@ cancel(){
     exit 1
 }
 
+LOG=/tmp/install-gsql.log
+cp /dev/null $LOG
+
 trap cancel INT
 
 if which apt-get > /dev/null 2>&1
@@ -61,7 +64,6 @@ fi
 
 notice "Welcome to GraphSQL System Prerequisite Installer"
 
-(
   [ $# -gt 0 ] && GSQL_USER=$1
  	
  	while [ "U$GSQL_USER" = 'U' ] 
@@ -122,9 +124,6 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
     chown -R ${GSQL_USER} ${DATA_PATH}
  	fi
  	
-  read -p "GraphSQL engine version: [4.3] " GIUM_VER
-  GIUM_VER=${GIUM_VER:-4.3}
-
   progress "Changing file handles and process limits in /etc/security/limits.conf"
   noFile=1000000
  	if ! grep -q "$GSQL_USER hard nofile $noFile" /etc/security/limits.conf
@@ -148,6 +147,12 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
     echo "$GSQL_USER soft nproc $noProc" >> /etc/security/limits.conf
   fi
 
+  if ! grep -q 'net.core.somaxconn' /etc/sysctl.conf
+  then 
+    echo "net.core.somaxconn = 10240" >> /etc/sysctl.conf
+    sysctl -p > /dev/null
+  fi
+
 	progress "Updating /etc/hosts"
 	IPS=$(ip addr|grep 'inet '|awk '{print $2}'|egrep -o "[0-9]{1,}.[0-9]{1,}.[0-9]{1,}.[0-9]{1,}"|xargs echo)
 	for ip in $IPS
@@ -162,18 +167,16 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
  	
  	if [ $OS = 'RHEL' ]
  	then
- 	  #$PKGMGR -y groupinstall "development tools"
     PKGS="curl java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof cmake openssh-clients nmap-ncat nc ntp postfix sysstat hdparm"
- 	  $PKGMGR -y install $PKGS
+    $PKGMGR -y install $PKGS 1>>$LOG 2>&1
 	  chkconfig --level 345 ntpd on
-	  service ntpd start
+	  service ntpd start 1>>$LOG 2>&1
  	else
- 	  #$PKGMGR -y install "build-essential"
     $PKGMGR update >/dev/null 2>&1 # this only updates source.lst, not packages
     PKGS="curl openjdk-7-jdk wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof cmake ntp postfix sysstat hdparm "
- 	  $PKGMGR -y install $PKGS
+    $PKGMGR -y install $PKGS 1>>$LOG 2>&1
 	  update-rc.d ntp enable
-	  service ntp start 
+	  service ntp start 1>>$LOG 2>&1
  	fi
 
   # make libjvm.so available to gpath
@@ -188,7 +191,6 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
     else
       ln -sf $jvm /lib64/libjvm.so
     fi
-
   fi
   
 	if [ -f ./SysPrerequisites-master.tar ] #already downloaded
@@ -219,11 +221,11 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
       progress "Installing redis server"
       tar xzf graphsql_redis-2.8.17.tar.gz
       cd redis-2.8.17
-      make install
-      utils/install_server.sh
+      make install 1>>$LOG 2>&1
+      utils/install_server.sh 1>>$LOG 2>&1
       cd ..
       rm -rf redis-2.8.17
-      service redis_6379 start
+      service redis_6379 start 1>>$LOG 2>&1
     fi
   fi
 
@@ -243,7 +245,8 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
     if [ -d $pymod ]
     then
       progress "Installing Python Module $pymod"
-      cd $pymod && python setup.py install
+      cd $pymod
+      python setup.py install 1>>$LOG 2>&1
       cd ..
     else
       warn "$pymod not found"
@@ -266,20 +269,14 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
   TOKEN='84C73D474150B3B54771053B17FA32CB31328EF3'
   GIT_TOKEN=$(echo $TOKEN |tr '97531' '13579' |tr 'FEDCBA' 'abcdef')
 
+  read -p "GraphSQL engine version: [4.3] " GPE_VER
+  GIUM_BRANCH=${GPE_VER:-4.3}
+  [ "$GPE_VER" = '4.2' ] && GIUM_BRANCH='master'
+
  	if has_internet
  	then
-      progress "Downloading GIUM package"
-      if [ "$GIUM_VER" != '4.3' ]
-      then
- 	      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball -o gium.tar"
-      else
-        if ! grep -q 'net.core.somaxconn' /etc/sysctl.conf
-        then 
-          echo "net.core.somaxconn = 10240" >> /etc/sysctl.conf
-          sysctl -p > /dev/null
-        fi
- 	      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/4.3 -o gium.tar"
-      fi
+    progress "Downloading GIUM package"
+ 	  su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/${GIUM_BRANCH} -o gium.tar"
  	fi
 
  	giumtar=$(eval "echo ~${GSQL_USER}/gium.tar")
@@ -291,18 +288,14 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
     warn "You need to manually install IUM for user \"${GSQL_USER}\""
   fi
 
-	## Install gsql_monitor service
   echo
-	progress "Installing GSQL monitoring service"
+	progress "Installing GSQL monitor service"
 	[ -x ./install-monitor-service.sh ] && ./install-monitor-service.sh $GSQL_USER
-        [ -x ./SysPrerequisites-master/install-monitor-service.sh ] && (cd ./SysPrerequisites-master; ./install-monitor-service.sh $GSQL_USER)
+  [ -x ./SysPrerequisites-master/install-monitor-service.sh ] && (cd ./SysPrerequisites-master; ./install-monitor-service.sh $GSQL_USER)
 	#rm -rf SysPrerequisites-master
-
- ) 2>&1 | tee ${HOME}/install-gsql.log
 
 echo
 echo "System prerequisites installation completed"
-echo "Please check ${HOME}/install-gsql.log for installation details"
 echo
 
 echo "You may verify system settings by running \"check_system.sh\" script in SysPrerequisites-master folder."
