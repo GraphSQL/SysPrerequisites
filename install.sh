@@ -44,6 +44,9 @@ cancel(){
     exit 1
 }
 
+LOG=${HOME}/install-gsql.log
+cp /dev/null $LOG
+
 trap cancel INT
 
 if which apt-get > /dev/null 2>&1
@@ -61,7 +64,6 @@ fi
 
 notice "Welcome to GraphSQL System Prerequisite Installer"
 
-(
   [ $# -gt 0 ] && GSQL_USER=$1
  	
  	while [ "U$GSQL_USER" = 'U' ] 
@@ -161,16 +163,14 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
  	
  	if [ $OS = 'RHEL' ]
  	then
- 	  #$PKGMGR -y groupinstall "development tools"
     PKGS="curl java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof cmake openssh-clients nmap-ncat nc ntp postfix sysstat hdparm"
- 	  $PKGMGR -y install $PKGS
+    $PKGMGR -y install $PKGS 1>>$LOG 2>&1
 	  chkconfig --level 345 ntpd on
-	  service ntpd start
+	  service ntpd start 1>>$LOG 2>&1
  	else
- 	  #$PKGMGR -y install "build-essential"
     $PKGMGR update >/dev/null 2>&1 # this only updates source.lst, not packages
     PKGS="curl openjdk-7-jdk wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof cmake ntp postfix sysstat hdparm "
- 	  $PKGMGR -y install $PKGS
+    $PKGMGR -y install $PKGS 1>>$LOG 2>&1
 	  update-rc.d ntp enable
 	  service ntp start 
  	fi
@@ -218,11 +218,11 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
       progress "Installing redis server"
       tar xzf graphsql_redis-2.8.17.tar.gz
       cd redis-2.8.17
-      make install
-      utils/install_server.sh
+      make install 1>>$LOG 2>&1
+      utils/install_server.sh 1>>$LOG 2>&1
       cd ..
       rm -rf redis-2.8.17
-      service redis_6379 start
+      service redis_6379 start 1>>$LOG 2>&1
     fi
   fi
 
@@ -242,7 +242,8 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
     if [ -d $pymod ]
     then
       progress "Installing Python Module $pymod"
-      cd $pymod && python setup.py install
+      cd $pymod
+      python setup.py install 1>>$LOG 2>&1
       cd ..
     else
       warn "$pymod not found"
@@ -297,11 +298,8 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
         [ -x ./SysPrerequisites-master/install-monitor-service.sh ] && (cd ./SysPrerequisites-master; ./install-monitor-service.sh $GSQL_USER)
 	#rm -rf SysPrerequisites-master
 
- ) 2>&1 | tee ${HOME}/install-gsql.log
-
 echo
 echo "System prerequisites installation completed"
-echo "Please check ${HOME}/install-gsql.log for installation details"
 echo
 
 echo "You may verify system settings by running \"check_system.sh\" script in SysPrerequisites-master folder."
