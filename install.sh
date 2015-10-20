@@ -40,14 +40,14 @@ has_internet(){
 }
 
 cancel(){
-    [ ! -z $PID ] && kill -9 $PID
-    echo
-    warn "Installation canceled by user"
-    exit 1
+  [ ! -z $PID ] && kill -9 $PID
+  echo
+  warn "Installation cancelled by user"
+  exit 1
 }
 
-LOG=/dev/null
-cp /dev/null $LOG
+LOG=/dev/null #use /dev/null to suppress logs
+cp -f /dev/null $LOG >/dev/null 2>&1
 
 trap cancel INT
 
@@ -66,6 +66,27 @@ fi
 
 notice "Welcome to GraphSQL System Prerequisite Installer"
 
+  if [ -f ./SysPrerequisites-master.tar ]
+  then
+    tar -xf SysPrerequisites-master.tar
+    cd SysPrerequisites-master
+  else
+    if [ ! -d ./nose-1.3.4 ]
+    then
+      if has_internet
+      then
+        progress "Downloading System Prerequisite package"
+        curl  -L https://github.com/GraphSQL/SysPrerequisites/archive/master.tar.gz -o SysPrerequisites-master.tar
+        tar -xf SysPrerequisites-master.tar
+        cd SysPrerequisites-master
+      else
+        warn "No Internet connection. Cannot find SysPrerequisites in the current directory"
+        warn "Program terminated"
+        exit 3
+      fi
+    fi
+  fi
+
   [ $# -gt 0 ] && GSQL_USER=$1
  	
  	while [ "U$GSQL_USER" = 'U' ] 
@@ -78,7 +99,7 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
     then
       echo
       warn "Running GraphSQL software as \"${GSQL_USER}\" is not recommended."
- 	    read -p "Continue with user \"${GSQL_USER}\" (y/N): " USER_ROOT
+      read -p "Continue with user \"${GSQL_USER}\"? (y/N): " USER_ROOT
       if [ "y${USER_ROOT}" = "yy" -o "y${USER_ROOT}" = "yY" ]
       then
         break
@@ -152,7 +173,7 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
   if ! grep -q 'net.core.somaxconn' /etc/sysctl.conf
   then 
     echo "net.core.somaxconn = 10240" >> /etc/sysctl.conf
-    sysctl -p > /dev/null
+    sysctl -p > /dev/null 2>&1
   fi
 
 	progress "Updating /etc/hosts"
@@ -174,7 +195,7 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
 	  chkconfig --level 345 ntpd on
 	  service ntpd start 1>>$LOG 2>&1
  	else
-    $PKGMGR update >/dev/null 2>&1 # this only updates source.lst, not packages
+    $PKGMGR update >/dev/null 2>&1
     PKGS="curl openjdk-7-jdk wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof cmake ntp postfix sysstat hdparm "
     $PKGMGR -y install $PKGS 1>>$LOG 2>&1
 	  update-rc.d ntp enable
@@ -187,35 +208,14 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
   then
     warn "Cannot find libjvm.so. GPath will not work without this file."
   else
-    if which apt-get >/dev/null 2>&1
+    if [ $OS = 'RHEL' ]
     then
-      ln -sf $jvm /usr/lib/libjvm.so
-    else
       ln -sf $jvm /lib64/libjvm.so
+    else
+      ln -sf $jvm /usr/lib/libjvm.so
     fi
   fi
   
-	if [ -f ./SysPrerequisites-master.tar ] #already downloaded
-	then
- 	  tar -xf SysPrerequisites-master.tar
- 	  cd SysPrerequisites-master
- 	else
-		if [ ! -d ./nose-1.3.4 ] 
- 		then
- 	  	if has_internet
- 	  	then
-          progress "Downloading System Prerequisite package"
- 	   			curl  -L https://github.com/GraphSQL/SysPrerequisites/archive/master.tar.gz -o SysPrerequisites-master.tar
- 	   			tar -xf SysPrerequisites-master.tar
- 	   			cd SysPrerequisites-master
- 	  	else
-          warn "No Internet connection. Cannot find SysPrerequisites in the current directory"
-          warn "Program terminated"
- 	   			exit 3
- 	  	fi
- 		fi
-	fi
- 	
   if ! which redis-server >/dev/null 2>&1
   then
     if [ -f graphsql_redis-2.8.17.tar.gz ]
