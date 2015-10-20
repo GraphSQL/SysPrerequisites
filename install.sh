@@ -46,7 +46,7 @@ cancel(){
     exit 1
 }
 
-LOG=${HOME}/install-gsql.log
+LOG=/dev/null
 cp /dev/null $LOG
 
 trap cancel INT
