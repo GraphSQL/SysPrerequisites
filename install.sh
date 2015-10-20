@@ -1,5 +1,7 @@
 #!/bin/bash
 
+GIUM_BRANCH='prod_0.1'  #change this line for different version
+
 txtbld=$(tput bold)             # Bold
 bldred=${txtbld}$(tput setaf 1) # red
 bldgre=${txtbld}$(tput setaf 2) # green
@@ -124,8 +126,6 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
     chown -R ${GSQL_USER} ${DATA_PATH}
  	fi
  	
-  GIUM_VER='4.3'
-
   progress "Changing file handles and process limits in /etc/security/limits.conf"
   noFile=1000000
  	if ! grep -q "$GSQL_USER hard nofile $noFile" /etc/security/limits.conf
@@ -147,6 +147,12 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
   if ! grep -q "$GSQL_USER soft nproc $noProc" /etc/security/limits.conf
   then 
     echo "$GSQL_USER soft nproc $noProc" >> /etc/security/limits.conf
+  fi
+
+  if ! grep -q 'net.core.somaxconn' /etc/sysctl.conf
+  then 
+    echo "net.core.somaxconn = 10240" >> /etc/sysctl.conf
+    sysctl -p > /dev/null
   fi
 
 	progress "Updating /etc/hosts"
@@ -172,7 +178,7 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
     PKGS="curl openjdk-7-jdk wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof cmake ntp postfix sysstat hdparm "
     $PKGMGR -y install $PKGS 1>>$LOG 2>&1
 	  update-rc.d ntp enable
-	  service ntp start 
+	  service ntp start 1>>$LOG 2>&1
  	fi
 
   # make libjvm.so available to gpath
@@ -187,7 +193,6 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
     else
       ln -sf $jvm /lib64/libjvm.so
     fi
-
   fi
   
 	if [ -f ./SysPrerequisites-master.tar ] #already downloaded
@@ -268,18 +273,8 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
 
  	if has_internet
  	then
-      progress "Downloading GIUM package"
-      if [ "$GIUM_VER" != '4.3' ]
-      then
-      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/prod_0.1 -o gium.tar"
-      else
-        if ! grep -q 'net.core.somaxconn' /etc/sysctl.conf
-        then 
-          echo "net.core.somaxconn = 10240" >> /etc/sysctl.conf
-          sysctl -p > /dev/null
-        fi
- 	      su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/4.3 -o gium.tar"
-      fi
+    progress "Downloading GIUM package"
+ 	  su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/${GIUM_BRANCH} -o gium.tar"
  	fi
 
  	giumtar=$(eval "echo ~${GSQL_USER}/gium.tar")
@@ -291,11 +286,10 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
     warn "You need to manually install IUM for user \"${GSQL_USER}\""
   fi
 
-	## Install gsql_monitor service
   echo
-	progress "Installing GSQL monitoring service"
+	progress "Installing GSQL monitor service"
 	[ -x ./install-monitor-service.sh ] && ./install-monitor-service.sh $GSQL_USER
-        [ -x ./SysPrerequisites-master/install-monitor-service.sh ] && (cd ./SysPrerequisites-master; ./install-monitor-service.sh $GSQL_USER)
+  [ -x ./SysPrerequisites-master/install-monitor-service.sh ] && (cd ./SysPrerequisites-master; ./install-monitor-service.sh $GSQL_USER)
 	#rm -rf SysPrerequisites-master
 
 echo
