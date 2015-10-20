@@ -246,7 +246,7 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
  	do
     if [ -d $pymod ]
     then
-      progress "Installing Python Module $pymod"
+      progress "Installing Python module $pymod"
       cd $pymod
       python setup.py install 1>>$LOG 2>&1
       cd ..
@@ -261,13 +261,19 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
     sed -i -e 's/_warn("Not using mpz_powm_sec/pass #_warn("Not using mpz_powm_sec/' $numberPy
   fi
 
+  if [ ! -d ~$USER_HOME/.python-eggs ]
+  then
+    su - ${GSQL_USER} -c "mkdir ~/.python-eggs; chmod go-w ~/.python-eggs"
+  else
+    su - ${GSQL_USER} -c "chmod go-w ~/.python-eggs"
+  fi
+
   if ! hash jq 2>/dev/null; then
     cp bin/jq /usr/bin/
   fi
 
  	echo
   
-  # TOKEN is a faked one. Run feed_token.sh to change the token below.
   TOKEN='84C73D474150B3B54771053B17FA32CB31328EF3'
   GIT_TOKEN=$(echo $TOKEN |tr '97531' '13579' |tr 'FEDCBA' 'abcdef')
 
@@ -277,8 +283,7 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
  	  su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/${GIUM_BRANCH} -o gium.tar"
  	fi
 
- 	giumtar=$(eval "echo ~${GSQL_USER}/gium.tar")
-  if [ -f $giumtar ]
+  if [ -f ${USER_HOME}/gium.tar ]
   then
     progress "Installing GIUM package for ${GSQL_USER}"
     su - ${GSQL_USER} -c "tar xf gium.tar; GraphSQL-gium-*/install.sh; rm -rf GraphSQL-gium-*; rm -f gium.tar"
@@ -293,7 +298,7 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
 	#rm -rf SysPrerequisites-master
 
 echo
-echo "System prerequisites installation completed"
+echo "System prerequisite installation completed."
 echo
 
 echo "You may verify system settings by running \"check_system.sh\" script in SysPrerequisites-master folder."
