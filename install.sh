@@ -142,7 +142,7 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
     notice "You may need to run command \"chown -R ${GSQL_USER} ${DATA_PATH}\" "
     sleep 3
  	else
-    progress "Creating folder ${DATA_PATH} ..."
+    progress "Creating folder ${DATA_PATH}"
     mkdir -p ${DATA_PATH}
     chown -R ${GSQL_USER} ${DATA_PATH}
  	fi
@@ -261,7 +261,7 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
     sed -i -e 's/_warn("Not using mpz_powm_sec/pass #_warn("Not using mpz_powm_sec/' $numberPy
   fi
 
-  if [ ! -d ~$USER_HOME/.python-eggs ]
+  if [ ! -d $USER_HOME/.python-eggs ]
   then
     su - ${GSQL_USER} -c "mkdir ~/.python-eggs; chmod go-w ~/.python-eggs"
   else
@@ -301,4 +301,4 @@ echo
 echo "System prerequisite installation completed."
 echo
 
-echo "You may verify system settings by running \"check_system.sh\" script in SysPrerequisites-master folder."
+echo "You may verify system settings by running \"check_system.sh\" script in SysPrerequisites folder."
