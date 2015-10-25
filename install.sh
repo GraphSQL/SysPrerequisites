@@ -26,12 +26,6 @@ usage(){
   exit 1
 }
 
-if [[ $EUID -ne 0 ]]
-then
-  warn "Sudo or root rights are requqired to install prerequsites for GraphSQL software."
-  exit 1
-fi
-
 has_internet(){
   ping -c2 -i0.5 -W1 -q www.github.com >/dev/null 2>&1
   return $?
@@ -44,22 +38,66 @@ cancel(){
   exit 1
 }
 
+get_os(){
+  if which apt-get > /dev/null 2>&1
+  then
+    echo UBUNTU
+  elif which yum >/dev/null 2>&1
+  then
+    echo RHEL
+  else
+    warn "Unsupported OS."
+    exit 2
+  fi
+}
+
+install_service(){
+  run_as=$1
+  srv_name=$2
+  start_order=$3
+  let "stop_order = 100 - ${start_order}"
+
+  srv_src=./${srv_name}
+  srv_dest=/etc/init.d/${srv_name}
+  if [ -f $srv_src ]
+  then
+    cp -f $srv_src $srv_dest
+    chmod 0755 $srv_dest
+    chown 0:0 $srv_dest
+    sed -i -e "s#user=.*#user=${run_as}#" $srv_dest
+
+    if which chkconfig >/dev/null 2>&1  # Redhat or CentOS
+    then
+      chkconfig --level 345 ${srv_name} on
+    elif which update-rc.d  >/dev/null 2>&1
+    then
+      update-rc.d ${srv_name} defaults ${start_order} ${stop_order}
+    else
+      warn "Please follow your system manual to install $srv_name service: $SRC"
+    fi
+  else
+    warn "Service file $srv_src not found in folder"
+  fi
+}
+
+
+if [[ $EUID -ne 0 ]]
+then
+  warn "Sudo or root rights are requqired to install prerequsites for GraphSQL software."
+  exit 1
+fi
+
 LOG=/dev/null #use /dev/null to suppress logs
 cp -f /dev/null $LOG >/dev/null 2>&1
 
 trap cancel INT
 
-if which apt-get > /dev/null 2>&1
+OS=$(get_os)
+if [ "Q$OS" = "QRHEL" ]  # Redhat or CentOS
 then
-    OS=UBUNTU
-    PKGMGR=`which apt-get`
-elif which yum >/dev/null 2>&1
-then
-    OS=RHEL
-    PKGMGR=`which yum`
+  PKGMGR=`which yum`
 else
-    warn "Unsupported OS."
-    exit 2
+  PKGMGR=`which apt-get`
 fi
 
   notice "Welcome to GraphSQL System Prerequisite Installer"
@@ -195,7 +233,8 @@ fi
       warn "Failed to install one or more system packages: ${PKGS}. Program terminated."
       exit 3
     fi
-	  chkconfig --level 345 ntpd on
+
+	  chkconfig --level 345 ntpd on 1>>$LOG 2>&1
 	  service ntpd start 1>>$LOG 2>&1
  	else
     $PKGMGR update >/dev/null 2>&1
@@ -291,6 +330,7 @@ fi
   
   TOKEN='84C73D474150B3B54771053B17FA32CB31328EF3'
   GIT_TOKEN=$(echo $TOKEN |tr '97531' '13579' |tr 'FEDCBA' 'abcdef')
+  GIUM_BRANCH='prod_0.1'
 
   read -p "Enter the IUM branch to install: [4.3] " GIUM_BRANCH
   GIUM_BRANCH=${GIUM_BRANCH:-4.3}
@@ -307,13 +347,16 @@ fi
     progress "Installing GIUM package for ${GSQL_USER}"
     su - ${GSQL_USER} -c "tar xf gium.tar; GraphSQL-gium-*/install.sh; rm -rf GraphSQL-gium-*; rm -f gium.tar"
   else
-    warn "You need to manually install IUM for user \"${GSQL_USER}\""
+    warn "GIUM package not found. Please install IUM for user \"${GSQL_USER}\" manually"
   fi
 
   echo
+  #progress "Installing GraphSQL service"
+  #install_service $GSQL_USER graphsql 87
+
 	progress "Installing GSQL monitor service"
-	[ -x ./install-monitor-service.sh ] && ./install-monitor-service.sh $GSQL_USER
-  [ -x ./SysPrerequisites-master/install-monitor-service.sh ] && (cd ./SysPrerequisites-master; ./install-monitor-service.sh $GSQL_USER)
+  install_service $GSQL_USER gsql_monitor 88
+
 	#rm -rf SysPrerequisites-master
 
 echo

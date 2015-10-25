@@ -1,0 +1,68 @@
+#! /bin/sh
+# chkconfig: 345 87 13
+# description: /etc/init.d/graphsql, script to start/stop GraphSQL server
+
+user='graphsql'
+prog=$(eval echo "~${user}/.gium/gsql_admin")
+
+## check if /proc exists 
+if ! grep -q '/proc' /etc/mtab
+then
+  echo "This system is not supported."
+  exit 1
+fi
+
+
+startDaemon() 
+{
+  if [ -x $prog ]
+  then
+    su - $user -c "$prog start"
+  fi
+}
+
+stopDaemon() 
+{
+  if [ -x $prog ] 
+  then
+    su - $user -c "$prog stop -fy"
+  fi
+}
+
+restartDaemon()
+{
+  if [ -x $prog ]
+  then
+    su - $user -c "$prog restart"
+  fi
+}
+
+check_status()
+{
+  if [ -x $prog ]
+  then
+    su - $user -c "$prog status -v"
+  fi
+}
+
+
+case "$1" in
+  start)
+    startDaemon
+    ;;
+  stop)
+    stopDaemon
+    ;;
+  restart)
+    restartDaemon
+    ;;
+  status)
+    check_status
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|startus}"
+    exit 1
+    ;;
+esac
+
+exit 0
