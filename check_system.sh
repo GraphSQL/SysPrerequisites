@@ -30,7 +30,7 @@ found()
 
 if [[ $EUID -ne 0 ]]
 then
-  warn "Please log in as root, or 'sudo' run the command if you have sudo privileges."
+  warn "Please log in as root, or 'sudo' to run the command if you have sudo privileges."
   exit 1
 fi
 
@@ -311,12 +311,16 @@ report="./report_`hostname`.txt"
 
   if which hdparm >/dev/null 2>&1
   then
-    collectList "Disk speed"
     disks=$(dmesg | grep -Po '\[.d.\]' | sed -e 's/\[//' -e 's/\]//'|sort|uniq)
-    for disk in $disks
-    do
-        hdparm -t --direct /dev/$disk
-    done
+    if [ "D$disks" != "D" ]
+    then
+      collectList "Disk speed"
+      for disk in $disks
+      do
+        hdparm -ITt /dev/$disk
+        hdparm -Tt --direct /dev/$disk | sed -e '1,2d'
+      done
+    fi
   fi
 
   collectList "Network adapter and IP address"
