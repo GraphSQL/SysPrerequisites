@@ -278,8 +278,11 @@ report="./report_`hostname`.txt"
       then
         echo -n Status: 
         firewall-cmd --state
-        echo Rules:
-        egrep -v '^#' /etc/sysconfig/iptables
+        if [ -f /etc/sysconfig/iptables ]
+        then
+          echo Rules:
+          egrep -v '^#' /etc/sysconfig/iptables
+        fi
       else
         iptables -L
       fi
