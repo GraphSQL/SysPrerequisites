@@ -167,7 +167,7 @@ fi
     USER_HOME=$(eval echo ~$GSQL_USER)
     echo
     echo 'Enter the path to install GraphSQL software and to store graph data. '
-    echo -n 'This path is referred as "graphsql.root.dir":' "[$USER_HOME] "
+    echo -n 'This path is referred as "Graphsql.Root.Dir":' "[$USER_HOME] "
     read DATA_PATH
     DATA_PATH=${DATA_PATH:-${USER_HOME}}
  	fi
