@@ -354,7 +354,7 @@ fi
   #progress "Installing GraphSQL service"
   #install_service $GSQL_USER graphsql 87
 
-	progress "Installing GSQL monitor service"
+	progress "Installing GraphSQL Monitor service"
   install_service $GSQL_USER gsql_monitor 88
 
 	#rm -rf SysPrerequisites-master
