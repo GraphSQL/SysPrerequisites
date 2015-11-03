@@ -1,6 +1,16 @@
 #! /bin/sh
-# chkconfig: 345 87 13
+# chkconfig: 2345 87 13
 # description: /etc/init.d/graphsql, script to start/stop GraphSQL server
+
+### BEGIN INIT INFO
+# Provides:          graphsql
+# Required-Start:
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start daemon at boot time
+# Description:       script to start/stop GraphSQL server
+### END INIT INFO
 
 user='graphsql'
 prog=$(eval echo "~${user}/.gium/gsql_admin")

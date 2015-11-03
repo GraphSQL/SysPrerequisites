@@ -68,10 +68,10 @@ install_service(){
 
     if which chkconfig >/dev/null 2>&1  # Redhat or CentOS
     then
-      chkconfig --level 345 ${srv_name} on
+      chkconfig --level 2345 ${srv_name} on
     elif which update-rc.d  >/dev/null 2>&1
     then
-      update-rc.d ${srv_name} defaults ${start_order} ${stop_order}
+      update-rc.d ${srv_name} defaults ${start_order} ${stop_order} >/dev/null 2>&1
     else
       warn "Please follow your system manual to install $srv_name service: $SRC"
     fi
@@ -167,7 +167,7 @@ fi
     USER_HOME=$(eval echo ~$GSQL_USER)
     echo
     echo 'Enter the path to install GraphSQL software and to store graph data. '
-    echo -n 'This path is referred as "graphsql.root.dir":' "[$USER_HOME] "
+    echo -n 'This path is referred as "Graphsql.Root.Dir":' "[$USER_HOME] "
     read DATA_PATH
     DATA_PATH=${DATA_PATH:-${USER_HOME}}
  	fi
@@ -183,7 +183,7 @@ fi
     chown -R ${GSQL_USER} ${DATA_PATH}
  	fi
  	
-  progress "Changing file handles and process limits in /etc/security/limits.conf"
+  progress "Changing file handles and process limits"
   noFile=1000000
  	if ! grep -q "$GSQL_USER hard nofile $noFile" /etc/security/limits.conf
  	then 
@@ -222,16 +222,35 @@ fi
 		fi
 	done
 
+
   progress "Installing required system tools and libraries"
  	
- 	if [ $OS = 'RHEL' ]
- 	then
-    PKGS="curl java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof cmake openssh-clients nmap-ncat nc ntp postfix sysstat hdparm"
-    $PKGMGR -y install $PKGS 1>>$LOG 2>&1
-    if [ "$?" != "0" ]
-    then
-      warn "Failed to install one or more system packages: ${PKGS}. Program terminated."
-      exit 3
+  if [ $OS = 'RHEL' ]
+  then
+    PKGS="cur java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof cmake openssh-clients ntp postfix sysstat hdparm"
+
+	  if has_internet
+	  then
+	    $PKGMGR -y install $PKGS 1>>$LOG 2>&1
+	    if [ "$?" != "0" ]
+	    then
+	      warn "Failed to install one or more system packages: ${PKGS}. Program terminated."
+	      exit 3
+	    fi
+	  else
+	    toBeInstalled=''
+	    for pkg in $PKGS
+	    do
+	      if ! rpm -q $pkg > /dev/null 2>&1
+	      then
+	        toBeInstalled="$toBeInstalled $pkg"
+	      fi
+      	    done
+      if [ "T${toBeInstalled}" != "T" ]
+      then
+        warn "No Internet access. Please manually install pakcage: $toBeInstalled "
+        exit 4
+      fi
     fi
 
 	  chkconfig --level 345 ntpd on 1>>$LOG 2>&1
@@ -330,7 +349,6 @@ fi
   
   TOKEN='84C73D474150B3B54771053B17FA32CB31328EF3'
   GIT_TOKEN=$(echo $TOKEN |tr '97531' '13579' |tr 'FEDCBA' 'abcdef')
-  GIUM_BRANCH='prod_0.1'
 
   read -p "Enter the IUM branch to install: [4.3] " GIUM_BRANCH
   GIUM_BRANCH=${GIUM_BRANCH:-4.3}
@@ -351,8 +369,8 @@ fi
   fi
 
   echo
-  #progress "Installing GraphSQL service"
-  #install_service $GSQL_USER graphsql 87
+  progress "Installing GraphSQL service"
+  install_service $GSQL_USER graphsql 87
 
 	progress "Installing GraphSQL Monitor service"
   install_service $GSQL_USER gsql_monitor 88
