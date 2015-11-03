@@ -68,10 +68,10 @@ install_service(){
 
     if which chkconfig >/dev/null 2>&1  # Redhat or CentOS
     then
-      chkconfig --level 345 ${srv_name} on
+      chkconfig --level 2345 ${srv_name} on
     elif which update-rc.d  >/dev/null 2>&1
     then
-      update-rc.d ${srv_name} defaults ${start_order} ${stop_order}
+      update-rc.d ${srv_name} defaults ${start_order} ${stop_order} >/dev/null 2>&1
     else
       warn "Please follow your system manual to install $srv_name service: $SRC"
     fi
