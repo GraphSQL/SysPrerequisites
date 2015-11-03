@@ -183,7 +183,7 @@ fi
     chown -R ${GSQL_USER} ${DATA_PATH}
  	fi
  	
-  progress "Changing file handles and process limits in /etc/security/limits.conf"
+  progress "Changing file handles and process limits"
   noFile=1000000
  	if ! grep -q "$GSQL_USER hard nofile $noFile" /etc/security/limits.conf
  	then 
@@ -222,16 +222,35 @@ fi
 		fi
 	done
 
+
   progress "Installing required system tools and libraries"
  	
- 	if [ $OS = 'RHEL' ]
- 	then
-    PKGS="curl java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof cmake openssh-clients nmap-ncat nc ntp postfix sysstat hdparm"
-    $PKGMGR -y install $PKGS 1>>$LOG 2>&1
-    if [ "$?" != "0" ]
-    then
-      warn "Failed to install one or more system packages: ${PKGS}. Program terminated."
-      exit 3
+  if [ $OS = 'RHEL' ]
+  then
+    PKGS="cur java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof cmake openssh-clients ntp postfix sysstat hdparm"
+
+	  if has_internet
+	  then
+	    $PKGMGR -y install $PKGS 1>>$LOG 2>&1
+	    if [ "$?" != "0" ]
+	    then
+	      warn "Failed to install one or more system packages: ${PKGS}. Program terminated."
+	      exit 3
+	    fi
+	  else
+	    toBeInstalled=''
+	    for pkg in $PKGS
+	    do
+	      if ! rpm -q $pkg > /dev/null 2>&1
+	      then
+	        toBeInstalled="$toBeInstalled $pkg"
+	      fi
+      	    done
+      if [ "T${toBeInstalled}" != "T" ]
+      then
+        warn "No Internet access. Please manually install pakcage: $toBeInstalled "
+        exit 4
+      fi
     fi
 
 	  chkconfig --level 345 ntpd on 1>>$LOG 2>&1
