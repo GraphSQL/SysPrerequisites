@@ -12,7 +12,7 @@
 # Description:       script to start/stop GraphSQL monitor
 ### END INIT INFO
 
-user='graphsql'
+user=graphsql
 gmonitor=$(eval echo "~${user}/.gium/gsql_mon")
 glogger=$(eval echo "~${user}/.gium/gsql_logger")
 
@@ -42,7 +42,7 @@ stopDaemon()
   fi
 }
 
-loadConfig() 
+reloadConfig()
 {
   prog=$1
   if [ -x "$prog" ]
@@ -54,24 +54,24 @@ loadConfig()
 
 case "$1" in
   start)
-    startDaemon gmonitor
-    startDaemon glogger >/dev/null 2>&1
+    startDaemon $gmonitor
+    startDaemon $glogger >/dev/null 2>&1
     ;;
   stop)
-    stopDaemon glogger >/dev/null 2>&1
-    stopDaemon gmonitor
+    stopDaemon $glogger >/dev/null 2>&1
+    stopDaemon $gmonitor
     ;;
   restart)
-    stopDaemon glogger >/dev/null 2>&1
-    stopDaemon gmonitor
-    startDaemon gmonitor
-    startDaemon glogger >/dev/null 2>&1
+    stopDaemon $glogger >/dev/null 2>&1
+    stopDaemon $gmonitor
+    startDaemon $gmonitor
+    startDaemon $glogger >/dev/null 2>&1
     ;;
   reload)
     echo "Reloading GSQL monitor configuration file"
-    reloadConfig gmonitor
-    stopDaemon glogger >/dev/null 2>&1
-    startDaemon glogger >/dev/null 2>&1
+    reloadConfig $gmonitor
+    stopDaemon $glogger >/dev/null 2>&1
+    startDaemon $glogger >/dev/null 2>&1
     ;;
   *)
     echo "Usage: $0 {start|stop|restart|reload}"
