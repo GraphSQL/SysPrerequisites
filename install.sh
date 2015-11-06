@@ -227,7 +227,7 @@ fi
  	
   if [ $OS = 'RHEL' ]
   then
-    PKGS="curl java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof cmake openssh-clients ntp postfix sysstat hdparm"
+    PKGS="curl java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof cmake openssh-clients ntp postfix"
 
 	  if has_internet
 	  then
@@ -257,7 +257,7 @@ fi
 	  service ntpd start 1>>$LOG 2>&1
  	else
     $PKGMGR update >/dev/null 2>&1
-    PKGS="curl openjdk-7-jdk wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof cmake ntp postfix sysstat hdparm "
+    PKGS="curl openjdk-7-jdk wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof cmake ntp postfix"
     $PKGMGR -y install $PKGS 1>>$LOG 2>&1
     if [ "$?" != "0" ]
     then
