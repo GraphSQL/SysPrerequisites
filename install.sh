@@ -88,46 +88,43 @@ set_limits()
   noFile=1000000
   noProc=102400
   maxCore=30000000 #30GB
-  partitionSize=$(df -k $data_path| tail -1 | awk '{print $4}')
+  partitionSize=$(df -Pk $data_path | tail -1 | awk '{print $4}')
   let "core = partitionSize / 10"
   [ "$core" -gt $maxCore ] && core=$maxCore
 
   limit_file=/etc/security/limits.d/98-graphsql.conf
-	echo "$limit_user soft nofile $noFile" >> $limit_file
-	echo "$limit_user hard nofile $noFile" > $limit_file
-	echo "$limit_user soft nproc $noProc" >> $limit_file
-	echo "$limit_user hard nproc $noProc" >> $limit_file
-	echo "$limit_user soft core $core" >> $limit_file
-	echo "$limit_user hard core $core" >> $limit_file
+  echo "$limit_user soft nofile $noFile" >> $limit_file
+  echo "$limit_user hard nofile $noFile" > $limit_file
+  echo "$limit_user soft nproc $noProc" >> $limit_file
+  echo "$limit_user hard nproc $noProc" >> $limit_file
+  echo "$limit_user soft core $core" >> $limit_file
+  echo "$limit_user hard core $core" >> $limit_file
 }
 
 set_sysctl()
 {
   coreLocation=$1
   sysctl_file=/etc/sysctl.conf # use /etc/sysctl.d/98-graphsql.conf for newer OS
-  if ! grep -q 'net.core.somaxconn' $sysctl_file
-  then
-    echo "net.core.somaxconn = 10240" >> $sysctl_file
-  fi
 
-  if ! grep -q 'kernel.core_pattern' $sysctl_file
-  then
-    echo "kernel.core_pattern=${coreLocation}/core-%e-%s-%p.%t" >> $sysctl_file
-  fi
+  sed -i -e 's/^net.core.somaxconn/#net.core.somaxconn/' $sysctl_file 
+  echo "net.core.somaxconn = 10240" >> $sysctl_file
+
+  sed -i -e 's/^kernel.core_pattern/#kernel.core_pattern/' $sysctl_file
+  echo "kernel.core_pattern=${coreLocation}/core-%e-%s-%p.%t" >> $sysctl_file
 
   sysctl -p > /dev/null 2>&1
 }
 
 set_etcHosts()
 {
-	IPS=$(ip addr|grep 'inet '|awk '{print $2}'|egrep -o "[0-9]{1,}.[0-9]{1,}.[0-9]{1,}.[0- 9]{1,}"|xargs echo)
-	for ip in $IPS
-	do
-	  if ! grep $ip /etc/hosts >/dev/null 2>&1
-	  then
-	    echo "$ip `hostname`" >> /etc/hosts
-	  fi
-	done
+  IPS=$(ip addr|grep 'inet '|awk '{print $2}'|egrep -o "[0-9]{1,}.[0-9]{1,}.[0-9]{1,}.[0- 9]{1,}"|xargs echo)
+  for ip in $IPS
+  do
+    if ! grep $ip /etc/hosts >/dev/null 2>&1
+    then
+      echo "$ip `hostname`" >> /etc/hosts
+    fi
+  done
 }
 
 
