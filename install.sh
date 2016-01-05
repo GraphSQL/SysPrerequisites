@@ -150,20 +150,19 @@ fi
 
 notice "Welcome to GraphSQL System Prerequisite Installer"
 
-if [ -f ./SysPrerequisites-graphsql.tar ]
+if [ -d ./SysPrerequisites-graphsql ]
 then
-  tar -xf SysPrerequisites-graphsql.tar
   cd SysPrerequisites-graphsql
 else
   if [ ! -d ./nose-1.3.4 ]
   then
     if has_internet
     then
-      progress "Downloading System Prerequisite package"
+      progress "Downloading system prerequisite package"
       curl  -L https://github.com/GraphSQL/SysPrerequisites/archive/graphsql.tar.gz | tar zxf -
       cd SysPrerequisites-graphsql
     else
-      warn "No Internet connection. Cannot find SysPrerequisites in the current directory"
+      warn "No Internet connection. Please download system prerequisite package from https://github.com/GraphSQL/SysPrerequisites/archive/graphsql.tar.gz"
       warn "Program terminated"
       exit 3
     fi
@@ -451,10 +450,4 @@ install_service $GSQL_USER gsql_monitor 88
 echo
 echo "System prerequisite installation completed."
 echo
-if [ -f SysPrerequisites-graphsql/check_system.sh ]
-then
-  echo "Please run \"SysPrerequisites-graphsql/check_system.sh\" to verify system settings."
-  rm -f install.sh
-else
-  echo "Please run \"./check_system.sh\" to verify system settings."
-fi
+echo "Please run \"${PWD}/check_system.sh\" to verify system settings."
