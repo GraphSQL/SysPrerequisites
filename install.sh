@@ -89,7 +89,7 @@ set_limits()
   noProc=102400
   maxCore=30000000 #30GB
   partitionSize=$(df -Pk $data_path | tail -1 | awk '{print $4}')
-  let "core = partitionSize / 10"
+  let "core = partitionSize / 5"
   [ "$core" -gt $maxCore ] && core=$maxCore
 
   limit_file=/etc/security/limits.d/98-graphsql.conf
