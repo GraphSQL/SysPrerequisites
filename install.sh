@@ -93,8 +93,8 @@ set_limits()
   [ "$core" -gt $maxCore ] && core=$maxCore
 
   limit_file=/etc/security/limits.d/98-graphsql.conf
-  echo "$limit_user soft nofile $noFile" >> $limit_file
-  echo "$limit_user hard nofile $noFile" > $limit_file
+  echo "$limit_user soft nofile $noFile" > $limit_file
+  echo "$limit_user hard nofile $noFile" >> $limit_file
   echo "$limit_user soft nproc $noProc" >> $limit_file
   echo "$limit_user hard nproc $noProc" >> $limit_file
   echo "$limit_user soft core $core" >> $limit_file
@@ -117,7 +117,7 @@ set_sysctl()
 
 set_etcHosts()
 {
-  IPS=$(ip addr|grep 'inet '|awk '{print $2}'|egrep -o "[0-9]{1,}.[0-9]{1,}.[0-9]{1,}.[0- 9]{1,}"|xargs echo)
+  IPS=$(ip addr|grep 'inet '|awk '{print $2}'|egrep -o "[0-9]{1,}.[0-9]{1,}.[0-9]{1,}.[0-9]{1,}"|xargs echo)
   for ip in $IPS
   do
     if ! grep $ip /etc/hosts >/dev/null 2>&1
@@ -451,5 +451,10 @@ install_service $GSQL_USER gsql_monitor 88
 echo
 echo "System prerequisite installation completed."
 echo
-
-echo "You may verify system settings by running script \"./check_system.sh\"."
+if [ -f SysPrerequisites-graphsql/check_system.sh ]
+then
+  echo "Please run \"SysPrerequisites-graphsql/check_system.sh\" to verify system settings."
+  rm -f install.sh
+else
+  echo "Please run \"./check_system.sh\" to verify system settings."
+fi
