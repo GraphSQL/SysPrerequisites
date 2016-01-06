@@ -1,0 +1,3 @@
+# ignore offline RPMs and Debs
+Packages
+Packages/*

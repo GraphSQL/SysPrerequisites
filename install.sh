@@ -80,7 +80,55 @@ install_service(){
   fi
 }
 
+set_limits()
+{
+  limit_user=$1
+  data_path=$2
 
+  noFile=1000000
+  noProc=102400
+  maxCore=30000000 #30GB
+  partitionSize=$(df -Pk $data_path | tail -1 | awk '{print $4}')
+  let "core = partitionSize / 5"
+  [ "$core" -gt $maxCore ] && core=$maxCore
+
+  limit_file=/etc/security/limits.d/98-graphsql.conf
+  echo "$limit_user soft nofile $noFile" > $limit_file
+  echo "$limit_user hard nofile $noFile" >> $limit_file
+  echo "$limit_user soft nproc $noProc" >> $limit_file
+  echo "$limit_user hard nproc $noProc" >> $limit_file
+  echo "$limit_user soft core $core" >> $limit_file
+  echo "$limit_user hard core $core" >> $limit_file
+}
+
+set_sysctl()
+{
+  coreLocation=$1
+  sysctl_file=/etc/sysctl.conf # use /etc/sysctl.d/98-graphsql.conf for newer OS
+
+  sed -i -e 's/^net.core.somaxconn/#net.core.somaxconn/' $sysctl_file 
+  echo "net.core.somaxconn = 10240" >> $sysctl_file
+
+  sed -i -e 's/^kernel.core_pattern/#kernel.core_pattern/' $sysctl_file
+  echo "kernel.core_pattern=${coreLocation}/core-%e-%s-%p.%t" >> $sysctl_file
+
+  sysctl -p > /dev/null 2>&1
+}
+
+set_etcHosts()
+{
+  IPS=$(ip addr|grep 'inet '|awk '{print $2}'|egrep -o "[0-9]{1,}.[0-9]{1,}.[0-9]{1,}.[0-9]{1,}"|xargs echo)
+  for ip in $IPS
+  do
+    if ! grep $ip /etc/hosts >/dev/null 2>&1
+    then
+      echo "$ip `hostname`" >> /etc/hosts
+    fi
+  done
+}
+
+
+## Main ##
 if [[ $EUID -ne 0 ]]
 then
   warn "Sudo or root rights are requqired to install prerequsites for GraphSQL software."
@@ -102,21 +150,19 @@ fi
 
 notice "Welcome to GraphSQL System Prerequisite Installer"
 
-if [ -f ./SysPrerequisites-master.tar ]
+if [ -d ./SysPrerequisites-master ]
 then
-  tar -xf SysPrerequisites-master.tar
   cd SysPrerequisites-master
 else
   if [ ! -d ./nose-1.3.4 ]
   then
     if has_internet
     then
-      progress "Downloading System Prerequisite package"
-      curl  -L https://github.com/GraphSQL/SysPrerequisites/archive/master.tar.gz -o SysPrerequisites-master.tar
-      tar -xf SysPrerequisites-master.tar
+      progress "Downloading system prerequisite package"
+      curl  -L https://github.com/GraphSQL/SysPrerequisites/archive/master.tar.gz | tar zxf -
       cd SysPrerequisites-master
     else
-      warn "No Internet connection. Cannot find SysPrerequisites in the current directory"
+      warn "No Internet connection. Please download system prerequisite package from https://github.com/GraphSQL/SysPrerequisites/archive/master.tar.gz"
       warn "Program terminated"
       exit 3
     fi
@@ -182,51 +228,44 @@ else
   chown -R ${GSQL_USER} ${DATA_PATH}
 fi
  	
-progress "Changing file handles and process limits"
-noFile=1000000
-if ! grep -q "$GSQL_USER hard nofile $noFile" /etc/security/limits.conf
-then
-  echo "$GSQL_USER hard nofile $noFile" >> /etc/security/limits.conf
-fi
- 	
-if ! grep -q "$GSQL_USER soft nofile $noFile" /etc/security/limits.conf
-then
-  echo "$GSQL_USER soft nofile $noFile" >> /etc/security/limits.conf
-fi
- 	
-noProc=102400
-if ! grep -q "$GSQL_USER hard nproc $noProc" /etc/security/limits.conf
-then
-  echo "$GSQL_USER hard nproc $noProc" >> /etc/security/limits.conf
-fi
-
-if ! grep -q "$GSQL_USER soft nproc $noProc" /etc/security/limits.conf
-then
-  echo "$GSQL_USER soft nproc $noProc" >> /etc/security/limits.conf
-fi
-
-if ! grep -q 'net.core.somaxconn' /etc/sysctl.conf
-then
-  echo "net.core.somaxconn = 10240" >> /etc/sysctl.conf
-  sysctl -p > /dev/null 2>&1
-fi
+progress "Tuning system parameters"
+set_limits ${GSQL_USER} ${DATA_PATH}
+set_sysctl $USER_HOME  # leave core dumps at home
 
 progress "Updating /etc/hosts"
-IPS=$(ip addr|grep 'inet '|awk '{print $2}'|egrep -o "[0-9]{1,}.[0-9]{1,}.[0-9]{1,}.[0-9]{1,}"|xargs echo)
-for ip in $IPS
-do
-	if ! grep $ip /etc/hosts >/dev/null 2>&1
-	then
-		echo "$ip	`hostname`" >> /etc/hosts
-	fi
-done
-
+set_etcHosts
 
 progress "Checking required system tools and libraries"
-toBeInstalled=''
-if [ $OS = 'RHEL' ]
+if which javac > /dev/null 2>&1
 then
-  PKGS="curl java-1.7.0-openjdk-devel wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof cmake openssh-clients ntp postfix sysstat hdparm"
+  jdk_ver=$(javac -version 2>&1 |awk '{print $2}' | tr -d '.')
+  jdk_num=${jdk_ver%_*}
+  if [ "$jdk_num" -lt 170 ]
+  then
+    jdk_installed='N'
+  else
+    jdk_installed='Y'
+  fi
+else
+  jdk_installed='N'
+fi
+
+if [ "$jdk_installed" = 'N' ]
+then
+  if [ "$OS" = 'RHEL' ]
+  then
+    toBeInstalled='java-1.7.0-openjdk-devel'
+  else
+    toBeInstalled='openjdk-7-jdk'
+  fi
+else
+  toBeInstalled=''
+fi
+
+if [ "$OS" = 'RHEL' ]
+then
+
+  PKGS="curl wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof cmake openssh-clients ntp postfix python-unittest2 python-urllib3"
   for pkg in $PKGS
   do
     if ! rpm -q $pkg > /dev/null 2>&1
@@ -236,7 +275,7 @@ then
   done
 else #Ubuntu
   $PKGMGR update >/dev/null 2>&1
-  PKGS="curl openjdk-7-jdk wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof cmake ntp postfix sysstat hdparm"
+  PKGS="curl wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof cmake ntp postfix"
   for pkg in $PKGS
   do
     if ! dpkg -s $pkg 2>&1| grep -q 'install ok installed'
@@ -263,8 +302,35 @@ then
       exit 3
     fi
   else
-    warn "No Internet access. Please manually install pakcage: $toBeInstalled "
-    exit 4
+    if [ -d ./Packages ] # local repository
+    then
+      if [ $OS = 'RHEL' ]
+      then
+        gsql_repo="/etc/yum.repos.d/graphsql.repo"
+        echo [graphsql] > $gsql_repo
+        echo name=GraphSQL SysPrerequisite - Local >> $gsql_repo
+        echo baseurl=file://${PWD}/Packages >> $gsql_repo
+        echo gpgcheck=0 >> $gsql_repo
+        echo enabled=1 >> $gsql_repo
+        $PKGMGR --disablerepo \* --enablerepo graphsql -y install ${toBeInstalled} 1>>$LOG 2>&1
+      else
+        gsql_repo="/etc/apt/sources.list.d/graphsql.list"
+        echo "deb file:/${PWD}/Packages ./" > $gsql_repo
+        $PKGMGR update >/dev/null 2>&1
+        $PKGMGR -y install ${toBeInstalled} 1>>$LOG 2>&1
+      fi
+      result=$?
+
+      rm -f $gsql_repo
+      if [ "$result" != "0" ]
+      then
+        warn "Failed to install one or more packages. Program terminated."
+        exit 3
+      fi
+    else
+      warn "No Internet access. Please download the offline installer or manually install $toBeInstalled "
+      exit 4
+    fi
   fi
 fi
 
@@ -383,10 +449,8 @@ install_service $GSQL_USER graphsql 87
 progress "Installing GraphSQL Monitor service"
 install_service $GSQL_USER gsql_monitor 88
 
-#rm -rf SysPrerequisites-master
 
 echo
 echo "System prerequisite installation completed."
 echo
-
-echo "You may verify system settings by running script \"./check_system.sh\"."
+echo "Please run \"${PWD}/check_system.sh\" to verify system settings."
