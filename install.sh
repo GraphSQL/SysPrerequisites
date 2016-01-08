@@ -357,6 +357,16 @@ else
   fi
 fi
 
+if [ -f tsar.tar.gz ]
+then
+  progress "Installing tsar utility"
+  tar zxf tsar.tar.gz
+  cd tsar
+  make install >/dev/null 2>&1
+  cd ..
+  rm -rf tsar
+fi
+
 if ! which redis-server >/dev/null 2>&1
 then
   if [ -f graphsql_redis-2.8.17.tar.gz ]
