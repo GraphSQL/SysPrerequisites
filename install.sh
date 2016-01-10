@@ -203,7 +203,7 @@ else
     exit 2
   fi
   progress "Setting password for user ${GSQL_USER}"
-  passwd ${GSQL_USER}
+  passwd ${GSQL_USER} < /dev/tty
 fi
  	
 if [ $# -gt 1 ]
