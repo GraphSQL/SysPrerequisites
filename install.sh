@@ -175,13 +175,13 @@ while [ "U$GSQL_USER" = 'U' ]
 do
   echo
   echo -n "Enter the user who will own and run GraphSQL software: [graphsql] "
-  read GSQL_USER
+  read GSQL_USER < /dev/tty
   GSQL_USER=${GSQL_USER:-graphsql}
   if [ "${GSQL_USER}" = "root" ]
   then
     echo
     warn "Running GraphSQL software as \"${GSQL_USER}\" is not recommended."
-    read -p "Continue with user \"${GSQL_USER}\"? (y/N): " USER_ROOT
+    read -p "Continue with user \"${GSQL_USER}\"? (y/N): " USER_ROOT < /dev/tty
     if [ "y${USER_ROOT}" = "yy" -o "y${USER_ROOT}" = "yY" ]
     then
       break
@@ -214,7 +214,7 @@ else
   echo
   echo 'Enter the path to install GraphSQL software and to store graph data.'
   echo -n 'This path is referred as "Graphsql.Root.Dir":' "[$USER_HOME] "
-  read DATA_PATH
+  read DATA_PATH < /dev/tty
   DATA_PATH=${DATA_PATH:-${USER_HOME}}
 fi
  	
