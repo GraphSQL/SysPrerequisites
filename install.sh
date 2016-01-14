@@ -434,7 +434,7 @@ echo
 TOKEN='84C73D474150B3B54771053B17FA32CB31328EF3'
 GIT_TOKEN=$(echo $TOKEN |tr '97531' '13579' |tr 'FEDCBA' 'abcdef')
 
-read -p "Enter the IUM branch to install: [4.3] " GIUM_BRANCH
+read -p "Enter the IUM branch to install: [4.3] " GIUM_BRANCH < /dev/tty
 GIUM_BRANCH=${GIUM_BRANCH:-4.3}
 [ "$GIUM_BRANCH" = '4.2' ] && GIUM_BRANCH='master'
 
