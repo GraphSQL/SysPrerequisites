@@ -154,7 +154,7 @@ if [ -d ./SysPrerequisites-graphsql ]
 then
   cd SysPrerequisites-graphsql
 else
-  if [ ! -d ./nose-1.3.4 ]
+  if [ ! -f ./check_system.sh ]
   then
     if has_internet
     then
@@ -357,9 +357,9 @@ else
   fi
 fi
 
-if [ -f tsar.tar.gz ]
+if [ ! -d /etc/tsar -a -f tsar.tar.gz ]
 then
-  progress "Installing tsar utility"
+  progress "Installing utility tsar"
   tar zxf tsar.tar.gz
   cd tsar
   make install >/dev/null 2>&1
@@ -388,29 +388,33 @@ else
   service redis start 1>>$LOG 2>&1
 fi
 
-for pymod in \
-    'pycrypto-2.6' \
- 		'ecdsa-0.11' \
- 		'paramiko-1.14.0' \
- 		'nose-1.3.4' \
- 		'PyYAML-3.10' \
- 		'setuptools-5.4.1' \
- 		'Fabric-1.8.2' \
- 		'kazoo-2.0.1' \
- 		'elasticsearch-py' \
- 		'requests-2.7.0' \
- 		'psutil-2.1.3'
+declare -a pyMod
+declare -a pyDir
+#The indices of the two arrays must match. Use associative arrays if bash >= 4.0
+pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric elasticsearch requests flask zmq psutil)
+pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 elasticsearch-py requests-2.7.0 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3)
+
+for i in $(seq 0 $((${#pyMod[@]} - 1)))
 do
-  if [ -d $pymod ]
+  if ! python -c "import ${pyMod[$i]}" >/dev/null 2>&1
   then
-    progress "Installing Python module $pymod"
-    cd $pymod
-    python setup.py install 1>>$LOG 2>&1
-    cd ..
-  else
-    warn "$pymod not found"
+    if [ -f ${pyDir[$i]}.tar.gz ]
+    then
+      tar zxf ${pyDir[$i]}.tar.gz
+      if [ -f ./${pyDir[$i]}/setup.py ]
+      then
+        cd $pyDir[$i]
+        progress "Installing Python module ${pyMod[$i]}"
+        python setup.py install 1>>$LOG 2>&1
+        [ "$?" != 0 ] && warn "Failed to install ${pyMod[$i]}"
+        cd ..
+      fi
+      rm -rf ${pyDir[$i]}
+    else
+      warn "${pyDir[$i]}.tar.gz not found"
+    fi
   fi
-done  
+done
 
 numberPy="/usr/lib64/python2.6/site-packages/Crypto/Util/number.py"
 if [ -f $numberPy ]
