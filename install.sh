@@ -6,6 +6,15 @@ bldgre=${txtbld}$(tput setaf 2) # green
 bldblu=${txtbld}$(tput setaf 4) # blue
 txtrst=$(tput sgr0)             # Reset
 
+help()
+{
+  echo "`basename $0` [-h] [-l] [-i version]" 
+  echo "  -h  --  show this message"
+  echo "  -l  --  send output to a log file." 
+  echo "  -v  --  IUM version (branch)"
+  exit 1
+}
+
 warn()
 {
   echo "${bldred}Warning: $* $txtrst"
@@ -135,10 +144,24 @@ then
   exit 1
 fi
 
-LOG=/dev/null #use /dev/null to suppress logs
-cp -f /dev/null $LOG >/dev/null 2>&1
-
 trap cancel INT
+
+LOG=/dev/null # suppress log by default
+IUM_BRANCH='prod_0.1'
+while getopts ":hlv:" opt; do
+  case $opt in
+    h|H)
+      help
+      ;;
+    l|L)
+      LOG="syspre_install.log"
+      ;;
+    v|V)
+      IUM_BRANCH=$OPTARG
+      ;;
+  esac
+done
+cp -f /dev/null $LOG >/dev/null 2>&1
 
 OS=$(get_os)
 if [ "Q$OS" = "QRHEL" ]  # Redhat or CentOS
@@ -264,7 +287,11 @@ fi
 
 if [ "$OS" = 'RHEL' ]
 then
-
+  if [ ! -f  /etc/yum.repos.d/epel.repo ]
+  then
+    $PKGMGR -y install epel-release 1>>$LOG 2>&1  # required for python-unittest2
+  fi
+  
   PKGS="curl wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof cmake openssh-clients ntp postfix python-unittest2 python-urllib3"
   for pkg in $PKGS
   do
@@ -437,20 +464,19 @@ echo
 
 TOKEN='84C73D474150B3B54771053B17FA32CB31328EF3'
 GIT_TOKEN=$(echo $TOKEN |tr '97531' '13579' |tr 'FEDCBA' 'abcdef')
-GIUM_BRANCH='prod_0.1'
 
 if has_internet
 then
-  progress "Downloading GIUM package"
-  su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/${GIUM_BRANCH} -o gium.tar"
+  progress "Downloading IUM package"
+  su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/${IUM_BRANCH} -o gium.tar"
 fi
 
 if [ -f ${USER_HOME}/gium.tar ]
 then
-  progress "Installing GIUM package for ${GSQL_USER}"
+  progress "Installing IUM package for ${GSQL_USER}"
   su - ${GSQL_USER} -c "tar xf gium.tar; GraphSQL-gium-*/install.sh; rm -rf GraphSQL-gium-*; rm -f gium.tar"
 else
-  warn "GIUM package not found. Please install GIUM for user \"${GSQL_USER}\" manually"
+  warn "IUM package not found. Please install IUM for user \"${GSQL_USER}\" manually"
 fi
 
 echo
