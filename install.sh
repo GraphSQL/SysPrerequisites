@@ -8,11 +8,13 @@ txtrst=$(tput sgr0)             # Reset
 
 help()
 {
-  echo "`basename $0` [-h] [-l] [-i version]" 
+  echo "`basename $0` [-h] [-l] [-i <ium_version>] [-u <user>] [-r <graphsql_root_dir>]" 
   echo "  -h  --  show this message"
   echo "  -l  --  send output to a log file." 
-  echo "  -v  --  IUM version (branch)"
-  exit 1
+  echo "  -i  --  IUM version (branch)"
+  echo "  -r  --  Graphsql.Root.Dir"
+  echo "  -u  --  GraphSQL user"
+  exit 0
 }
 
 warn()
@@ -28,11 +30,6 @@ notice()
 progress()
 {
   echo "${bldgre}*** $* ...$txtrst"
-}
-
-usage(){
-  echo "Usage: $0 [username] [path_for_gstore]"
-  exit 1
 }
 
 has_internet(){
@@ -148,7 +145,7 @@ trap cancel INT
 
 LOG=/dev/null # suppress log by default
 IUM_BRANCH='prod_0.1'
-while getopts ":hlv:" opt; do
+while getopts ":hli:r:u:" opt; do
   case $opt in
     h|H)
       help
@@ -156,8 +153,14 @@ while getopts ":hlv:" opt; do
     l|L)
       LOG="syspre_install.log"
       ;;
-    v|V)
+    i|I)
       IUM_BRANCH=$OPTARG
+      ;;
+    r|R)
+      DATA_PATH=$OPTARG
+      ;;
+    u|U)
+      GSQL_USER=$OPTARG
       ;;
   esac
 done
@@ -191,8 +194,6 @@ else
     fi
   fi
 fi
-
-[ $# -gt 0 ] && GSQL_USER=$1
 
 while [ "U$GSQL_USER" = 'U' ]
 do
@@ -229,11 +230,10 @@ else
   passwd ${GSQL_USER} < /dev/tty
 fi
  	
-if [ $# -gt 1 ]
+USER_HOME=$(eval echo ~$GSQL_USER)
+
+if [ "D${DATA_PATH}" = "D" ]
 then
-  DATA_PATH=$2
-else
-  USER_HOME=$(eval echo ~$GSQL_USER)
   echo
   echo 'Enter the path to install GraphSQL software and to store graph data.'
   echo -n 'This path is referred as "Graphsql.Root.Dir":' "[$USER_HOME] "
