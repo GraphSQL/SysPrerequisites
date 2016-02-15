@@ -6,24 +6,30 @@ bldgre=${txtbld}$(tput setaf 2) # green
 bldblu=${txtbld}$(tput setaf 4) # blue
 txtrst=$(tput sgr0)             # Reset
 
+help()
+{
+  echo "`basename $0` [-h] [-l] [-i <ium_version>] [-r <graphsql_root_dir>] [-u <user>]" 
+  echo "  -h  --  show this message"
+  echo "  -l  --  send output to a log file." 
+  echo "  -i  --  IUM version (branch)"
+  echo "  -r  --  Graphsql.Root.Dir"
+  echo "  -u  --  GraphSQL user"
+  exit 0
+}
+
 warn()
 {
-  echo "${bldred}Warning: $* $txtrst"
+  echo "${bldred}Warning: $* $txtrst" | tee -a $LOG
 }
 
 notice()
 {
-  echo "${bldblu}$* $txtrst"
+  echo "${bldblu}$* $txtrst" | tee -a $LOG
 }
 
 progress()
 {
-  echo "${bldgre}*** $* ...$txtrst"
-}
-
-usage(){
-  echo "Usage: $0 [username] [path_for_gstore]"
-  exit 1
+  echo "${bldgre}*** $* ...$txtrst" | tee -a $LOG
 }
 
 has_internet(){
@@ -135,10 +141,32 @@ then
   exit 1
 fi
 
-LOG=/dev/null #use /dev/null to suppress logs
-cp -f /dev/null $LOG >/dev/null 2>&1
-
 trap cancel INT
+
+while getopts ":hli:r:u:" opt; do
+  case $opt in
+    h|H)
+      help
+      ;;
+    l|L)
+      LOG="syspre_install.log"
+      ;;
+    i|I)
+      IUM_BRANCH=$OPTARG
+      ;;
+    r|R)
+      DATA_PATH=$OPTARG
+      ;;
+    u|U)
+      GSQL_USER=$OPTARG
+      ;;
+  esac
+done
+
+IUM_BRANCH=${IUM_BRANCH:-4.3}
+syspre_BRANCH=master
+LOG=${LOG:-/dev/null} # suppress log by default
+cp -f /dev/null $LOG >/dev/null 2>&1
 
 OS=$(get_os)
 if [ "Q$OS" = "QRHEL" ]  # Redhat or CentOS
@@ -150,26 +178,24 @@ fi
 
 notice "Welcome to GraphSQL System Prerequisite Installer"
 
-if [ -d ./SysPrerequisites-master ]
+if [ -d ./SysPrerequisites-${syspre_BRANCH} ]
 then
-  cd SysPrerequisites-master
+  cd SysPrerequisites-${syspre_BRANCH}
 else
-  if [ ! -d ./nose-1.3.4 ]
+  if [ ! -f ./check_system.sh ]
   then
     if has_internet
     then
       progress "Downloading system prerequisite package"
-      curl  -L https://github.com/GraphSQL/SysPrerequisites/archive/master.tar.gz | tar zxf -
-      cd SysPrerequisites-master
+      curl  -L https://github.com/GraphSQL/SysPrerequisites/archive/${syspre_BRANCH}.tar.gz | tar zxf -
+      cd SysPrerequisites-${syspre_BRANCH}
     else
-      warn "No Internet connection. Please download system prerequisite package from https://github.com/GraphSQL/SysPrerequisites/archive/master.tar.gz"
+      warn "No Internet connection. Please download system prerequisite package from https://github.com/GraphSQL/SysPrerequisites/archive/${syspre_BRANCH}.tar.gz"
       warn "Program terminated"
       exit 3
     fi
   fi
 fi
-
-[ $# -gt 0 ] && GSQL_USER=$1
 
 while [ "U$GSQL_USER" = 'U' ]
 do
@@ -206,11 +232,10 @@ else
   passwd ${GSQL_USER} < /dev/tty
 fi
  	
-if [ $# -gt 1 ]
+USER_HOME=$(eval echo ~$GSQL_USER)
+
+if [ "D${DATA_PATH}" = "D" ]
 then
-  DATA_PATH=$2
-else
-  USER_HOME=$(eval echo ~$GSQL_USER)
   echo
   echo 'Enter the path to install GraphSQL software and to store graph data.'
   echo -n 'This path is referred as "Graphsql.Root.Dir":' "[$USER_HOME] "
@@ -264,7 +289,11 @@ fi
 
 if [ "$OS" = 'RHEL' ]
 then
-
+  if [ ! -f  /etc/yum.repos.d/epel.repo ]
+  then
+    $PKGMGR -y install epel-release 1>>$LOG 2>&1  # required for python-unittest2
+  fi
+  
   PKGS="curl wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof cmake openssh-clients ntp postfix python-unittest2 python-urllib3"
   for pkg in $PKGS
   do
@@ -357,12 +386,12 @@ else
   fi
 fi
 
-if [ -f tsar.tar.gz ]
+if [ ! -d /etc/tsar -a -f tsar.tar.gz ]
 then
-  progress "Installing tsar utility"
+  progress "Installing utility tsar"
   tar zxf tsar.tar.gz
   cd tsar
-  make install >/dev/null 2>&1
+  make install >>$LOG 2>&1
   cd ..
   rm -rf tsar
 fi
@@ -388,29 +417,33 @@ else
   service redis start 1>>$LOG 2>&1
 fi
 
-for pymod in \
-    'pycrypto-2.6' \
- 		'ecdsa-0.11' \
- 		'paramiko-1.14.0' \
- 		'nose-1.3.4' \
- 		'PyYAML-3.10' \
- 		'setuptools-5.4.1' \
- 		'Fabric-1.8.2' \
- 		'kazoo-2.0.1' \
- 		'elasticsearch-py' \
- 		'requests-2.7.0' \
- 		'psutil-2.1.3'
+declare -a pyMod
+declare -a pyDir
+#The indices of the two arrays must match. Use associative arrays if bash >= 4.0
+pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo elasticsearch requests flask zmq psutil)
+pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 elasticsearch-py requests-2.7.0 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3)
+
+for i in $(seq 0 $((${#pyMod[@]} - 1)))
 do
-  if [ -d $pymod ]
+  if ! python -c "import ${pyMod[$i]}" >/dev/null 2>&1
   then
-    progress "Installing Python module $pymod"
-    cd $pymod
-    python setup.py install 1>>$LOG 2>&1
-    cd ..
-  else
-    warn "$pymod not found"
+    if [ -f ${pyDir[$i]}.tar.gz ]
+    then
+      tar zxf ${pyDir[$i]}.tar.gz
+      if [ -f ./${pyDir[$i]}/setup.py ]
+      then
+        cd ${pyDir[$i]}
+        progress "Installing Python module ${pyMod[$i]}"
+        python setup.py install 1>>$LOG 2>&1
+        [ "$?" != 0 ] && warn "Failed to install ${pyMod[$i]}"
+        cd ..
+      fi
+      rm -rf ${pyDir[$i]}
+    else
+      warn "${pyDir[$i]}.tar.gz not found"
+    fi
   fi
-done  
+done
 
 numberPy="/usr/lib64/python2.6/site-packages/Crypto/Util/number.py"
 if [ -f $numberPy ]
@@ -434,22 +467,18 @@ echo
 TOKEN='84C73D474150B3B54771053B17FA32CB31328EF3'
 GIT_TOKEN=$(echo $TOKEN |tr '97531' '13579' |tr 'FEDCBA' 'abcdef')
 
-read -p "Enter the IUM branch to install: [4.3] " GIUM_BRANCH < /dev/tty
-GIUM_BRANCH=${GIUM_BRANCH:-4.3}
-[ "$GIUM_BRANCH" = '4.2' ] && GIUM_BRANCH='master'
-
 if has_internet
 then
-  progress "Downloading GIUM package"
-  su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/${GIUM_BRANCH} -o gium.tar"
+  progress "Downloading IUM package"
+  su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/${IUM_BRANCH} -o gium.tar"
 fi
 
 if [ -f ${USER_HOME}/gium.tar ]
 then
-  progress "Installing GIUM package for ${GSQL_USER}"
+  progress "Installing IUM package for ${GSQL_USER}"
   su - ${GSQL_USER} -c "tar xf gium.tar; GraphSQL-gium-*/install.sh; rm -rf GraphSQL-gium-*; rm -f gium.tar"
 else
-  warn "GIUM package not found. Please install GIUM for user \"${GSQL_USER}\" manually"
+  warn "IUM package not found. Please install IUM for user \"${GSQL_USER}\" manually"
 fi
 
 echo
@@ -462,5 +491,6 @@ install_service $GSQL_USER gsql_monitor 88
 
 echo
 echo "System prerequisite installation completed."
+[ "$LOG" = "/dev/null" ] || echo "Check \"${LOG}\" for details."
 echo
 echo "Please run \"${PWD}/check_system.sh\" to verify system settings."
