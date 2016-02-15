@@ -19,17 +19,17 @@ help()
 
 warn()
 {
-  echo "${bldred}Warning: $* $txtrst"
+  echo "${bldred}Warning: $* $txtrst" | tee -a $LOG
 }
 
 notice()
 {
-  echo "${bldblu}$* $txtrst"
+  echo "${bldblu}$* $txtrst" | tee -a $LOG
 }
 
 progress()
 {
-  echo "${bldgre}*** $* ...$txtrst"
+  echo "${bldgre}*** $* ...$txtrst" | tee -a $LOG
 }
 
 has_internet(){
@@ -143,8 +143,6 @@ fi
 
 trap cancel INT
 
-LOG=/dev/null # suppress log by default
-IUM_BRANCH='prod_0.1'
 while getopts ":hli:r:u:" opt; do
   case $opt in
     h|H)
@@ -164,6 +162,9 @@ while getopts ":hli:r:u:" opt; do
       ;;
   esac
 done
+
+LOG=${LOG:-/dev/null} # suppress log by default
+IUM_BRANCH=${IUM_BRANCH:-prod_0.1}
 cp -f /dev/null $LOG >/dev/null 2>&1
 
 OS=$(get_os)
@@ -389,7 +390,7 @@ then
   progress "Installing utility tsar"
   tar zxf tsar.tar.gz
   cd tsar
-  make install >/dev/null 2>&1
+  make install >>$LOG 2>&1
   cd ..
   rm -rf tsar
 fi
@@ -489,5 +490,6 @@ install_service $GSQL_USER gsql_monitor 88
 
 echo
 echo "System prerequisite installation completed."
+[ "$LOG" = "/dev/null" ] || echo "Check \"${LOG}\" for details."
 echo
 echo "Please run \"${PWD}/check_system.sh\" to verify system settings."
