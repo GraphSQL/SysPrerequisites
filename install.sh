@@ -44,15 +44,30 @@ cancel(){
   exit 1
 }
 
+## check OS version. Terminate if OS is not supported.  
 get_os(){
   if which apt-get > /dev/null 2>&1
   then
-    echo UBUNTU
+    os_version=$(lsb_release  -r | awk '{print $2}' | cut -d. -f1)
+    if [ "$os_version" -lt 12 ]
+    then
+      warn "Unsupported OS. Please upgrade to Ubuntu 12.x or above."
+      exit 2
+    else
+      echo UBUNTU
+    fi
   elif which yum >/dev/null 2>&1
   then
-    echo RHEL
+    os_version=$(rpm -qa | grep 'kernel-' | head -1 |grep -o .'el[0-9]'. | grep -o '[0-9]') 
+    if [ "$os_version" -lt 6 ]
+    then
+      warn "Unsupported OS. Please upgrade to RHEL or CentOS 6.x or above."
+      exit 2
+    else
+      echo RHEL
+    fi
   else
-    warn "Unsupported OS."
+    warn "Unknown OS. Please contact GraphSQL support."
     exit 2
   fi
 }
