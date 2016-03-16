@@ -129,7 +129,6 @@ set_sysctl()
 
   sed -i -e 's/^net.core.somaxconn/#net.core.somaxconn/' $sysctl_file 
   echo "net.core.somaxconn = 10240" >> $sysctl_file
-  echo "vm.swappiness = 1" >> $sysctl_file
 
   sed -i -e 's/^kernel.core_pattern/#kernel.core_pattern/' $sysctl_file
   echo "kernel.core_pattern=${coreLocation}/core-%e-%s-%p.%t" >> $sysctl_file
