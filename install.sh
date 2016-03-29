@@ -460,11 +460,11 @@ do
   fi
 done
 
-numberPy="/usr/lib64/python2.6/site-packages/Crypto/Util/number.py"
-if [ -f $numberPy ]
-then
-  sed -i -e 's/_warn("Not using mpz_powm_sec/pass #_warn("Not using mpz_powm_sec/' $numberPy
-fi
+for numberPy in "/usr/lib64/python2.6/site-packages/Crypto/Util/number.py" \
+                "/usr/lib/python2.6/site-packages/pycrypto-2.6.1-py2.6-linux-x86_64.egg/Crypto/Util/number.py"
+do
+  [ -f $numberPy ] && sed -i -e 's/_warn("Not using mpz_powm_sec/pass #_warn("Not using mpz_powm_sec/' $numberPy
+done
 
 if [ ! -d $USER_HOME/.python-eggs ]
 then
