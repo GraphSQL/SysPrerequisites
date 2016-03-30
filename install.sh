@@ -108,8 +108,8 @@ set_limits()
 
   noFile=1000000
   noProc=102400
-  maxCore=2000 #2GB
-  partitionSize=$(df -Pm $data_path | tail -1 | awk '{print $4}')
+  maxCore=2000000 #2GB
+  partitionSize=$(df -Pk $data_path | tail -1 | awk '{print $4}')
   let "core = partitionSize / 10"
   [ "$core" -gt $maxCore ] && core=$maxCore
 
@@ -269,7 +269,7 @@ fi
  	
 progress "Tuning system parameters"
 set_limits ${GSQL_USER} ${DATA_PATH}
-set_sysctl $USER_HOME  # leave core dumps at home
+set_sysctl ${USER_HOME}/graphsql_coredump  # leave core dumps at home
 
 progress "Updating /etc/hosts"
 set_etcHosts
