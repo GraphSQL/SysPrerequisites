@@ -309,7 +309,7 @@ then
     $PKGMGR -y install epel-release 1>>$LOG 2>&1  # required for python-unittest2
   fi
   
-  PKGS="curl wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof cmake openssh-clients ntp postfix python-unittest2 python-urllib3"
+  PKGS="curl wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof cmake openssh-clients ntp postfix python-unittest2"
   for pkg in $PKGS
   do
     if ! rpm -q $pkg > /dev/null 2>&1
@@ -444,8 +444,8 @@ then
   pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo elasticsearch requests flask zmq psutil)
   pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 elasticsearch-py requests-2.7.0 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3)
 else
-  pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo urllib3 elasticsearch requests itsdangerous jinja2 flask zmq psutil)
-  pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 urllib3-1.10.1 elasticsearch-py requests-2.7.0 itsdangerous-0.21 Jinja2-2.6 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3)
+  pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo urllib3 elasticsearch requests itsdangerous jinja2 werkzeug flask zmq psutil)
+  pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 urllib3-1.10.1 elasticsearch-py requests-2.7.0 itsdangerous-0.21 Jinja2-2.6 Werkzeug-0.11.9 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3)
 
 fi
 
