@@ -357,15 +357,19 @@ then
         echo gpgcheck=0 >> $gsql_repo
         echo enabled=1 >> $gsql_repo
         $PKGMGR --disablerepo \* --enablerepo graphsql -y install ${toBeInstalled} 1>>$LOG 2>&1
+        rm -f $gsql_repo
       else
-        gsql_repo="/etc/apt/sources.list.d/graphsql.list"
-        echo "deb file:/${PWD}/Packages ./" > $gsql_repo
+        gsql_source="/etc/apt/sources.list-gsql"
+        cp -f /etc/apt/sources.list $gsql_source
+        echo "deb file://${PWD}/Packages ./" > /etc/apt/sources.list
         $PKGMGR update >/dev/null 2>&1
-        $PKGMGR -y install ${toBeInstalled} 1>>$LOG 2>&1
+        $PKGMGR -y --allow-unauthenticated install ${toBeInstalled} 1>>$LOG 2>&1
+
+        mv -f $gsql_source /etc/apt/sources.list
+        $PKGMGR update >/dev/null 2>&1
       fi
       result=$?
 
-      rm -f $gsql_repo
       if [ "$result" != "0" ]
       then
         warn "Failed to install one or more packages. Program terminated."
@@ -440,8 +444,8 @@ then
   pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo elasticsearch requests flask zmq psutil)
   pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 elasticsearch-py requests-2.7.0 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3)
 else
-  pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo elasticsearch requests itsdangerous flask zmq psutil)
-  pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 elasticsearch-py requests-2.7.0 itsdangerous-0.21 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3)
+  pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo urllib3 elasticsearch requests itsdangerous jinja2 flask zmq psutil)
+  pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 urllib3-1.10.1 elasticsearch-py requests-2.7.0 itsdangerous-0.21 Jinja2-2.6 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3)
 
 fi
 
