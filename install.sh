@@ -434,9 +434,16 @@ fi
 
 declare -a pyMod
 declare -a pyDir
-#The indices of the two arrays must match. Use associative arrays if bash >= 4.0
-pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo elasticsearch requests flask zmq psutil)
-pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 elasticsearch-py requests-2.7.0 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3)
+if has_internet
+then
+  #The indices of the two arrays must match. Use associative arrays if bash >= 4.0
+  pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo elasticsearch requests flask zmq psutil)
+  pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 elasticsearch-py requests-2.7.0 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3)
+else
+  pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo elasticsearch requests itsdangerous flask zmq psutil)
+  pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 elasticsearch-py requests-2.7.0 itsdangerous-0.21 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3)
+
+fi
 
 for i in $(seq 0 $((${#pyMod[@]} - 1)))
 do
