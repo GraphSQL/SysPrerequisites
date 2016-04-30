@@ -275,18 +275,15 @@ progress "Updating /etc/hosts"
 set_etcHosts
 
 progress "Checking required system tools and libraries"
+jdk_installed='N'
 if which javac > /dev/null 2>&1
 then
   jdk_ver=$(javac -version 2>&1 |awk '{print $2}' | tr -d '.')
   jdk_num=${jdk_ver%_*}
-  if [ "$jdk_num" -lt 170 ]
+  if [ "$jdk_num" -ge 170 ]
   then
-    jdk_installed='N'
-  else
     jdk_installed='Y'
   fi
-else
-  jdk_installed='N'
 fi
 
 if [ "$jdk_installed" = 'N' ]
@@ -300,6 +297,7 @@ then
 else
   toBeInstalled=''
 fi
+
 
 if [ "$OS" = 'RHEL' ]
 then
@@ -391,17 +389,34 @@ else
 fi
 
 # make libjvm.so available to gpath
-jvm=$(find /usr -type f -name libjvm.so|grep server | head -1)
-if [ "J$jvm" = 'J' ]
+if which javac > /dev/null 2>&1
 then
-  warn "Cannot find libjvm.so. GPath will not work without this file."
-else
-  if [ $OS = 'RHEL' ]
+  jdk_ver=$(javac -version 2>&1 |awk '{print $2}' | tr -d '.')
+  jdk_num=${jdk_ver%_*}
+  if [ "$jdk_num" -lt 170 ]
   then
-    ln -sf $jvm /lib64/libjvm.so
+    warn "Require JDK >= 1.7 to run GPath."
   else
-    ln -sf $jvm /usr/lib/libjvm.so
+    java_path=$(readlink -f `which java`)
+    jdk_id=$(echo $java_path | tr '/' '\n '|grep 'java-') #JDK identifier
+    jvm_home=$(dirname $java_path)
+    jvm_home=${jvm_home%/*}  #remove /bin
+    jvm_home=${jvm_home%/*}  #remove /jre
+    jvm=$(find $jvm_home -type f -name libjvm.so | grep server | grep $jdk_id | head -1)
+		if [ "J$jvm" = 'J' ]
+		then
+		  warn "Cannot find libjvm.so. GPath will not work without this file."
+		else
+		  if [ "$OS" = 'RHEL' ]
+		  then
+		    ln -sf $jvm /lib64/libjvm.so
+		  else
+		    ln -sf $jvm /usr/lib/libjvm.so
+		  fi
+		fi
   fi
+else
+  warn "No java compiler found. GPath will not work without this file."
 fi
 
 if [ ! -d /etc/tsar -a -f tsar.tar.gz ]
