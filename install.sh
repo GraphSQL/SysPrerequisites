@@ -120,6 +120,11 @@ set_limits()
   echo "$limit_user hard nproc $noProc" >> $limit_file
   echo "$limit_user soft core $core" >> $limit_file
   echo "$limit_user hard core $core" >> $limit_file
+
+  if [ -f /etc/profile ]  # this is often seen on ubuntu system
+  then
+    sed -i -e 's/^ulimit -SHn 51200/ulimit -SHn 1000000/' /etc/profile
+  fi
 }
 
 set_sysctl()
