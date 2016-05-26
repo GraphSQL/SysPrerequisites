@@ -10,7 +10,7 @@ help()
 {
   echo "`basename $0` [-h] [-l] [-i <ium_version>] [-u <user>] [-r <graphsql_root_dir>]" 
   echo "  -h  --  show this message"
-  echo "  -l  --  send output to a log file." 
+  echo "  -v  --  verbose mode, send logs to gsql_syspre_install.log" 
   echo "  -i  --  IUM version (branch)"
   echo "  -r  --  Graphsql.Root.Dir"
   echo "  -u  --  GraphSQL user"
@@ -123,7 +123,7 @@ set_limits()
 
   if [ -f /etc/profile ]  # this is often seen on ubuntu system
   then
-    sed -i -e 's/^ulimit -SHn 51200/ulimit -SHn 1000000/' /etc/profile
+    sed -i -e 's/^\([ \t]*ulimit * -[SHcnu]\{2,3\} .*\)$/#\1/' /etc/profile
   fi
 }
 
@@ -163,13 +163,13 @@ fi
 
 trap cancel INT
 
-while getopts ":hli:r:u:" opt; do
+while getopts ":hvi:r:u:" opt; do
   case $opt in
     h|H)
       help
       ;;
-    l|L)
-      LOG="syspre_install.log"
+    v|V)
+      LOG="`pwd`/gsql_syspre_install.log"
       ;;
     i|I)
       IUM_BRANCH=$OPTARG
@@ -311,7 +311,7 @@ then
     $PKGMGR -y install epel-release 1>>$LOG 2>&1  # required for python-unittest2
   fi
   
-  PKGS="curl wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof cmake openssh-clients ntp postfix python-unittest2"
+  PKGS="curl wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof make cmake openssh-clients ntp postfix"
   for pkg in $PKGS
   do
     if ! rpm -q $pkg > /dev/null 2>&1
@@ -321,7 +321,7 @@ then
   done
 else #Ubuntu
   $PKGMGR update >/dev/null 2>&1
-  PKGS="curl wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof cmake ntp postfix"
+  PKGS="curl wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof make cmake ntp postfix"
   for pkg in $PKGS
   do
     if ! dpkg -s $pkg 2>&1| grep -q 'install ok installed'
@@ -350,7 +350,7 @@ then
   else
     if [ -d ./Packages ] # local repository
     then
-      if [ $OS = 'RHEL' ]
+      if [ "$OS" = 'RHEL' ]
       then
         gsql_repo="/etc/yum.repos.d/graphsql.repo"
         echo [graphsql] > $gsql_repo
@@ -384,7 +384,7 @@ then
   fi
 fi
 
-if [ $OS = 'RHEL' ]
+if [ "$OS" = 'RHEL' ]
 then
   chkconfig --level 345 ntpd on 1>>$LOG 2>&1
   service ntpd start 1>>$LOG 2>&1
@@ -457,20 +457,23 @@ fi
 
 declare -a pyMod
 declare -a pyDir
+declare -a pyForceInstall
+
 if has_internet
 then
-  #The indices of the two arrays must match. Use associative arrays if bash >= 4.0
+  #The indices of the three arrays must match. Use associative arrays if bash >= 4.0
   pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo elasticsearch requests flask zmq psutil)
   pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 elasticsearch-py requests-2.7.0 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3)
+  pyForceInstall=(1 0 0 0 0 0 0 0 0 0 0 0 0)
 else
   pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo urllib3 elasticsearch requests itsdangerous jinja2 werkzeug flask zmq psutil)
   pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 urllib3-1.10.1 elasticsearch-py requests-2.7.0 itsdangerous-0.21 Jinja2-2.6 Werkzeug-0.11.9 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3)
-
+  pyForceInstall=(1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
 fi
 
 for i in $(seq 0 $((${#pyMod[@]} - 1)))
 do
-  if ! python -c "import ${pyMod[$i]}" >/dev/null 2>&1
+  if [ "${pyForceInstall[$i]}" = "1" ] || ! python -c "import ${pyMod[$i]}" >/dev/null 2>&1
   then
     if [ -f ${pyDir[$i]}.tar.gz ]
     then
