@@ -372,7 +372,7 @@ check_os()
 	    then
 	      for disk in $disks
 	      do
-	        hdparm -ITt /dev/$disk
+	        #hdparm -ITt /dev/$disk
 	        hdparm -Tt --direct /dev/$disk | sed -e '1,2d'
 	      done
 	    fi
@@ -385,13 +385,13 @@ check_os()
     declare -a checkNames
     declare -a checkFunctions
     checkNames=("OS" "Required system libraries" "Required commands" "Required python modules" \
-                "System Locale" "NTP service" "Redis service" "Ulimit" \
+                "System Locale" "NTP service" "Redis service" \
                 "Firewall" "Internet Connection" "TCP Wrapper" "SSHD" \
                 "SeLinux" "Free Disk Space" "Disk Performance" "CRON service"
                )
 
     checkFunctions=("check_os" "check_system_library" "check_required_commands" "check_python_modules" \
-                    "check_system_locale" "check_ntp_service" "check_redis_service" "check_ulimit" \
+                    "check_system_locale" "check_ntp_service" "check_redis_service" \
 	                  "check_firewall" "check_internet_connection" "check_tcpwrapper" "check_sshd" \
 	                  "check_selinux" "check_diskfree" "check_disk_speed" "check_cron_service"
                   )
@@ -402,7 +402,14 @@ check_os()
 	    checkList  "${checkNames[$i]}"
       eval ${checkFunctions[$i]}
     done
+
+    if [ "$OS" = 'RHEL' ]
+    then
+      checkList  "Ulimit"
+      check_ulimit
+    fi
   }
+
 
 generate_report()
 {
