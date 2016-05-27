@@ -541,4 +541,4 @@ echo
 echo "System prerequisite installation completed."
 [ "$LOG" = "/dev/null" ] || echo "Check \"${LOG}\" for details."
 echo
-echo "Please run \"${PWD}/check_system.sh\" to verify system settings."
+echo "Please run \"${PWD}/check_system.sh -u ${GSQL_USER}\" to verify system settings."
