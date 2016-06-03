@@ -81,7 +81,7 @@ install_scons(){
     if [ -d $scons_dir ]
     then
       cd $scons_dir
-      python setup.py install
+      python setup.py install 1>>$LOG 2>&1
       cd ..
       rm -rf $scons_dir
     fi
