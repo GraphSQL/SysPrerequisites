@@ -339,7 +339,7 @@ then
   done
 else #Ubuntu
   $PKGMGR update >/dev/null 2>&1
-  PKGS="build-essential curl wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof make cmake ntp postfix pkgconfig"
+  PKGS="build-essential curl wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof make cmake ntp postfix pkgconf"
   for pkg in $PKGS
   do
     if ! dpkg -s $pkg 2>&1| grep -q 'install ok installed'
