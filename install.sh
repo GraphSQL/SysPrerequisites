@@ -72,6 +72,22 @@ get_os(){
   fi
 }
 
+install_scons(){
+  scons_ver=$1
+  scons_dir=scons-${scons_ver}
+  if [ -f ${scons_dir}.tar.gz ]
+  then
+    tar zxf ${scons_dir}.tar.gz
+    if [ -d $scons_dir ]
+    then
+      cd $scons_dir
+      python setup.py install
+      cd ..
+      rm -rf $scons_dir
+    fi
+  fi
+}
+
 install_service(){
   run_as=$1
   srv_name=$2
@@ -312,7 +328,8 @@ then
     $PKGMGR -y install epel-release 1>>$LOG 2>&1  # required for python-unittest2
   fi
   
-  PKGS="curl wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof make cmake openssh-clients ntp postfix"
+  $PKGMGR -y groupinstall 'Development Tools'
+  PKGS="curl wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof make cmake openssh-clients ntp postfix pkgconfig"
   for pkg in $PKGS
   do
     if ! rpm -q $pkg > /dev/null 2>&1
@@ -322,7 +339,7 @@ then
   done
 else #Ubuntu
   $PKGMGR update >/dev/null 2>&1
-  PKGS="curl wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof make cmake ntp postfix"
+  PKGS="build-essential curl wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof make cmake ntp postfix pkgconfig"
   for pkg in $PKGS
   do
     if ! dpkg -s $pkg 2>&1| grep -q 'install ok installed'
@@ -434,6 +451,9 @@ then
   cd ..
   rm -rf tsar
 fi
+
+progress "Installing Scons"
+install_scons 2.5.0
 
 if ! which redis-server >/dev/null 2>&1
 then

@@ -154,7 +154,7 @@ check_os()
 
   check_python_modules()
   {
-	  PyMod="Crypto ecdsa paramiko nose yaml setuptools fabric psutil kazoo elasticsearch requests flask zmq"
+	  PyMod="Crypto ecdsa paramiko nose yaml setuptools fabric psutil kazoo requests flask zmq"
 	  for pymod in $PyMod
 	  do
 	    if [ "$pymod" = "Crypto" ]
