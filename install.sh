@@ -328,7 +328,7 @@ then
     $PKGMGR -y install epel-release 1>>$LOG 2>&1  # required for python-unittest2
   fi
   
-  $PKGMGR -y groupinstall 'Development Tools'
+  $PKGMGR -y groupinstall 'Development Tools' 1>>$LOG 2>&1
   PKGS="curl wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof make cmake openssh-clients ntp postfix pkgconfig"
   for pkg in $PKGS
   do
