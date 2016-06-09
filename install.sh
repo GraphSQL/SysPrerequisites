@@ -403,11 +403,9 @@ then
     warn "Require JDK >= 1.7 to run GPath."
   else
     java_path=$(readlink -f `which java`)
-    jdk_id=$(echo $java_path | tr '/' '\n '|grep 'java-') #JDK identifier
     jvm_home=$(dirname $java_path)
     jvm_home=${jvm_home%/*}  #remove /bin
-    jvm_home=${jvm_home%/*}  #remove /jre
-    jvm=$(find $jvm_home -type f -name libjvm.so | grep server | grep $jdk_id | head -1)
+    jvm=$(find $jvm_home -type f -name libjvm.so | head -1)
 		if [ "J$jvm" = 'J' ]
 		then
 		  warn "Cannot find libjvm.so. GPath will not work without this file."
