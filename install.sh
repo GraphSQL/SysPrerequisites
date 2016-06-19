@@ -528,14 +528,6 @@ else
 fi
 
 echo
-progress "Installing GraphSQL service"
-install_service $GSQL_USER graphsql 87
-
-progress "Installing GraphSQL Monitor service"
-install_service $GSQL_USER gsql_monitor 88
-
-
-echo
 echo "System prerequisite installation completed."
 [ "$LOG" = "/dev/null" ] || echo "Check \"${LOG}\" for details."
 echo
