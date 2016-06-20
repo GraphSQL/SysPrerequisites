@@ -14,6 +14,7 @@ help()
   echo "  -i  --  IUM version (branch)"
   echo "  -r  --  Graphsql.Root.Dir"
   echo "  -u  --  GraphSQL user"
+  echo "  -d  --  dev. setup"
   exit 0
 }
 
@@ -179,10 +180,13 @@ fi
 
 trap cancel INT
 
-while getopts ":hvi:r:u:" opt; do
+while getopts ":hdvi:r:u:" opt; do
   case $opt in
     h|H)
       help
+      ;;
+    d|D)
+      DEV_SETUP=true
       ;;
     v|V)
       LOG="`pwd`/gsql_syspre_install.log"
@@ -450,8 +454,19 @@ then
   rm -rf tsar
 fi
 
-progress "Installing Scons"
-install_scons 2.5.0
+if [ "$DEV_SETUP" = true ]
+then
+  progress "Dev. Setup: installing Scons"
+  install_scons 2.5.0
+  progress "Dev. Setup: installing opnssl"
+  if [ "Q$OS" = "QRHEL" ]  # Redhat or CentOS
+  then
+      $PKGMGR -y install openssl-devel
+      $PKGMGR -y install libstdc++-static
+  else
+      $PKGMGR -y install libssl-dev
+  fi
+fi
 
 if ! which redis-server >/dev/null 2>&1
 then
