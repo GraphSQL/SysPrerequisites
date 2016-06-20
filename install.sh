@@ -516,13 +516,19 @@ GIT_TOKEN=$(echo $TOKEN |tr '97531' '13579' |tr 'FEDCBA' 'abcdef')
 if has_internet
 then
   progress "Downloading IUM package"
-  su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/${IUM_BRANCH} -o gium.tar"
-fi
-
-if [ -f ${USER_HOME}/gium.tar ]
+  if su - ${GSQL_USER} -c "curl -H 'Authorization: token $GIT_TOKEN' -L https://api.github.com/repos/GraphSQL/gium/tarball/${IUM_BRANCH} -o gium.tar"
+  then
+    progress "Installing IUM package for ${GSQL_USER}"
+    su - ${GSQL_USER} -c "tar xf gium.tar; GraphSQL-gium-*/install.sh; rm -rf GraphSQL-gium-*; rm -f gium.tar"
+  fi
+elif [ -d ../gium ]  #no Intenet, but w/ offline installation package
 then
-  progress "Installing IUM package for ${GSQL_USER}"
-  su - ${GSQL_USER} -c "tar xf gium.tar; GraphSQL-gium-*/install.sh; rm -rf GraphSQL-gium-*; rm -f gium.tar"
+  cp -ar ../gium ${USER_HOME}/GraphSQL-gium-offline && chown -R ${GSQL_USER} ${USER_HOME}/GraphSQL-gium-offline 
+  if [ -d ${USER_HOME}/GraphSQL-gium-offline ]
+  then
+    progress "Installing IUM package for ${GSQL_USER}"
+    su - ${GSQL_USER} -c "GraphSQL-gium-offline/install.sh; rm -rf GraphSQL-gium-offline"
+  fi
 else
   warn "IUM package not found. Please install IUM for user \"${GSQL_USER}\" manually"
 fi
