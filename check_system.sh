@@ -352,6 +352,37 @@ check_os()
     fi
   }
 
+  check_sshd(){
+    grep 'Port ' /etc/ssh/sshd_config
+    if which netstat >/dev/null 2>&1
+    then
+      netstat -tlnp|grep sshd
+    else
+      netstat -tlnp|grep sshd
+    fi
+  }
+
+  check_pam(){
+    if [ -f /etc/pam.d/su ]
+    then
+      pamLine=$(grep -P '^[[:space:]]*auth[[:space:]]+required[[:space:]]+pam_wheel.so' /etc/pam.d/su)
+      if [ "P$pamLine" != "P" ]
+      then
+        pam=$(echo $pamLine | grep -o 'group[[:space:]]*=[[:space:]]*[^ ]*' | sed -e 's/ //g')
+        if [ "P$pam" != "P" ] 
+        then
+          group=${pam##group=}
+        else
+          group=wheel
+        fi
+
+        warn "Only users in group \"$group\" can run \"su\" command."  
+        return
+      fi
+    fi
+      echo "${bldgre}No group restrictions in \"/etc/pam.d/su\". $txtrst"
+  }
+
   check_selinux(){
     if which getenforce >/dev/null 2>&1
     then
@@ -385,13 +416,13 @@ check_os()
     declare -a checkNames
     declare -a checkFunctions
     checkNames=("OS" "Required system libraries" "Required commands" "Required python modules" \
-                "System Locale" "NTP service" "Redis service" \
+                "System Locale" "NTP service" "Redis service" "PAM" \
                 "Firewall" "Internet Connection" "TCP Wrapper" "SSHD" \
                 "SeLinux" "Free Disk Space" "Disk Performance" "CRON service"
                )
 
     checkFunctions=("check_os" "check_system_library" "check_required_commands" "check_python_modules" \
-                    "check_system_locale" "check_ntp_service" "check_redis_service" \
+                    "check_system_locale" "check_ntp_service" "check_redis_service" "check_pam"\
 	                  "check_firewall" "check_internet_connection" "check_tcpwrapper" "check_sshd" \
 	                  "check_selinux" "check_diskfree" "check_disk_speed" "check_cron_service"
                   )
