@@ -333,7 +333,7 @@ then
   fi
   
   $PKGMGR -y groupinstall 'Development Tools' 1>>$LOG 2>&1
-  PKGS="curl wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof make cmake openssh-clients ntp postfix pkgconfig"
+  PKGS="curl wget gcc cpp gcc-c++ libgcc glibc glibc-common glibc-devel glibc-headers bison flex libtool automake zlib-devel libyaml-devel gdbm-devel autoconf unzip python-devel gmp-devel lsof make cmake openssh-clients ntp postfix pkg-config"
   for pkg in $PKGS
   do
     if ! rpm -q $pkg > /dev/null 2>&1
@@ -343,7 +343,7 @@ then
   done
 else #Ubuntu
   $PKGMGR update >/dev/null 2>&1
-  PKGS="build-essential curl wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof make cmake ntp postfix pkgconf"
+  PKGS="build-essential curl wget gcc cpp g++ bison flex libtool automake zlib1g-dev libyaml-dev autoconf unzip python-dev libgmp-dev lsof make cmake ntp postfix pkg-config"
   for pkg in $PKGS
   do
     if ! dpkg -s $pkg 2>&1| grep -q 'install ok installed'
