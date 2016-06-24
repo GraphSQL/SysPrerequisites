@@ -176,12 +176,12 @@ check_os()
   check_system_locale()
   {
 	  allowedLocale='en_US.UTF-8'
-	  if ! locale | grep -q "$allowedLocale"
+	  if locale | grep -q "LANG=$allowedLocale\|LC_ALL=$allowedLocale"
 	  then
+	    found "en_US.UTF-8"
+	  else
 	    warn "Locale $allowedLocale is required."
 	    exit 3
-	  else
-	    found "en_US.UTF-8"
 	  fi
   }
 
