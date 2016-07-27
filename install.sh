@@ -142,6 +142,14 @@ set_limits()
   then
     sed -i -e 's/^\([ \t]*ulimit * -[SHcnu]\{2,3\} .*\)$/#\1/' /etc/profile
   fi
+
+  if [ -f /etc/pam.d/common-session ]
+  then
+       if ! grep pam_limits /etc/pam.d/common-session >/dev/null 2>&1
+       then
+           echo "session required        pam_limits.so" >> /etc/pam.d/common-session
+       fi
+  fi
 }
 
 set_sysctl()
