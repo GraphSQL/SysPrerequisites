@@ -504,13 +504,13 @@ declare -a pyForceInstall
 if has_internet
 then
   #The indices of the three arrays must match. Use associative arrays if bash >= 4.0
-  pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo requests flask zmq psutil)
-  pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 requests-2.7.0 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3)
-  pyForceInstall=(1 0 0 0 0 0 0 0 0 0 0 0 0)
+  pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo requests flask zmq psutil kafka-python)
+  pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 requests-2.7.0 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3 kafka-python-1.3.1)
+  pyForceInstall=(1 0 0 0 0 0 0 0 0 0 0 0 0 0)
 else
-  pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo urllib3 requests itsdangerous jinja2 werkzeug flask zmq psutil)
-  pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 urllib3-1.10.1 requests-2.7.0 itsdangerous-0.21 Jinja2-2.6 Werkzeug-0.11.9 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3)
-  pyForceInstall=(1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+  pyMod=(Crypto ecdsa paramiko nose yaml setuptools fabric kazoo urllib3 requests itsdangerous jinja2 werkzeug flask zmq psutil kafka-python)
+  pyDir=(pycrypto-2.6 ecdsa-0.11 paramiko-1.14.0 nose-1.3.4 PyYAML-3.10 setuptools-5.4.1 Fabric-1.8.2 kazoo-2.0.1 urllib3-1.10.1 requests-2.7.0 itsdangerous-0.21 Jinja2-2.6 Werkzeug-0.11.9 Flask-0.10.1 pyzmq-15.2.0 psutil-2.1.3 kafka-python-1.3.1)
+  pyForceInstall=(1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
 fi
 
 for i in $(seq 0 $((${#pyMod[@]} - 1)))
