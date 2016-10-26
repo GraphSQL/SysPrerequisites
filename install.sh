@@ -224,6 +224,19 @@ else
   PKGMGR=`which apt-get`
 fi
 
+#############################################################
+## Only support 64bit OS
+if ! uname -a | grep -q  _64; then
+   warn "GraphSQL software only supports 64bit OS."
+   exit 1
+fi
+
+## Check if sshd is running
+if ! ps aux | grep -q [s]shd; then
+    warn "Didn't find ssh server running. This will cause issue in distributed setup!";
+fi
+#############################################################
+
 notice "Welcome to GraphSQL System Prerequisite Installer"
 
 if [ -d ./SysPrerequisites-${syspre_BRANCH} ]
