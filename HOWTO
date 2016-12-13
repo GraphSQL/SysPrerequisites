@@ -1,0 +1,5 @@
+rpmbuild is needed to build sysprereq rpm, in order to install:
+sudo yum install -y rpmbuild
+
+to build:
+rpmbuild -bb rpmbuild/SPECS/syspreq.spec
