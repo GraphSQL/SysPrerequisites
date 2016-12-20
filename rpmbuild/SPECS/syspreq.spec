@@ -14,6 +14,20 @@ Requires: curl java gcc gcc-c++  pkgconfig make libtool patch gettext openssh-cl
 GraphSQL System prerequisites.
 
 %prep
+%setup -n SysPrerequisites-master
+
+%build
+ls
+
+%install
+ls
+
+%files
+%doc
+
+%changelog
+
+%pre
 warn(){
   echo "${bldred}Warning: $* $txtrst" | tee -a $LOG
 }
@@ -209,15 +223,3 @@ set_sysctl ${USER_HOME}/graphsql_coredump  # leave core dumps at home
 
 progress "Updating /etc/hosts"
 set_etcHosts
-
-
-%build
-ls
-
-%install
-ls
-
-%files
-%doc
-
-%changelog
