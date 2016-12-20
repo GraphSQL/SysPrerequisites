@@ -6,9 +6,9 @@ Summary:  System prerequisites for GraphSQL system
 Group:    System
 License:  Commercial
 URL:    http://www.graphsql.com/
-Source0:  https://github.com/GraphSQL/SysPrerequisites/archive/master.tar.gz
+Source0: SysPrerequisites-master.tar.gz
 
-Requires: curl java gcc gcc-c++  pkgconfig make libtool patch gettext openssh-clients sshd ntp 
+Requires: curl, java, gcc, gcc-c++, pkgconfig, make, libtool, patch, gettext, openssh-clients, sshd, ntp
 
 %description
 GraphSQL System prerequisites.
