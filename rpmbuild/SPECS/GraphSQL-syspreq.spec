@@ -119,7 +119,7 @@ notice "Welcome to GraphSQL System Prerequisite Installer"
 
 GSQL_USER='graphsql'
 progress "Creating user ${GSQL_USER}"
-useradd ${GSQL_USER} -m -c "GraphSQL User" -s /bin/bas >/dev/null 2>&1h
+useradd ${GSQL_USER} -m -c "GraphSQL User" -s /bin/bash >/dev/null 2>&1
 echo "${GSQL_USER}" |passwd ${GSQL_USER} >/dev/null 2>&1
 
 USER_HOME=$(eval echo ~$GSQL_USER)
