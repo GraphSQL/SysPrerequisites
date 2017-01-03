@@ -7,7 +7,7 @@ Group:    System
 License:  Commercial
 URL:    http://www.graphsql.com/
 
-Requires: curl, java, gcc, gcc-c++, pkgconfig, make, libtool, patch, gettext, openssh-clients, ntp
+Requires: curl, java, gcc, gcc-c++, pkgconfig, make, libtool, patch, gettext, openssh-clients, ntp,ruby
 
 %description
 GraphSQL System prerequisites.
