@@ -49,23 +49,17 @@ get_os(){
 }
 
 create_rpm(){
-  echo "%_topdir ${pwd}/rpmbuild" > ~/.rpmmacros
+  echo "%_topdir ${PWD}/rpmbuild" > ~/.rpmmacros
   rpmbuild -ba rpmbuild/SPECS/GraphSQL-syspreq.spec 1>>$LOG 2>&1  
   cp rpmbuild/RPMS/x86_64/*.rpm* /root/ >/dev/null 2>&1 
 }
 
 create_rpm_offline_repo(){
-  off_repo="/etc/yum.repos.d/syspreq_off.repo" 
   if [ -d $rpm_off_repo_dir ]
   then 
     rm -rf $rpm_off_repo_dir
   fi
   mkdir -p $rpm_off_repo_dir 
-  echo "[graphsql-local]" > $off_repo
-  echo "name=GraphSQL-syspreq Local" >> $off_repo
-  echo "baseurl=file://${rpm_off_repo_dir}" >> $off_repo
-  echo "gpgcheck=0" >> $off_repo
-  echo "enabled=1" >> $off_repo
   if ! rpm -q createrepo >/dev/null 2>&1
   then
     yum -y install createrepo 1>>$LOG 2>&1
@@ -75,11 +69,11 @@ create_rpm_offline_repo(){
 }
 
 
-LOG="/root/install.log"
+LOG="${PWD}/build.log"
 OS=$(get_os)
 if [ "Q$OS" = "QRHEL" ]  # Redhat or CentOS
 then
-  rpm_off_repo_dir="/root/rpm_off_repo"
+  rpm_off_repo_dir="${PWD}/rpm_off_repo"
   if has_internet
   then 
     create_rpm
