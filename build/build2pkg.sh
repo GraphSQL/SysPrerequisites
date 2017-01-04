@@ -1,3 +1,26 @@
+txtbld=$(tput bold)             # Bold
+bldred=${txtbld}$(tput setaf 1) # red
+bldgre=${txtbld}$(tput setaf 2) # green
+bldblu=${txtbld}$(tput setaf 4) # blue
+txtrst=$(tput sgr0)             # Reset
+
+warn(){
+  echo "${bldred}Warning: $* $txtrst" | tee -a $LOG
+}
+
+notice(){
+  echo "${bldblu}$* $txtrst" | tee -a $LOG
+}
+
+progress(){
+  echo "${bldgre}*** $* ...$txtrst" | tee -a $LOG
+}
+
+has_internet(){
+  ping -c2 -i0.5 -W1 -q www.github.com >/dev/null 2>&1
+  return $?
+}
+
 get_os(){
   if which apt-get > /dev/null 2>&1
   then
@@ -26,24 +49,47 @@ get_os(){
 }
 
 create_rpm(){
-  if [ ! -f ~/.rpmmacros ]
+  echo "%_topdir ${pwd}/rpmbuild" > ~/.rpmmacros
+  rpmbuild -ba rpmbuild/SPECS/GraphSQL-syspreq.spec 1>>$LOG 2>&1  
+  cp rpmbuild/RPMS/x86_64/*.rpm* /root/ >/dev/null 2>&1 
+}
+
+create_rpm_offline_repo(){
+  off_repo="/etc/yum.repos.d/syspreq_off.repo" 
+  if [ -d $rpm_off_repo_dir ]
   then 
-    echo "%_topdir /root/SysPrerequisites/rpmbuild" > ~/.rpmmacros
+    rm -rf $rpm_off_repo_dir
   fi
-  cd rpmbuild
-  rpmbuild -ba SPECS/GraphSQL-syspreq.spec
-  
+  mkdir -p $rpm_off_repo_dir 
+  echo "[graphsql-local]" > $off_repo
+  echo "name=GraphSQL-syspreq Local" >> $off_repo
+  echo "baseurl=file://${rpm_off_repo_dir}" >> $off_repo
+  echo "gpgcheck=0" >> $off_repo
+  echo "enabled=1" >> $off_repo
+  if ! rpm -q createrepo >/dev/null 2>&1
+  then
+    yum -y install createrepo 1>>$LOG 2>&1
+  fi
+  cp /root/*.rpm $rpm_off_repo_dir >/dev/null 2>&1 
+  createrepo $rpm_off_repo_dir 1>>$LOG 2>&1  
 }
 
-create_deb(){
 
-}
-
+LOG="/root/install.log"
 OS=$(get_os)
 if [ "Q$OS" = "QRHEL" ]  # Redhat or CentOS
 then
-  create_rpm
-else
-  create_deb
+  rpm_off_repo_dir="/root/rpm_off_repo"
+  if has_internet
+  then 
+    create_rpm
+    create_rpm_offline_repo
+    progress "created rpm repository successfully"
+  elif [ -d $rpm_off_repo_dir ]
+  then 
+    progress "offline local repository already existed and can be used to install"
+  else 
+    warn "No Internet access and offline local repository"
+  fi
 fi
   
