@@ -51,39 +51,34 @@ get_os(){
 create_rpm(){
   echo "%_topdir $rpm_build_dir" > ~/.rpmmacros
   rpmbuild -ba $rpm_build_dir/SPECS/GraphSQL-syspreq.spec 1>>$LOG 2>&1  
-}
-
-create_rpm_offline_repo(){
+  
   if [ -d $rpm_off_repo_dir ]
   then rm -rf $rpm_off_repo_dir
   fi
-  mkdir -p $rpm_off_repo_dir 
+  mkdir -p $rpm_off_repo_dir
   if ! rpm -q createrepo >/dev/null 2>&1
   then yum -y install createrepo 1>>$LOG 2>&1
   fi
-  cp $rpm_build_dir/RPMS/x86_64/*.rpm $rpm_off_repo_dir >/dev/null 2>&1 
-  createrepo $rpm_off_repo_dir 1>>$LOG 2>&1  
+  cp $rpm_build_dir/RPMS/x86_64/*.rpm $rpm_off_repo_dir >/dev/null 2>&1
+  createrepo $rpm_off_repo_dir 1>>$LOG 2>&1
 }
 
 create_deb(){
-  dpkg -b $deb_build_dir/syspreq_deb $deb_build_dir/syspreq_deb.deb
-}
-
-create_deb_offline_repo(){
   if [ -d $deb_off_repo_dir ]
   then rm -rf $deb_off_repo_dir
   fi
   mkdir -p $deb_off_repo_dir
+  dpkg -b $deb_build_dir/syspreq_deb $deb_off_repo_dir/syspreq_deb.deb 1>>$LOG 2>&1
+  
   if ! dpkg -s dpkg-dev 2>&1 | grep -q 'install ok installed'
   then apt-get -y install dpkg-dev 1>>$LOG 2>&1
   fi
-  cp $deb_build_dir/syspreq_deb.deb $deb_off_repo_dir >/dev/null 2>&1
   newsource="deb file://${deb_off_repo_dir}/ ./"
   if ! cat /etc/apt/sources.list | grep "$newsource"
   then echo $newsource >> /etc/apt/sources.list
   fi
-  cd $dev_off_repo_dir
-  dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz 1>>$LOG 2>&1
+  cd $deb_off_repo_dir
+  dpkg-scanpackages . /dev/null 1>>$LOG 2>&1 | gzip -9c > Packages.gz 1>>$LOG 2>&1
   apt-get update 1>>$LOG 2>&1
 }
 
@@ -97,13 +92,11 @@ then
   rpm_off_repo_dir="${PWD}/rpm_off_repo"
   rpm_build_dir="${PWD}/rpmbuild"
   create_rpm
-  create_rpm_offline_repo
   progress "created rpm repository successfully"
 else
   deb_off_repo_dir="${PWD}/deb_off_repo"
   deb_build_dir="${PWD}/dpkgbuild"
   create_deb
-  create_deb_offline_repo
   progress "created deb repository successfully"
 fi
   
