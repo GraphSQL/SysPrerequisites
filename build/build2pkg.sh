@@ -68,7 +68,7 @@ create_deb(){
   then rm -rf $deb_off_repo_dir
   fi
   mkdir -p $deb_off_repo_dir
-  dpkg -b $deb_build_dir/syspreq_deb $deb_off_repo_dir/syspreq_deb.deb
+  dpkg -b $deb_build_dir/syspreq_deb $deb_off_repo_dir/syspreq_deb.deb 1>>$LOG 2>&1
   
   if ! dpkg -s dpkg-dev 2>&1 | grep -q 'install ok installed'
   then apt-get -y install dpkg-dev 1>>$LOG 2>&1
@@ -77,9 +77,9 @@ create_deb(){
   if ! cat /etc/apt/sources.list | grep "$newsource"
   then echo $newsource >> /etc/apt/sources.list
   fi
-  echo $deb_off_repo_dir
   cd $deb_off_repo_dir
-  dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
+  dpkg-scanpackages . /dev/null 1>>$LOG 2>&1 | gzip -9c > Packages.gz 1>>$LOG 2>&1
+  apt-get update 1>>$LOG 2>&1
 }
 
 LOG="${PWD}/build.log"
