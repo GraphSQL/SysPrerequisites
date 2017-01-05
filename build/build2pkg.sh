@@ -55,43 +55,42 @@ create_rpm(){
 
 create_rpm_offline_repo(){
   if [ -d $rpm_off_repo_dir ]
-  then 
-    rm -rf $rpm_off_repo_dir
+  then rm -rf $rpm_off_repo_dir
   fi
   mkdir -p $rpm_off_repo_dir 
   if ! rpm -q createrepo >/dev/null 2>&1
-  then
-    yum -y install createrepo 1>>$LOG 2>&1
+  then yum -y install createrepo 1>>$LOG 2>&1
   fi
   cp $rpm_build_dir/RPMS/x86_64/*.rpm $rpm_off_repo_dir >/dev/null 2>&1 
   createrepo $rpm_off_repo_dir 1>>$LOG 2>&1  
 }
 
 create_deb(){
-  dpkg -b $deb_build_dir/syspreq_deb syspreq_deb.deb
+  dpkg -b $deb_build_dir/syspreq_deb $deb_build_dir/syspreq_deb.deb
 }
 
 create_deb_offline_repo(){
   if [ -d $deb_off_repo_dir ]
-  then
-    rm -rf $deb_off_repo_dir
+  then rm -rf $deb_off_repo_dir
   fi
   mkdir -p $deb_off_repo_dir
   if ! dpkg -s dpkg-dev 2>&1 | grep -q 'install ok installed'
-  then
-    apt-get -y install dpkg-dev 1>>$LOG 2>&1
+  then apt-get -y install dpkg-dev 1>>$LOG 2>&1
   fi
   cp $deb_build_dir/syspreq_deb.deb $deb_off_repo_dir >/dev/null 2>&1
   newsource="deb file://${deb_off_repo_dir}/ ./"
-  if ! cat /etc/apt/sources.list | grep $newsource
-  then 
-    echo $newsource >> /etc/apt/sources.list
+  if ! cat /etc/apt/sources.list | grep "$newsource"
+  then echo $newsource >> /etc/apt/sources.list
   fi
-  dpkg-scanpackages $dev_off_repo_dir /dev/null | gzip -9c > Packages.gz 1>>$LOG 2>&1
+  cd $dev_off_repo_dir
+  dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz 1>>$LOG 2>&1
   apt-get update 1>>$LOG 2>&1
 }
 
 LOG="${PWD}/build.log"
+if [ -f $LOG ]
+then echo '' > $LOG
+fi 
 OS=$(get_os)
 if [ "Q$OS" = "QRHEL" ]  # Redhat or CentOS
 then
