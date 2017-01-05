@@ -49,9 +49,8 @@ get_os(){
 }
 
 create_rpm(){
-  echo "%_topdir ${PWD}/rpmbuild" > ~/.rpmmacros
-  rpmbuild -ba rpmbuild/SPECS/GraphSQL-syspreq.spec 1>>$LOG 2>&1  
-  cp rpmbuild/RPMS/x86_64/*.rpm* /root/ >/dev/null 2>&1 
+  echo "%_topdir $rpm_build_dir" > ~/.rpmmacros
+  rpmbuild -ba $rpm_build_dir/SPECS/GraphSQL-syspreq.spec 1>>$LOG 2>&1  
 }
 
 create_rpm_offline_repo(){
@@ -64,26 +63,48 @@ create_rpm_offline_repo(){
   then
     yum -y install createrepo 1>>$LOG 2>&1
   fi
-  cp /root/*.rpm $rpm_off_repo_dir >/dev/null 2>&1 
+  cp $rpm_build_dir/RPMS/x86_64/*.rpm $rpm_off_repo_dir >/dev/null 2>&1 
   createrepo $rpm_off_repo_dir 1>>$LOG 2>&1  
 }
 
+create_deb(){
+  dpkg -b $deb_build_dir/syspreq_deb syspreq_deb.deb
+}
+
+create_deb_offline_repo(){
+  if [ -d $deb_off_repo_dir ]
+  then
+    rm -rf $deb_off_repo_dir
+  fi
+  mkdir -p $deb_off_repo_dir
+  if ! dpkg -s dpkg-dev 2>&1 | grep -q 'install ok installed'
+  then
+    apt-get -y install dpkg-dev 1>>$LOG 2>&1
+  fi
+  cp $deb_build_dir/syspreq_deb.deb $deb_off_repo_dir >/dev/null 2>&1
+  newsource="deb file://${deb_off_repo_dir}/ ./"
+  if ! cat /etc/apt/sources.list | grep $newsource
+  then 
+    echo $newsource >> /etc/apt/sources.list
+  fi
+  dpkg-scanpackages $dev_off_repo_dir /dev/null | gzip -9c > Packages.gz 1>>$LOG 2>&1
+  apt-get update 1>>$LOG 2>&1
+}
 
 LOG="${PWD}/build.log"
 OS=$(get_os)
 if [ "Q$OS" = "QRHEL" ]  # Redhat or CentOS
 then
   rpm_off_repo_dir="${PWD}/rpm_off_repo"
-  if has_internet
-  then 
-    create_rpm
-    create_rpm_offline_repo
-    progress "created rpm repository successfully"
-  elif [ -d $rpm_off_repo_dir ]
-  then 
-    progress "offline local repository already existed and can be used to install"
-  else 
-    warn "No Internet access and offline local repository"
-  fi
+  rpm_build_dir="${PWD}/rpmbuild"
+  create_rpm
+  create_rpm_offline_repo
+  progress "created rpm repository successfully"
+else
+  deb_off_repo_dir="${PWD}/deb_off_repo"
+  deb_build_dir="${PWD}/dpkgbuild"
+  create_deb
+  create_deb_offline_repo
+  progress "created deb repository successfully"
 fi
   

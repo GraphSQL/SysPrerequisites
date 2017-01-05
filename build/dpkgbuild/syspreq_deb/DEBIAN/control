@@ -1,0 +1,9 @@
+Package: GraphSQL-syspreq
+Version: 0.8
+Section: Commercial
+Priority: optional
+Depends: curl, openjdk-7-jdk, gcc, cpp, g++, pkg-config, make, libtool, patch, gettext, openssh-client, libssl-dev, ntp, ruby, nodejs
+Architecture: amd64
+Maintainer: Justin
+Provide: GraphSQL
+Description: GraphSQL System Prerequisite
