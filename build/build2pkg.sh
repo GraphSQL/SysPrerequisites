@@ -68,7 +68,10 @@ create_rpm(){
   if ! rpm -q yum-utils >/dev/null 2>&1
   then yum -y install yum-utils 1>>$LOG 2>&1
   fi
-  total_dir="${rpm_repo_dir}/../rpm_off_repo_total"
+  total_dir="${rpm_repo_dir}/../rpm_offline_repo"
+  if [ -d $total_dir ]
+  then rm -rf $total_dir 
+  fi
   repotrack -a x86_64 -p $total_dir GraphSQL-syspreq 1>>$LOG 2>&1
   rm -f $total_dir/*.i686.rpm 
   createrepo $total_dir 1>>$LOG 2>&1
