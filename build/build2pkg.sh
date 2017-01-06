@@ -48,21 +48,19 @@ create_rpm(){
   rpmbuild -ba $rpm_build_dir/SPECS/GraphSQL-syspreq.spec 1>>$LOG 2>&1  
 
   progress "generating the GraphSQL-syspreq package"
-  if [ -d $rpm_off_repo_dir ]
-  then rm -rf $rpm_off_repo_dir
-  fi
   mkdir -p $rpm_off_repo_dir
-  
   off_repo="/etc/yum.repos.d/syspreq_off.repo"
+  
+  if ! rpm -q createrepo >/dev/null 2>&1
+  then yum -y install createrepo 1>>$LOG 2>&1
+  fi
+
   echo "[graphsql-local]" > $off_repo
   echo "name=GraphSQL-syspreq Local" >> $off_repo
   echo "baseurl=file://${rpm_off_repo_dir}" >> $off_repo
   echo "gpgcheck=0" >> $off_repo
   echo "enabled=1" >> $off_repo  
 
-  if ! rpm -q createrepo >/dev/null 2>&1
-  then yum -y install createrepo 1>>$LOG 2>&1
-  fi
   cp $rpm_build_dir/RPMS/x86_64/*.rpm $rpm_off_repo_dir >/dev/null 2>&1
   createrepo $rpm_off_repo_dir 1>>$LOG 2>&1
 
@@ -74,6 +72,9 @@ create_rpm(){
   repotrack -a x86_64 -p $total_dir GraphSQL-syspreq 1>>$LOG 2>&1
   rm -f $total_dir/*.i686.rpm 
   createrepo $total_dir 1>>$LOG 2>&1
+
+  rm -rf $rpm_off_repo_dir
+  rm $off_repo
 }
 
 create_deb(){

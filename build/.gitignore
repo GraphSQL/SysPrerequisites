@@ -1,0 +1,4 @@
+*.log
+rpmbuild/
+!rpmbuild/SPECS/
+rpm_off_repo_total/
