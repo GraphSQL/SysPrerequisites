@@ -1,0 +1,21 @@
+
+txtbld=$(tput bold)             # Bold
+bldred=${txtbld}$(tput setaf 1) # red
+bldgre=${txtbld}$(tput setaf 2) # green
+bldblu=${txtbld}$(tput setaf 4) # blue
+txtrst=$(tput sgr0)             # Reset
+
+warn()
+{
+  echo "${bldred}Warning: $* $txtrst" | tee -a $LOG
+}
+
+notice()
+{
+  echo "${bldblu}$* $txtrst" | tee -a $LOG
+}
+
+progress()
+{
+  echo "${bldgre}*** $* ...$txtrst" | tee -a $LOG
+}

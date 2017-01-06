@@ -1,10 +1,8 @@
 #!/bin/bash
 
-txtbld=$(tput bold)             # Bold
-bldred=${txtbld}$(tput setaf 1) # red
-bldgre=${txtbld}$(tput setaf 2) # green
-bldblu=${txtbld}$(tput setaf 4) # blue
-txtrst=$(tput sgr0)             # Reset
+cd `dirname $0`
+
+source prettyprt
 
 help()
 {
@@ -16,11 +14,6 @@ help()
   echo "  -o  --  Enforce offline install"
   echo "  -n  --  Enforce online install, if no internet access, it will fail"
   exit 0
-}
-
-warn()
-{
-  echo "${bldred}Warning: $* $txtrst" | tee -a $LOG
 }
 
 ## Main ##
@@ -63,9 +56,12 @@ done
 # ask for input if not specify username, input path, retrieve path if default
 
 # setup repo, online or offline according to options or internet connection
+progress "Setting up software package repository ..."
 
 # install rpm
+progress "Installing required system software packages ..."
 yum install GraphSQL-syspreq # or apt-get
 
 # config system, this should be defined in a separate shell file for easy extensibility
+progress "Configuring system ..."
 
