@@ -49,9 +49,11 @@ get_os(){
 }
 
 create_rpm(){
+  progress "generating .rpm file"
   echo "%_topdir $rpm_build_dir" > ~/.rpmmacros
   rpmbuild -ba $rpm_build_dir/SPECS/GraphSQL-syspreq.spec 1>>$LOG 2>&1  
-  
+
+  progress "generating the GraphSQL-syspreq package"
   if [ -d $rpm_off_repo_dir ]
   then rm -rf $rpm_off_repo_dir
   fi
@@ -69,9 +71,15 @@ create_rpm(){
   fi
   cp $rpm_build_dir/RPMS/x86_64/*.rpm $rpm_off_repo_dir >/dev/null 2>&1
   createrepo $rpm_off_repo_dir 1>>$LOG 2>&1
-  
-  repotrack -a x86_64 -p ${rpm_off_repo_dir}/../rpm_off_repo_totaldir GraphSQL-syspreq
-  createrepo ${rpm_off_repo_dir}/../rpm_off_repo_totaldir 
+
+  progress "generating the GraphSQL-syspreq package with all dependencies"
+  if ! rpm -q yum-utils >/dev/null 2>&1
+  then yum -y install yum-utils 1>>$LOG 2>&1
+  fi
+  total_dir="${rpm_off_repo_dir}/../rpm_off_repo_total"
+  repotrack -a x86_64 -p $total_dir GraphSQL-syspreq 1>>$LOG 2>&1
+  rm -f $total_dir/*.i686.rpm 
+  createrepo $total_dir 1>>$LOG 2>&1
 }
 
 create_deb(){
