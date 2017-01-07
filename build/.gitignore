@@ -1,4 +1,5 @@
 *.log
 rpmbuild/
 !rpmbuild/SPECS/
-rpm_off_repo_total/
+*online_repo/
+*offline_repo/

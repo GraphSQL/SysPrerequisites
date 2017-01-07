@@ -1,6 +1,7 @@
 txtbld=$(tput bold)             # Bold
 bldred=${txtbld}$(tput setaf 1) # red
 bldgre=${txtbld}$(tput setaf 2) # green
+txtrst=$(tput sgr0)             # Reset
 
 warn(){
   echo "${bldred}Warning: $* $txtrst" | tee -a $LOG
@@ -72,7 +73,7 @@ create_rpm(){
   if [ -d $total_dir ]
   then rm -rf $total_dir 
   fi
-  repotrack -a x86_64 -p $total_dir GraphSQL-syspreq 1>>$LOG 2>&1
+  repotrack -a x86_64 -p $total_dir GraphSQL-syspreq 
   rm -f $total_dir/*.i686.rpm 
   createrepo $total_dir 1>>$LOG 2>&1
 
@@ -81,12 +82,11 @@ create_rpm(){
 }
 
 create_deb(){
-  if [ -d $deb_repo_dir ]
-  then rm -rf $deb_repo_dir
-  fi
+  progress "generating .deb file"
   mkdir -p $deb_repo_dir
   dpkg -b $deb_build_dir/syspreq_deb $deb_repo_dir/syspreq_deb.deb 1>>$LOG 2>&1
-  
+
+  progress "generating the GraphSQL-syspreq package"  
   if ! dpkg -s dpkg-dev 2>&1 | grep -q 'install ok installed'
   then apt-get -y install dpkg-dev 1>>$LOG 2>&1
   fi
@@ -94,9 +94,25 @@ create_deb(){
   if ! cat /etc/apt/sources.list | grep "$newsource"
   then echo $newsource >> /etc/apt/sources.list
   fi
+  echo $deb_repo_dir
   cd $deb_repo_dir
+  #dpkg-scanpackages . /dev/null 1>>$LOG 2>&1 | gzip -9c > Packages.gz 1>>$LOG 2>&1
+  dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
+  apt-get update 
+ 
+  progress "generating the GraphSQL-syspreq package with all dependencies"
+  total_dir="${deb_repo_dir}/../deb_offline_repo"
+  if [ -d $total_dir ] 
+  then rm -rf $total_dir
+  fi
+  
+  mkdir $total_dir   
+  cd $total_dir
+  apt-get download $(${PWD}/../deb_download.sh) 
   dpkg-scanpackages . /dev/null 1>>$LOG 2>&1 | gzip -9c > Packages.gz 1>>$LOG 2>&1
-  apt-get update 1>>$LOG 2>&1
+  apt-get update
+  rm -rf $deb_repo_dir
+  sed '$d' /etc/apt/sources.list
 }
 
 LOG="${PWD}/build.log"
