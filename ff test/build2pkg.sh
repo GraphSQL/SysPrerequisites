@@ -4,11 +4,11 @@ bldgre=${txtbld}$(tput setaf 2) # green
 txtrst=$(tput sgr0)             # Reset
 
 warn(){
-  echo "${bldred}Warning: $* $txtrst" | tee -a $LOG
+  echo "${bldred}Warning: $* $txtrst" | tee -a "$LOG"
 }
 
 progress(){
-  echo "${bldgre}*** $* ...$txtrst" | tee -a $LOG
+  echo "${bldgre}*** $* ...$txtrst" | tee -a "$LOG"
 }
 
 has_internet(){
@@ -46,78 +46,85 @@ get_os(){
 create_rpm(){
   progress "generating .rpm file"
   echo "%_topdir $rpm_build_dir" > ~/.rpmmacros
-  rpmbuild -ba $rpm_build_dir/SPECS/GraphSQL-syspreq.spec 1>>$LOG 2>&1  
+  rpmbuild -ba "${rpm_build_dir}/SPECS/GraphSQL-syspreq.spec" 1>>"$LOG" 2>&1  
 
   progress "generating the GraphSQL-syspreq package"
-  mkdir -p $rpm_repo_dir
+  mkdir -p "$rpm_repo_dir"
   off_repo="/etc/yum.repos.d/syspreq_off.repo"
   
   if ! rpm -q createrepo >/dev/null 2>&1
-  then yum -y install createrepo 1>>$LOG 2>&1
+  then yum -y install createrepo 1>>"$LOG" 2>&1
   fi
 
   echo "[graphsql-local]" > $off_repo
   echo "name=GraphSQL-syspreq Local" >> $off_repo
-  echo "baseurl=file://${rpm_repo_dir}" >> $off_repo
+  echo "baseurl=file://${rpm_repo_dir// /%20}" >> $off_repo
   echo "gpgcheck=0" >> $off_repo
   echo "enabled=1" >> $off_repo  
 
-  cp $rpm_build_dir/RPMS/x86_64/*.rpm $rpm_repo_dir >/dev/null 2>&1
-  createrepo $rpm_repo_dir 1>>$LOG 2>&1
+  cp "${rpm_build_dir}/RPMS/x86_64"/*.rpm "$rpm_repo_dir" >/dev/null 2>&1
+  createrepo "$rpm_repo_dir" 1>>"$LOG" 2>&1
 
   progress "generating the GraphSQL-syspreq package with all dependencies"
   if ! rpm -q yum-utils >/dev/null 2>&1
-  then yum -y install yum-utils 1>>$LOG 2>&1
+  then yum -y install yum-utils 1>>"$LOG" 2>&1
   fi
   total_dir="${rpm_repo_dir}/../rpm_offline_repo"
-  if [ -d $total_dir ]
-  then rm -rf $total_dir 
+  if [ -d "$total_dir" ]
+  then rm -rf "$total_dir" 
   fi
-  repotrack -a x86_64 -p $total_dir GraphSQL-syspreq 
-  rm -f $total_dir/*.i686.rpm 
-  createrepo $total_dir 1>>$LOG 2>&1
+  repotrack -a x86_64 -p "$total_dir" GraphSQL-syspreq 
+  rm -f "$total_dir"/*.i686.rpm 
+  createrepo "$total_dir" 1>>"$LOG" 2>&1
 
-  rm -rf $rpm_repo_dir
-  rm $off_repo
+  rm -rf "$rpm_repo_dir"
+  rm -f "$off_repo"
 }
 
 create_deb(){
   progress "generating .deb file"
-  mkdir -p $deb_repo_dir
-  dpkg -b $deb_build_dir/syspreq_deb $deb_repo_dir/syspreq_deb.deb 1>>$LOG 2>&1
+  mkdir -p "$deb_repo_dir"
+  dpkg -b "${deb_build_dir}/syspreq_deb" "${deb_repo_dir}/syspreq_deb.deb" 1>>"$LOG" 2>&1
 
   progress "generating the GraphSQL-syspreq package"  
   if ! dpkg -s dpkg-dev 2>&1 | grep -q 'install ok installed'
-  then apt-get -y install dpkg-dev 1>>$LOG 2>&1
+  then apt-get -y install dpkg-dev 1>>"$LOG" 2>&1
   fi
-  newsource="deb file://${deb_repo_dir}/ ./"
+  newsource="deb file://${deb_repo_dir// /%20}/ ./"
   if ! cat /etc/apt/sources.list | grep "$newsource"
-  then echo $newsource >> /etc/apt/sources.list
+  then echo "$newsource" >> /etc/apt/sources.list
   fi
-  echo $deb_repo_dir
-  cd $deb_repo_dir
+  cd "$deb_repo_dir"
   #dpkg-scanpackages . /dev/null 1>>$LOG 2>&1 | gzip -9c > Packages.gz 1>>$LOG 2>&1
   dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
   apt-get update 
  
   progress "generating the GraphSQL-syspreq package with all dependencies"
   total_dir="${deb_repo_dir}/../deb_offline_repo"
-  if [ -d $total_dir ] 
-  then rm -rf $total_dir
+  if [ -d "$total_dir" ] 
+  then rm -rf "$total_dir"
   fi
   
-  mkdir $total_dir   
-  cd $total_dir
-  apt-get download $(${PWD}/../deb_download.sh) 
-  dpkg-scanpackages . /dev/null 1>>$LOG 2>&1 | gzip -9c > Packages.gz 1>>$LOG 2>&1
+  mkdir "$total_dir"   
+  cd "$total_dir"
+  apt-get download $(./../deb_download.sh)
+  dpkg-scanpackages . /dev/null 1>>"$LOG" 2>&1 | gzip -9c > Packages.gz 1>>"$LOG" 2>&1
   apt-get update
-  rm -rf $deb_repo_dir
+  rm -rf "$deb_repo_dir"
   sed '$d' /etc/apt/sources.list
 }
 
+
+cd "$( dirname "${BASH_SOURCE[0]}" )" 
+if [[ $EUID -ne 0 ]]
+then
+  warn "Sudo or root rights are requqired to install prerequsites for GraphSQL software."
+  exit 1
+fi
 LOG="${PWD}/build.log"
-if [ -f $LOG ]
-then echo '' > $LOG
+echo "$LOG"
+if [ -f "$LOG" ]
+then echo '' > "$LOG"
 fi 
 OS=$(get_os)
 if [ "Q$OS" = "QRHEL" ]  # Redhat or CentOS
