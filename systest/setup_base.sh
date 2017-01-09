@@ -1,5 +1,4 @@
 #!/bin/bash
-#!/bin/bash
 
 cd `dirname $0`
 
@@ -21,6 +20,11 @@ yum install -y jenkins
 
 systemctl start jenkins.service
 systemctl enable jenkins.service
+
+# need to setup ssh to localhost, such that jenkins can do sudo
+cat /dev/zero | ssh-keygen -q -N ""
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+
 
 systemctl start firewalld
 systemctl enable firewalld
