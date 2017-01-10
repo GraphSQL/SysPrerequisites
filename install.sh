@@ -217,7 +217,7 @@ if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
   rm -f "$off_repo"
 else
   apt-get install GraphSQL-syspreq
-  sed '$d' /etc/apt/sources.list
+  sed -i '$ d' /etc/apt/sources.list
 fi
 
 # config system, this should be defined in a separate shell file for easy extensibility

@@ -42,7 +42,7 @@ create_rpm(){
 create_deb(){
   progress "generating .deb file"
   mkdir -p "$deb_repo_dir"
-  dpkg -b "${deb_build_dir}/syspreq_deb" "${deb_repo_dir}/syspreq_deb.deb" 1>>"$LOG" 2>&1
+  dpkg -b "${deb_build_dir}" "${deb_repo_dir}/GraphSQL-syspreq.deb" 1>>"$LOG" 2>&1
 
   progress "generating the GraphSQL-syspreq package"  
   if ! dpkg -s dpkg-dev 2>&1 | grep -q 'install ok installed'; then
@@ -60,11 +60,11 @@ create_deb(){
   total_dir="${deb_repo_dir}/../deb_offline_repo"
   if [ -d "$total_dir" ]; then
     rm -rf "$total_dir"
-  fi
-  
+  fi  
   mkdir "$total_dir"   
   cd "$total_dir"
   apt-get download $(./../deb_download.sh)
+  cp "${deb_repo_dir}/GraphSQL-syspreq.deb" "$total_dir"
   dpkg-scanpackages . /dev/null 1>>"$LOG" 2>&1 | gzip -9c > Packages.gz 1>>"$LOG" 2>&1
   apt-get update
   rm -rf "$deb_repo_dir"
