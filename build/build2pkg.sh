@@ -1,47 +1,8 @@
-txtbld=$(tput bold)             # Bold
-bldred=${txtbld}$(tput setaf 1) # red
-bldgre=${txtbld}$(tput setaf 2) # green
-txtrst=$(tput sgr0)             # Reset
+#!/bin/bash
 
-warn(){
-  echo "${bldred}Warning: $* $txtrst" | tee -a "$LOG"
-}
+cd `dirname $0`
 
-progress(){
-  echo "${bldgre}*** $* ...$txtrst" | tee -a "$LOG"
-}
-
-has_internet(){
-  ping -c2 -i0.5 -W1 -q www.github.com >/dev/null 2>&1
-  return $?
-}
-
-get_os(){
-  if which apt-get > /dev/null 2>&1
-  then
-    os_version=$(lsb_release  -r | awk '{print $2}' | cut -d. -f1)
-    if [ "$os_version" -lt 12 ]
-    then
-      warn "Unsupported OS. Please upgrade to Ubuntu 12.x or above."
-      exit 2
-    else
-      echo UBUNTU
-    fi
-  elif which yum >/dev/null 2>&1
-  then
-    os_version=$(rpm -qa | grep 'kernel-' | head -1 |grep -o .'el[0-9]'. | grep -o '[0-9]') 
-    if [ "$os_version" -lt 6 ]
-    then
-      warn "Unsupported OS. Please upgrade to RHEL or CentOS 6.x or above."
-      exit 2
-    else
-      echo RHEL
-    fi
-  else
-    warn "Unknown OS. Please contact GraphSQL support."
-    exit 2
-  fi
-}
+source ../prettyprt
 
 create_rpm(){
   progress "generating .rpm file"
@@ -50,28 +11,25 @@ create_rpm(){
 
   progress "generating the GraphSQL-syspreq package"
   mkdir -p "$rpm_repo_dir"
-  off_repo="/etc/yum.repos.d/syspreq_off.repo"
-  
-  if ! rpm -q createrepo >/dev/null 2>&1
-  then yum -y install createrepo 1>>"$LOG" 2>&1
+  off_repo="/etc/yum.repos.d/syspreq_build.repo" 
+  if ! rpm -q createrepo >/dev/null 2>&1; then
+    yum -y install createrepo 1>>"$LOG" 2>&1
   fi
-
   echo "[graphsql-local]" > $off_repo
   echo "name=GraphSQL-syspreq Local" >> $off_repo
   echo "baseurl=file://${rpm_repo_dir// /%20}" >> $off_repo
   echo "gpgcheck=0" >> $off_repo
   echo "enabled=1" >> $off_repo  
-
   cp "${rpm_build_dir}/RPMS/x86_64"/*.rpm "$rpm_repo_dir" >/dev/null 2>&1
   createrepo "$rpm_repo_dir" 1>>"$LOG" 2>&1
 
   progress "generating the GraphSQL-syspreq package with all dependencies"
-  if ! rpm -q yum-utils >/dev/null 2>&1
-  then yum -y install yum-utils 1>>"$LOG" 2>&1
+  if ! rpm -q yum-utils >/dev/null 2>&1; then
+    yum -y install yum-utils 1>>"$LOG" 2>&1
   fi
   total_dir="${rpm_repo_dir}/../rpm_offline_repo"
-  if [ -d "$total_dir" ]
-  then rm -rf "$total_dir" 
+  if [ -d "$total_dir" ]; then
+    rm -rf "$total_dir" 
   fi
   repotrack -a x86_64 -p "$total_dir" GraphSQL-syspreq 
   rm -f "$total_dir"/*.i686.rpm 
@@ -87,22 +45,21 @@ create_deb(){
   dpkg -b "${deb_build_dir}/syspreq_deb" "${deb_repo_dir}/syspreq_deb.deb" 1>>"$LOG" 2>&1
 
   progress "generating the GraphSQL-syspreq package"  
-  if ! dpkg -s dpkg-dev 2>&1 | grep -q 'install ok installed'
-  then apt-get -y install dpkg-dev 1>>"$LOG" 2>&1
+  if ! dpkg -s dpkg-dev 2>&1 | grep -q 'install ok installed'; then
+    apt-get -y install dpkg-dev 1>>"$LOG" 2>&1
   fi
   newsource="deb file://${deb_repo_dir// /%20}/ ./"
-  if ! cat /etc/apt/sources.list | grep "$newsource"
-  then echo "$newsource" >> /etc/apt/sources.list
+  if ! cat /etc/apt/sources.list | grep "$newsource"; then
+    echo "$newsource" >> /etc/apt/sources.list
   fi
   cd "$deb_repo_dir"
-  #dpkg-scanpackages . /dev/null 1>>$LOG 2>&1 | gzip -9c > Packages.gz 1>>$LOG 2>&1
   dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
   apt-get update 
  
   progress "generating the GraphSQL-syspreq package with all dependencies"
   total_dir="${deb_repo_dir}/../deb_offline_repo"
-  if [ -d "$total_dir" ] 
-  then rm -rf "$total_dir"
+  if [ -d "$total_dir" ]; then
+    rm -rf "$total_dir"
   fi
   
   mkdir "$total_dir"   
@@ -115,20 +72,16 @@ create_deb(){
 }
 
 
-cd "$( dirname "${BASH_SOURCE[0]}" )" 
-if [[ $EUID -ne 0 ]]
-then
+if [[ $EUID -ne 0 ]]; then
   warn "Sudo or root rights are requqired to install prerequsites for GraphSQL software."
   exit 1
 fi
 LOG="${PWD}/build.log"
-echo "$LOG"
-if [ -f "$LOG" ]
-then echo '' > "$LOG"
+if [ -f "$LOG" ]; then
+  echo '' > "$LOG"
 fi 
 OS=$(get_os)
-if [ "Q$OS" = "QRHEL" ]  # Redhat or CentOS
-then
+if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
   rpm_repo_dir="${PWD}/rpm_online_repo"
   rpm_build_dir="${PWD}/rpmbuild"
   create_rpm
