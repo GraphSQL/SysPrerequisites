@@ -65,8 +65,9 @@ create_deb(){
   cd "$total_dir"
   apt-get download $(./../deb_download.sh)
   cp "${deb_repo_dir}/GraphSQL-syspreq.deb" "$total_dir"
-  dpkg-scanpackages . /dev/null 1>>"$LOG" 2>&1 | gzip -9c > Packages.gz 1>>"$LOG" 2>&1
+  dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz 
   apt-get update
+
   rm -rf "$deb_repo_dir"
   sed -i '$ d' /etc/apt/sources.list
 }
