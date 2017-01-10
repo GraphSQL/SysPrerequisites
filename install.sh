@@ -179,12 +179,14 @@ if [ "Q$OS" = "QRHEL" ]; then
   off_repo_dir="${PWD}/rpm_offline_repo"
 else 
   off_repo_dir="${PWD}/deb_offline_repo"
+fi
 
 if [[ ! $ONLINE && ! $OFFLINE ]]; then
   if [ -f "${off_repo_dir}.tar.gz" ]; then
     OFFLINE=true
   else 
     ONLINE=true
+  fi
 fi 
 if $OFFLINE; then
   if [ ! -f "${off_repo_dir}.tar.gz" ]; then
@@ -206,6 +208,7 @@ if $OFFLINE; then
     fi
     apt-get update
   fi
+fi
   
 # install rpm
 progress "Installing required system software packages ..."

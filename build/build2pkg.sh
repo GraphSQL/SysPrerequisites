@@ -68,7 +68,7 @@ create_deb(){
   dpkg-scanpackages . /dev/null 1>>"$LOG" 2>&1 | gzip -9c > Packages.gz 1>>"$LOG" 2>&1
   apt-get update
   rm -rf "$deb_repo_dir"
-  sed '$d' /etc/apt/sources.list
+  sed -i '$ d' /etc/apt/sources.list
 }
 
 
