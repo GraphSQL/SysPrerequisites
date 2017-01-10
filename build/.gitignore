@@ -2,4 +2,3 @@
 rpmbuild/*
 !rpmbuild/SPECS/
 *online_repo/
-*offline_repo/
