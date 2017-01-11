@@ -94,7 +94,7 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-trap cancel INT
+trap cancel INT TERM EXIT
 
 while getopts ":hdr:u:on" opt; do
   case $opt in
