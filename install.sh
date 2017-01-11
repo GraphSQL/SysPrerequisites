@@ -221,11 +221,11 @@ elif $ONLINE; then
   if [ "Q$OS" = "QRHEL" ]; then
     echo "[graphsql-local]" > $off_repo
     echo "name=GraphSQL-syspreq Local" >> $off_repo
-    echo "baseurl=http://service.graphsql.com/repo}" >> $off_repo
+    echo "baseurl=http://service.graphsql.com/repo/rpm_offline_repo}" >> $off_repo
     echo "gpgcheck=0" >> $off_repo
     echo "enabled=1" >> $off_repo 
   else
-    newsource="deb http://service.graphsql.com/repo ./"
+    newsource="deb http://service.graphsql.com/repo/deb_offline_repo ./"
     echo "$newsource" >> /etc/apt/sources.list
     apt-get update 1>/dev/null
   fi
