@@ -174,19 +174,23 @@ set_etcHosts
 
 # setup repo, online or offline according to options or internet connection
 progress "Setting up software package repository ..."
-off_repo_dir="${PWD}/offline_repo"
+if [ "Q$OS" = "QRHEL" ]; then
+  off_repo_dir="${PWD}/rpm_offline_repo"
+else 
+  off_repo_dir="${PWD}/deb_offline_repo"  
+fi
+if [ -f "${off_repo_dir}.tar.gz" ]; then
+  tar -xzf "${off_repo_dir}.tar.gz"
+fi
 
 if [[ ! $ONLINE && ! $OFFLINE ]]; then
-  if [ -f "${off_repo_dir}.tar.gz" ]; then
+  if [ -d "$off_repo_dir" ]; then
     OFFLINE=true
   else 
     ONLINE=true
   fi
 fi 
 if $OFFLINE; then
-  if [ -f "${off_repo_dir}.tar.gz" ]; then
-    tar -xzf "${off_repo_dir}.tar.gz"
-  fi
   if [ ! -d "$off_repo_dir" ]; then
     warn "No offline installation repository. Program terminated."
     exit 3

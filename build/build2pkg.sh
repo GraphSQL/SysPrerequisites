@@ -86,15 +86,16 @@ fi
 OS=$(get_os)
 
 on_dir="${PWD}/online_repo"
-off_dir="${PWD}/../offline_repo"
 
 if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
   build_dir="${PWD}/rpmbuild"
   off_repo="/etc/yum.repos.d/syspreq_build.repo"
+  off_dir="${PWD}/../rpm_offline_repo"
   create_rpm
 else
   build_dir="${PWD}/dpkgbuild"
   newsource="deb file://${on_dir// /%20}/ ./"
+  off_dir="${PWD}/../deb_offline_repo"
   create_deb
 fi
 cd "$off_dir/../"
