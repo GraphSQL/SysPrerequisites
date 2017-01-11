@@ -92,15 +92,17 @@ if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
   off_repo="/etc/yum.repos.d/syspreq_build.repo"
   off_dir="${PWD}/../rpm_offline_repo"
   create_rpm
+  cd "$off_dir/../"
+  tar czf "rpm_offline_repo.tar.gz" "rpm_offline_repo/"
 else
   build_dir="${PWD}/dpkgbuild"
   newsource="deb file://${on_dir// /%20}/ ./"
   off_dir="${PWD}/../deb_offline_repo"
   create_deb
+  cd "$off_dir/../"
+  tar czf "deb_offline_repo.tar.gz" "deb_offline_repo/"
 fi
-#cd "$off_dir/../"
-#tar czf "offline_repo.tar.gz" "offline_repo/"
-#rm -rf "$off_dir"
+rm -rf "$off_dir"
 rm -rf "$on_dir"
 progress "created deb repository successfully"
   

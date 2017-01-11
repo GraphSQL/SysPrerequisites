@@ -179,22 +179,20 @@ if [ "Q$OS" = "QRHEL" ]; then
 else 
   off_repo_dir="${PWD}/deb_offline_repo"  
 fi
-if [ -f "${off_repo_dir}.tar.gz" ]; then
-  tar -xzf "${off_repo_dir}.tar.gz"
-fi
 
 if [[ ! $ONLINE && ! $OFFLINE ]]; then
-  if [ -d "$off_repo_dir" ]; then
+  if [ -f "${off_repo_dir}.tar.gz" ]; then
     OFFLINE=true
   else 
     ONLINE=true
   fi
 fi 
 if $OFFLINE; then
-  if [ ! -d "$off_repo_dir" ]; then
+  if [ ! -f "${off_repo_dir}.tar.gz" ]; then
     warn "No offline installation repository. Program terminated."
     exit 3
   fi
+  tar -xzf "${off_repo_dir}.tar.gz"
   if [ "Q$OS" = "QRHEL" ]; then  
     off_repo="/etc/yum.repos.d/syspreq_off.repo"
     echo "[graphsql-local]" > $off_repo
@@ -209,6 +207,7 @@ if $OFFLINE; then
     fi
     apt-get update 1>/dev/null
   fi
+  rm -rf "$off_repo_dir"
 fi
   
 # install rpm
@@ -220,6 +219,6 @@ else
   apt-get install -y --force-yes GraphSQL-syspreq
   sed -i '$ d' /etc/apt/sources.list
 fi
-# rm -rf "$off_repo_dir"
+
 # config system, this should be defined in a separate shell file for easy extensibility
 progress "Configuring system ..."
