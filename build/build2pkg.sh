@@ -98,7 +98,7 @@ else
   off_dir="${PWD}/../deb_offline_repo"
   create_deb
 fi
-cd "$off_dir/../"
+#cd "$off_dir/../"
 #tar czf "offline_repo.tar.gz" "offline_repo/"
 #rm -rf "$off_dir"
 rm -rf "$on_dir"
