@@ -4,6 +4,9 @@ cancel(){
   if [ -d "$on_dir" ]; then
     rm -rf "$on_dir"
   fi
+  if [ -d "$off_dir" ]; then
+    rm -rf "$off_dir"
+  fi
   if [ -f "$off_repo" ]; then
     rm -f "$off_repo"
   fi
@@ -56,9 +59,7 @@ create_deb(){
   if ! dpkg -s dpkg-dev 2>&1 | grep -q 'install ok installed'; then
     apt-get -y install dpkg-dev 1>>"$LOG" 2>&1
   fi
-  if ! cat /etc/apt/sources.list | grep "$newsource"; then
-    echo "$newsource" >> /etc/apt/sources.list
-  fi
+  echo "$newsource" >> /etc/apt/sources.list
   cd "$on_dir"
   dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
   apt-get update 

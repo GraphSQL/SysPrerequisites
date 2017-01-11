@@ -76,13 +76,25 @@ set_etcHosts(){
   done
 }
 
+cancel(){
+  if [ -d "$off_repo_dir" ]; then
+    rm -rf "$off_repo_dir"
+  fi
+  if [ -f "$off_repo" ]; then
+    rm -f "$off_repo"
+  fi
+  if [[ $OS == "UBUNTU" ]] && cat /etc/apt/sources.list | grep "$newsource"; then
+    sed -i '$ d' /etc/apt/sources.list
+  fi
+}
+
 ## Main ##
 if [[ $EUID -ne 0 ]]; then
   warn "Sudo or root rights are requqired to install prerequsites for GraphSQL software."
   exit 1
 fi
 
-#trap cancel INT
+trap cancel INT
 
 while getopts ":hdr:u:on" opt; do
   case $opt in
@@ -202,9 +214,19 @@ if $OFFLINE; then
     echo "enabled=1" >> $off_repo 
   else
     newsource="deb file://${off_repo_dir// /%20}/ ./"
-    if ! cat /etc/apt/sources.list | grep "$newsource"; then
-      echo "$newsource" >> /etc/apt/sources.list
-    fi
+    echo "$newsource" >> /etc/apt/sources.list
+    apt-get update 1>/dev/null
+  fi
+elif $ONLINE; then
+  if [ "Q$OS" = "QRHEL" ]; then
+    echo "[graphsql-local]" > $off_repo
+    echo "name=GraphSQL-syspreq Local" >> $off_repo
+    echo "baseurl=http://service.graphsql.com/repo}" >> $off_repo
+    echo "gpgcheck=0" >> $off_repo
+    echo "enabled=1" >> $off_repo 
+  else
+    newsource="deb http://service.graphsql.com/repo ./"
+    echo "$newsource" >> /etc/apt/sources.list
     apt-get update 1>/dev/null
   fi
 fi
