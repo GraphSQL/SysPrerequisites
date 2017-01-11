@@ -207,7 +207,6 @@ if $OFFLINE; then
     fi
     apt-get update 1>/dev/null
   fi
-  rm -rf "$off_repo_dir"
 fi
   
 # install rpm
@@ -218,6 +217,9 @@ if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
 else
   apt-get install -y --force-yes GraphSQL-syspreq
   sed -i '$ d' /etc/apt/sources.list
+fi
+if [ -d "$off_repo_dir" ]; then
+  rm -rf "$off_repo_dir"
 fi
 
 # config system, this should be defined in a separate shell file for easy extensibility
