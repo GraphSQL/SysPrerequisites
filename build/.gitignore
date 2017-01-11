@@ -1,4 +1,0 @@
-*.log
-rpmbuild/*
-!rpmbuild/SPECS/
-*online_repo/

@@ -1,7 +1,6 @@
 #!/bin/bash
 
 cd `dirname $0`
-
 source prettyprt
 
 help(){
@@ -83,7 +82,7 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-trap cancel INT
+#trap cancel INT
 
 while getopts ":hdr:u:on" opt; do
   case $opt in
@@ -175,11 +174,7 @@ set_etcHosts
 
 # setup repo, online or offline according to options or internet connection
 progress "Setting up software package repository ..."
-if [ "Q$OS" = "QRHEL" ]; then
-  off_repo_dir="${PWD}/rpm_offline_repo"
-else 
-  off_repo_dir="${PWD}/deb_offline_repo"
-fi
+off_repo_dir="${PWD}/offline_repo"
 
 if [[ ! $ONLINE && ! $OFFLINE ]]; then
   if [ -f "${off_repo_dir}.tar.gz" ]; then
@@ -189,11 +184,13 @@ if [[ ! $ONLINE && ! $OFFLINE ]]; then
   fi
 fi 
 if $OFFLINE; then
-  if [ ! -f "${off_repo_dir}.tar.gz" ]; then
-    warn "No offline installation files. Program terminated "
+  if [ -f "${off_repo_dir}.tar.gz" ]; then
+    tar -xzf "${off_repo_dir}.tar.gz"
+  fi
+  if [ ! -d "$off_repo_dir" ]; then
+    warn "No offline installation repository. Program terminated."
     exit 3
   fi
-  tar -xzf "${off_repo_dir}.tar.gz"
   if [ "Q$OS" = "QRHEL" ]; then  
     off_repo="/etc/yum.repos.d/syspreq_off.repo"
     echo "[graphsql-local]" > $off_repo
@@ -206,19 +203,19 @@ if $OFFLINE; then
     if ! cat /etc/apt/sources.list | grep "$newsource"; then
       echo "$newsource" >> /etc/apt/sources.list
     fi
-    apt-get update
+    apt-get update 1>/dev/null
   fi
 fi
   
 # install rpm
 progress "Installing required system software packages ..."
 if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
-  yum install GraphSQL-syspreq
+  yum install -y GraphSQL-syspreq
   rm -f "$off_repo"
 else
-  apt-get install GraphSQL-syspreq
+  apt-get install -y GraphSQL-syspreq
   sed -i '$ d' /etc/apt/sources.list
 fi
-
+rm -rf "$off_repo_dir"
 # config system, this should be defined in a separate shell file for easy extensibility
 progress "Configuring system ..."
