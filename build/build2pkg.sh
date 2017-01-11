@@ -7,7 +7,7 @@ cancel(){
   if [ -f "$off_repo" ]; then
     rm -f "$off_repo"
   fi
-  if [[ "Q$OS" = "QUBUNTU" && cat /etc/apt/sources.list | grep "$newsource" ]]; then
+  if [[ $OS == "UBUNTU" ]] && cat /etc/apt/sources.list | grep "$newsource"; then
     sed -i '$ d' /etc/apt/sources.list      
   fi
 }
