@@ -24,5 +24,3 @@ ls
 %files
 %doc
 
-%changelog
-
