@@ -15,7 +15,7 @@ help(){
 }
 
 has_internet(){
-  ping -c2 -i0.5 -W1 -q service.graphsql.com >/dev/null 2>&1
+  ping -c2 -i0.5 -W1 -q www.github.com >/dev/null 2>&1
   return $?
 }
 
