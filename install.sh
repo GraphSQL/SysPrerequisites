@@ -221,7 +221,7 @@ elif [ "$ONLINE" = true ]; then
   if [ "Q$OS" = "QRHEL" ]; then
     echo "[graphsql-local]" > $off_repo
     echo "name=GraphSQL-syspreq Local" >> $off_repo
-    echo "baseurl=http://service.graphsql.com/repo/rpm_offline_repo}" >> $off_repo
+    echo "baseurl=http://service.graphsql.com/repo/rpm_offline_repo" >> $off_repo
     echo "gpgcheck=0" >> $off_repo
     echo "enabled=1" >> $off_repo 
   else
