@@ -1,4 +1,4 @@
-Name:   GraphSQL-syspreq
+Name:   GraphSQL
 Version:  0.8
 Release:  1%{?dist}
 Summary:  System prerequisites for GraphSQL system

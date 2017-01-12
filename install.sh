@@ -2,6 +2,7 @@
 
 cd `dirname $0`
 source prettyprt
+pkg_name="GraphSQL"
 
 help(){
   echo "`basename $0` [-h] [-d] [-r <graphsql_root_dir>] [-u <user>] [-o] [-n]"
@@ -174,13 +175,6 @@ else
   chown -R ${GSQL_USER} ${DATA_PATH}
 fi
 
-progress "Tuning system parameters"
-set_limits ${GSQL_USER} ${DATA_PATH}
-set_sysctl ${USER_HOME}/graphsql_coredump  # leave core dumps at home
-
-progress "Updating /etc/hosts"
-set_etcHosts
-
 # setup repo, online or offline according to options or internet connection
 progress "Setting up software package repository ..."
 if [ "Q$OS" = "QRHEL" ]; then
@@ -206,6 +200,7 @@ if [ "$OFFLINE" = true ]; then
   tar -xzf "${off_repo_dir}.tar.gz"
   url="baseurl=file://${off_repo_dir// /%20}"
   newsource="deb file://${off_repo_dir// /%20}/ ./"
+  title="${pkg_name} Local"
 elif [ "$ONLINE" = true ]; then
   if ! has_internet; then
     warn "No Internet connection. Program terminated"
@@ -213,11 +208,12 @@ elif [ "$ONLINE" = true ]; then
   fi 
   url=="baseurl=http://service.graphsql.com/repo/centos"
   newsource="deb http://service.graphsql.com/repo/ubuntu ./"
+  title="${pkg_name} Remote"
 fi
 
 if [ "Q$OS" = "QRHEL" ]; then
-  echo "[graphsql-local]" > $off_repo
-  echo "name=GraphSQL Local" >> $off_repo
+  echo "[${title}]" > $off_repo
+  echo "name=${title}" >> $off_repo
   echo "$url" >> $off_repo
   echo "gpgcheck=0" >> $off_repo
   echo "enabled=1" >> $off_repo
@@ -229,13 +225,18 @@ fi
 # install rpm
 progress "Installing required system software packages ..."
 if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
-  yum install -y GraphSQL-syspreq
+  yum install -y ${pkg_name}
   rm -f "$off_repo"
 else
-  apt-get install -y --force-yes GraphSQL-syspreq
+  apt-get install -y --force-yes ${pkg_name}
   sed -i '$ d' /etc/apt/sources.list
 fi
 rm -rf "$off_repo_dir"
 
 # config system, this should be defined in a separate shell file for easy extensibility
 progress "Configuring system ..."
+set_limits ${GSQL_USER} ${DATA_PATH}
+set_sysctl ${USER_HOME}/graphsql_coredump  # leave core dumps at home
+
+progress "Updating /etc/hosts"
+set_etcHosts
