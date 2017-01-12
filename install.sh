@@ -15,7 +15,7 @@ help(){
 }
 
 has_internet(){
-  ping -c2 -i0.5 -W1 -q www.github.com >/dev/null 2>&1
+  ping -c2 -i0.5 -W1 -q service.graphsql.com >/dev/null 2>&1
   return $?
 }
 
@@ -76,13 +76,9 @@ set_etcHosts(){
   done
 }
 
-cancel(){
-  if [ -d "$off_repo_dir" ]; then
-    rm -rf "$off_repo_dir"
-  fi
-  if [ -f "$off_repo" ]; then
-    rm -f "$off_repo"
-  fi
+cleanup(){
+  rm -rf "$off_repo_dir"
+  rm -f "$off_repo"
   if [[ $OS == "UBUNTU" ]] && cat /etc/apt/sources.list | grep "$newsource"; then
     sed -i '$ d' /etc/apt/sources.list
   fi
@@ -94,7 +90,7 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-trap cancel INT TERM EXIT
+trap cleanup INT TERM EXIT
 
 while getopts ":hdr:u:on" opt; do
   case $opt in
@@ -170,7 +166,8 @@ fi
 
 if [ -d ${DATA_PATH} ]; then
   notice "Folder ${DATA_PATH} already exists"
-  notice "You may need to run command \"chown -R ${GSQL_USER} ${DATA_PATH}\" "
+  # notice "You may need to run command \"chown -R ${GSQL_USER} ${DATA_PATH}\" "
+  chown -R "$GSQL_USER" "$DATA_PATH"
 else
   progress "Creating folder ${DATA_PATH}"
   mkdir -p ${DATA_PATH}
@@ -192,7 +189,7 @@ else
   off_repo_dir="${PWD}/deb_offline_repo"  
 fi
 
-off_repo="/etc/yum.repos.d/syspreq_off.repo"
+off_repo="/etc/yum.repos.d/graphsql.repo"
 if [[ ! $ONLINE && ! $OFFLINE ]]; then
   if [ -f "${off_repo_dir}.tar.gz" ]; then
     OFFLINE=true
@@ -200,35 +197,33 @@ if [[ ! $ONLINE && ! $OFFLINE ]]; then
     ONLINE=true
   fi
 fi 
+
 if [ "$OFFLINE" = true ]; then
   if [ ! -f "${off_repo_dir}.tar.gz" ]; then
     warn "No offline installation repository. Program terminated."
     exit 3
   fi
   tar -xzf "${off_repo_dir}.tar.gz"
-  if [ "Q$OS" = "QRHEL" ]; then  
-    echo "[graphsql-local]" > $off_repo
-    echo "name=GraphSQL-syspreq Local" >> $off_repo
-    echo "baseurl=file://${off_repo_dir// /%20}" >> $off_repo
-    echo "gpgcheck=0" >> $off_repo
-    echo "enabled=1" >> $off_repo 
-  else
-    newsource="deb file://${off_repo_dir// /%20}/ ./"
-    echo "$newsource" >> /etc/apt/sources.list
-    apt-get update 1>/dev/null
-  fi
+  url="baseurl=file://${off_repo_dir// /%20}"
+  newsource="deb file://${off_repo_dir// /%20}/ ./"
 elif [ "$ONLINE" = true ]; then
-  if [ "Q$OS" = "QRHEL" ]; then
-    echo "[graphsql-local]" > $off_repo
-    echo "name=GraphSQL-syspreq Local" >> $off_repo
-    echo "baseurl=http://service.graphsql.com/repo/rpm_offline_repo" >> $off_repo
-    echo "gpgcheck=0" >> $off_repo
-    echo "enabled=1" >> $off_repo 
-  else
-    newsource="deb http://service.graphsql.com/repo/deb_offline_repo ./"
-    echo "$newsource" >> /etc/apt/sources.list
-    apt-get update 1>/dev/null
-  fi
+  if ! has_internet; then
+    warn "No Internet connection. Program terminated"
+    exit 3
+  fi 
+  url=="baseurl=http://service.graphsql.com/repo/centos"
+  newsource="deb http://service.graphsql.com/repo/ubuntu ./"
+fi
+
+if [ "Q$OS" = "QRHEL" ]; then
+  echo "[graphsql-local]" > $off_repo
+  echo "name=GraphSQL Local" >> $off_repo
+  echo "$url" >> $off_repo
+  echo "gpgcheck=0" >> $off_repo
+  echo "enabled=1" >> $off_repo
+else
+  echo "$newsource" >> /etc/apt/sources.list
+  apt-get update 1>/dev/null
 fi
   
 # install rpm
@@ -240,9 +235,7 @@ else
   apt-get install -y --force-yes GraphSQL-syspreq
   sed -i '$ d' /etc/apt/sources.list
 fi
-if [ -d "$off_repo_dir" ]; then
-  rm -rf "$off_repo_dir"
-fi
+rm -rf "$off_repo_dir"
 
 # config system, this should be defined in a separate shell file for easy extensibility
 progress "Configuring system ..."

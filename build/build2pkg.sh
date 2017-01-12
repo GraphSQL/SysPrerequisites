@@ -1,15 +1,9 @@
 #!/bin/bash
 
-cancel(){
-  if [ -d "$on_dir" ]; then
-    rm -rf "$on_dir"
-  fi
-  if [ -d "$off_dir" ]; then
-    rm -rf "$off_dir"
-  fi
-  if [ -f "$off_repo" ]; then
-    rm -f "$off_repo"
-  fi
+cleanup(){
+  rm -rf "$on_dir"
+  rm -rf "$off_dir"
+  rm -f "$off_repo"
   if [[ $OS == "UBUNTU" ]] && cat /etc/apt/sources.list | grep "$newsource"; then
     sed -i '$ d' /etc/apt/sources.list      
   fi
@@ -17,7 +11,7 @@ cancel(){
 
 cd `dirname $0`
 source ../prettyprt
-trap cancel INT EXIT TERM
+trap cleanup INT EXIT TERM
 
 create_rpm(){
   progress "generating .rpm file"
@@ -86,22 +80,24 @@ if [ -f "$LOG" ]; then
 fi 
 OS=$(get_os)
 
-on_dir="${PWD}/online_repo"
-
 if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
   build_dir="${PWD}/rpmbuild"
-  off_repo="/etc/yum.repos.d/syspreq_build.repo"
+  on_dir="${PWD}/../rpm_online_repo"
   off_dir="${PWD}/../rpm_offline_repo"
+  off_repo="/etc/yum.repos.d/syspreq_build.repo"
   create_rpm
   cd "$off_dir/../"
   tar czf "rpm_offline_repo.tar.gz" "rpm_offline_repo/"
+  tar czf "rpm_online_repo.tar.gz" "rpm_online_repo/"
 else
   build_dir="${PWD}/dpkgbuild"
-  newsource="deb file://${on_dir// /%20}/ ./"
+  on_dir="${PWD}/../deb_online_repo"
   off_dir="${PWD}/../deb_offline_repo"
+  newsource="deb file://${on_dir// /%20}/ ./"
   create_deb
   cd "$off_dir/../"
   tar czf "deb_offline_repo.tar.gz" "deb_offline_repo/"
+  tar czf "deb_online_repo.tar.gz" "deb_online_repo/"
 fi
 rm -rf "$off_dir"
 rm -rf "$on_dir"
