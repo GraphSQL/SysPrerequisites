@@ -3,3 +3,4 @@ build/rpmbuild/*
 !build/rpmbuild/SPECS/
 *offline_repo/
 *offline_repo.tar.gz
+*online_repo.tar.gz

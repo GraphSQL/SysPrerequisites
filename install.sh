@@ -2,7 +2,6 @@
 
 cd `dirname $0`
 source prettyprt
-pkg_name="GraphSQL"
 
 help(){
   echo "`basename $0` [-h] [-d] [-r <graphsql_root_dir>] [-u <user>] [-o] [-n]"

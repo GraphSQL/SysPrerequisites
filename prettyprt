@@ -1,3 +1,4 @@
+pkg_name="GraphSQL"
 
 txtbld=$(tput bold)             # Bold
 bldred=${txtbld}$(tput setaf 1) # red

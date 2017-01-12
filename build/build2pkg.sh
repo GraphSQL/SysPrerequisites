@@ -12,7 +12,6 @@ cleanup(){
 cd `dirname $0`
 source ../prettyprt
 trap cleanup INT EXIT TERM
-pkg_name="GraphSQL"
 
 create_rpm(){
   progress "generating .rpm file"
@@ -36,12 +35,26 @@ create_rpm(){
   if ! rpm -q yum-utils >/dev/null 2>&1; then
     yum -y install yum-utils 1>>"$LOG" 2>&1
   fi
-  repotrack -a x86_64 -p "$off_dir" ${pkg_name}
+  repotrack -a x86_64 -p "$off_dir" "${pkg_name}"
   rm -f "$off_dir"/*.i686.rpm 
   createrepo "$off_dir" 1>>"$LOG" 2>&1
 
   rm -f "$off_repo"
 }
+
+download_deb(){
+  pkgs=$(apt-rdepends ${pkg_name} | grep -v "^ ")
+  t_pkgs=""
+  for pkg in $pkgs; do
+    $(aptitude show $pkg 2>/dev/null | grep "not a real package"  >/dev/null 2>&1)
+    if [[ "$pkg" != "$pkg_name" && $? -eq 1 ]]
+    then t_pkgs="$t_pkgs $pkg"
+    fi
+  done
+
+  echo $t_pkgs
+}
+
 
 create_deb(){
   apt-get update
@@ -62,7 +75,7 @@ create_deb(){
   progress "generating the ${pkg_name} package with all dependencies"
   mkdir -p "$off_dir"   
   cd "$off_dir"
-  apt-get download $(./../build/deb_download.sh)
+  apt-get download $(download_deb)
   cp "${on_dir}/${pkg_name}.deb" "$off_dir"
   dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz 
   apt-get update
