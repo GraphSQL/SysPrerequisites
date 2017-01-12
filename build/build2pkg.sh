@@ -88,6 +88,7 @@ if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
   create_rpm
   cd "$off_dir/../"
   tar czf "rpm_offline_repo.tar.gz" "rpm_offline_repo/"
+  cd "$on_dir/../"
   tar czf "rpm_online_repo.tar.gz" "rpm_online_repo/"
 else
   build_dir="${PWD}/dpkgbuild"
@@ -97,6 +98,7 @@ else
   create_deb
   cd "$off_dir/../"
   tar czf "deb_offline_repo.tar.gz" "deb_offline_repo/"
+  cd "$on_dir/../"
   tar czf "deb_online_repo.tar.gz" "deb_online_repo/"
 fi
 rm -rf "$off_dir"
