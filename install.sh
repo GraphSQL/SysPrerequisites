@@ -199,7 +199,7 @@ if [[ ! $ONLINE && ! $OFFLINE ]]; then
     ONLINE=true
   fi
 fi 
-if $OFFLINE; then
+if [ "$OFFLINE" = true ]; then
   if [ ! -f "${off_repo_dir}.tar.gz" ]; then
     warn "No offline installation repository. Program terminated."
     exit 3
@@ -217,7 +217,7 @@ if $OFFLINE; then
     echo "$newsource" >> /etc/apt/sources.list
     apt-get update 1>/dev/null
   fi
-elif $ONLINE; then
+elif [ "$ONLINE" = true ]; then
   if [ "Q$OS" = "QRHEL" ]; then
     echo "[graphsql-local]" > $off_repo
     echo "name=GraphSQL-syspreq Local" >> $off_repo
