@@ -200,7 +200,7 @@ if [ "$OFFLINE" = true ]; then
   tar -xzf "${off_repo_dir}.tar.gz"
   url="baseurl=file://${off_repo_dir// /%20}"
   newsource="deb file://${off_repo_dir// /%20}/ ./"
-  title="${pkg_name} Local"
+  title="${pkg_name}-Local"
 elif [ "$ONLINE" = true ]; then
   if ! has_internet; then
     warn "No Internet connection. Program terminated"
@@ -208,7 +208,7 @@ elif [ "$ONLINE" = true ]; then
   fi 
   url=="baseurl=http://service.graphsql.com/repo/centos"
   newsource="deb http://service.graphsql.com/repo/ubuntu ./"
-  title="${pkg_name} Remote"
+  title="${pkg_name}-Remote"
 fi
 
 if [ "Q$OS" = "QRHEL" ]; then

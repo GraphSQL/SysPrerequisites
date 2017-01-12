@@ -25,7 +25,7 @@ create_rpm(){
     yum -y install createrepo 1>>"$LOG" 2>&1
   fi
   echo "[${pkg_name}-build]" > $off_repo
-  echo "name=${pkg_name} Build" >> $off_repo
+  echo "name=${pkg_name}-build" >> $off_repo
   echo "baseurl=file://${on_dir// /%20}" >> $off_repo
   echo "gpgcheck=0" >> $off_repo
   echo "enabled=1" >> $off_repo  
