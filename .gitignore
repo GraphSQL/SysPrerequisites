@@ -1,6 +1,7 @@
 *.log
 build/rpmbuild/*
 !build/rpmbuild/SPECS/
-*offline_repo/
-*offline_repo.tar.gz
-*_online_repo.tar.gz
+deb_offline_repo.tar.gz
+deb_online_repo.tar.gz
+rpm_offline_repo.tar.gz
+rpm_online_repo.tar.gz
