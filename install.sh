@@ -192,6 +192,7 @@ else
   off_repo_dir="${PWD}/deb_offline_repo"  
 fi
 
+off_repo="/etc/yum.repos.d/syspreq_off.repo"
 if [[ ! $ONLINE && ! $OFFLINE ]]; then
   if [ -f "${off_repo_dir}.tar.gz" ]; then
     OFFLINE=true
@@ -206,7 +207,6 @@ if [ "$OFFLINE" = true ]; then
   fi
   tar -xzf "${off_repo_dir}.tar.gz"
   if [ "Q$OS" = "QRHEL" ]; then  
-    off_repo="/etc/yum.repos.d/syspreq_off.repo"
     echo "[graphsql-local]" > $off_repo
     echo "name=GraphSQL-syspreq Local" >> $off_repo
     echo "baseurl=file://${off_repo_dir// /%20}" >> $off_repo
