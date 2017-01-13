@@ -205,7 +205,7 @@ elif [ "$ONLINE" = true ]; then
     warn "No Internet connection. Program terminated"
     exit 3
   fi 
-  url=="baseurl=http://service.graphsql.com/repo/centos"
+  url="baseurl=http://service.graphsql.com/repo/centos"
   newsource="deb http://service.graphsql.com/repo/ubuntu ./"
   title="${pkg_name}-Remote"
 fi
