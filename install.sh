@@ -196,6 +196,17 @@ if [ "$OFFLINE" = true ]; then
     warn "No offline installation repository. Program terminated."
     exit 3
   fi
+  if [ "Q$OS" = "QRHEL" ]; then
+    if ! rpm -q tar >/dev/null 2>&1; then
+      warn "Tar should be installed before GraphSQL installation. Program terminated."
+      exit 3
+    fi
+  else
+    if ! dpkg -s tar 2>&1 | grep -q 'install ok installed'; then
+      warn "Tar should be installed before GraphSQL installation. Program terminated."
+      exit 3
+    fi
+  fi
   tar -xzf "${off_repo_dir}.tar.gz"
   url="baseurl=file://${off_repo_dir// /%20}"
   newsource="deb file://${off_repo_dir// /%20}/ ./"
@@ -204,7 +215,16 @@ elif [ "$ONLINE" = true ]; then
   if ! has_internet; then
     warn "No Internet connection. Program terminated"
     exit 3
-  fi 
+  fi
+  if [ "Q$OS" = "QRHEL" ]; then
+    if ! rpm -q tar >/dev/null 2>&1; then
+      yum -y install tar 1>>"$LOG" 2>&1
+    fi
+  else
+    if ! dpkg -s tar 2>&1 | grep -q 'install ok installed'; then
+      yum -y install tar 1>>"$LOG" 2>&1
+    fi
+  fi
   url="baseurl=http://service.graphsql.com/repo/centos"
   newsource="deb http://service.graphsql.com/repo/ubuntu ./"
   title="${pkg_name}-Remote"

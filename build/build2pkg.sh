@@ -15,6 +15,9 @@ trap cleanup INT EXIT TERM
 
 create_rpm(){
   progress "generating .rpm file"
+  if ! rpm -q rpm-build >/dev/null 2>&1; then
+    yum -y install rpm-build 1>>"$LOG" 2>&1
+  fi
   echo "%_topdir $build_dir" > ~/.rpmmacros
   rpmbuild -ba "${build_dir}/SPECS/${pkg_name}.spec" 1>>"$LOG" 2>&1  
 
@@ -95,8 +98,14 @@ fi
 OS=$(get_os)
 
 if [ "Q$OS" = "QRHEL" ]; then
+  if ! rpm -q tar >/dev/null 2>&1; then
+    yum -y install tar 1>>"$LOG" 2>&1
+  fi
   name="rpm"
 else 
+  if ! dpkg -s tar 2>&1 | grep -q 'install ok installed'; then
+    apt-get -y install tar 1>>"$LOG" 2>&1
+  fi
   name="deb"
 fi
 build_dir="${PWD}/${name}_build"

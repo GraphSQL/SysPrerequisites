@@ -1,3 +1,4 @@
+#!/bin/bash
 pkg_name="GraphSQL"
 
 txtbld=$(tput bold)             # Bold
@@ -22,7 +23,7 @@ progress()
 }
 
 get_os(){
-  if [ -f /etc/apt/sources.list ]
+  if [ -f "/etc/apt/sources.list" ]
   then
     os_version=$(lsb_release  -r | awk '{print $2}' | cut -d. -f1)
     if [ "$os_version" -lt 12 ]
@@ -32,7 +33,7 @@ get_os(){
     else
       echo UBUNTU
     fi
-  elif [ -d /etc/yum.repos.d ]
+  elif [ -d "/etc/yum.repos.d" ]
   then
     os_version=$(rpm -qa | grep 'kernel-' | head -1 |grep -o .'el[0-9]'. | grep -o '[0-9]') 
     if [ "$os_version" -lt 6 ]
