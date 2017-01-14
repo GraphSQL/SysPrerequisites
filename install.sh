@@ -220,9 +220,11 @@ elif [ "$ONLINE" = true ]; then
     if ! rpm -q tar >/dev/null 2>&1; then
       yum -y install tar 1>>"$LOG" 2>&1
     fi
+    if gcc --version | grep "4.4.7"; then
+      wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
   else
     if ! dpkg -s tar 2>&1 | grep -q 'install ok installed'; then
-      yum -y install tar 1>>"$LOG" 2>&1
+      apt-get -y install tar 1>>"$LOG" 2>&1
     fi
   fi
   url="baseurl=http://service.graphsql.com/repo/centos"
@@ -246,6 +248,11 @@ progress "Installing required system software packages ..."
 if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
   yum install -y ${pkg_name}
   rm -f "$off_repo"
+  if gcc --version | grep "4.4.7"; then
+    echo "#!/bin/bash" > /etc/profile.d/enableGcc11.sh
+    echo "source /opt/rh/devtoolset-2/enable" >> /etc/profile.d/enableGcc11.sh
+    echo "export X_SCLS=\"\`scl enable devtoolset-2 'echo \$X_SCLS'\`\"" >> /etc/profile.d/enableGcc11.sh
+  fi  
 else
   apt-get install -y --force-yes ${pkg_name}
   sed -i '$ d' /etc/apt/sources.list
@@ -254,6 +261,9 @@ rm -rf "$off_repo_dir"
 
 # config system, this should be defined in a separate shell file for easy extensibility
 progress "Configuring system ..."
+echo "#!/bin/bash" > /etc/profile.d/enableGcc11.sh
+echo "source /opt/rh/devtoolset-2/enable" >> /etc/profile.d/enableGcc11.sh
+echo "export X_SCLS=\"\`scl enable devtoolset-2 'echo \$X_SCLS'\`\"" >> /etc/profile.d/enableGcc11.sh
 set_limits ${GSQL_USER} ${DATA_PATH}
 set_sysctl ${USER_HOME}/graphsql_coredump  # leave core dumps at home
 
