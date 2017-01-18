@@ -25,7 +25,7 @@ progress()
 get_os(){
   if [ -f "/etc/apt/sources.list" ]
   then
-    os_version=$(lsb_release  -r | awk '{print $2}' | cut -d. -f1)
+    os_version=$(cat /etc/lsb-release | awk '{print $2}' | cut -d. -f1)
     if [ "$os_version" -lt 12 ]
     then
       warn "Unsupported OS. Please upgrade to Ubuntu 12.x or above."
