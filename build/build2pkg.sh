@@ -14,12 +14,16 @@ source ../prettyprt
 trap cleanup INT EXIT TERM
 
 create_rpm(){
-  wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
 
   progress "generating .rpm file"
   if ! rpm -q rpm-build >/dev/null 2>&1; then
     yum -y install rpm-build 1>>"$LOG" 2>&1
   fi
+  if ! rpm -q wget >/dev/null 2>&1; then
+    yum -y install wget 1>>"$LOG" 2>&1
+  fi
+  wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
+
   echo "%_topdir $build_dir" > ~/.rpmmacros
   rpmbuild -ba "${build_dir}/SPECS/${pkg_name}.spec" 1>>"$LOG" 2>&1  
 
