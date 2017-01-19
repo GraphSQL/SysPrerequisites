@@ -250,6 +250,10 @@ fi
 progress "Installing required system software packages ..."
 if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
   yum install -y ${pkg_name}
+  if [ $? -ne 0 ]; then
+    warn "Installation fails"
+    exit 2
+  fi
   rm -f "$off_repo"
   if gcc --version | grep "4.4.7"; then
     echo "#!/bin/bash" > /etc/profile.d/enableGcc11.sh
@@ -258,6 +262,10 @@ if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
   fi  
 else
   apt-get install -y --force-yes ${pkg_name}
+  if [ $? -ne 0 ]; then
+    warn "Installation fails"
+    exit 2
+  fi
   sed -i '$ d' /etc/apt/sources.list
 fi
 rm -rf "$off_repo_dir"
