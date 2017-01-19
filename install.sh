@@ -269,3 +269,5 @@ set_sysctl ${USER_HOME}/graphsql_coredump  # leave core dumps at home
 
 progress "Updating /etc/hosts"
 set_etcHosts
+
+progress "Install Success !"
