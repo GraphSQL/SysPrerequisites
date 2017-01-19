@@ -176,10 +176,11 @@ fi
 
 # setup repo, online or offline according to options or internet connection
 progress "Setting up software package repository ..."
+os_version="10"
 if [ "Q$OS" = "QRHEL" ]; then
-  off_repo_dir="${PWD}/rpm_offline_repo"
+  off_repo_dir="${PWD}/centos_${os_version}_offline"
 else 
-  off_repo_dir="${PWD}/deb_offline_repo"  
+  off_repo_dir="${PWD}/ubuntu_${os_version}_offline"  
 fi
 
 off_repo="/etc/yum.repos.d/graphsql.repo"

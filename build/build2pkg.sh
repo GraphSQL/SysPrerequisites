@@ -14,7 +14,6 @@ source ../prettyprt
 trap cleanup INT EXIT TERM
 
 create_rpm(){
-
   progress "generating .rpm file"
   if ! rpm -q rpm-build >/dev/null 2>&1; then
     yum -y install rpm-build 1>>"$LOG" 2>&1
@@ -110,16 +109,21 @@ if [ "Q$OS" = "QRHEL" ]; then
   if ! rpm -q tar >/dev/null 2>&1; then
     yum -y install tar 1>>"$LOG" 2>&1
   fi
-  name="rpm"
+  name="centos"
 else 
   if ! dpkg -s tar 2>&1 | grep -q 'install ok installed'; then
     apt-get -y install tar 1>>"$LOG" 2>&1
   fi
-  name="deb"
+  name="ubuntu"
 fi
+os_version=10
 build_dir="${PWD}/${name}_build"
-on_dir="${PWD}/../${name}_online_repo"
-off_dir="${PWD}/../${name}_offline_repo"
+on_dir_name="${name}_${os_version}"
+off_dir_name="${name}_${os_version}_offline"
+echo $on_dir_name
+echo $off_dir_name
+on_dir="${PWD}/../${on_dir_name}"
+off_dir="${PWD}/../${off_dir_name}"
 if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
   off_repo="/etc/yum.repos.d/${pkg_name}_build.repo"
   create_rpm
@@ -129,9 +133,9 @@ else
 fi
 
 cd "$off_dir/../"
-tar czf "${name}_offline_repo.tar.gz" "${name}_offline_repo/"
+tar czf "${off_dir_name}.tar.gz" "${off_dir_name}/"
 cd "$on_dir/../"
-tar czf "${name}_online_repo.tar.gz" "${name}_online_repo/"
+tar czf "${on_dir_name}.tar.gz" "${on_dir_name}/"
 rm -rf "$off_dir"
 rm -rf "$on_dir"
 progress "created repository successfully"
