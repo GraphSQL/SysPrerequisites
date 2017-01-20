@@ -124,8 +124,6 @@ fi
 build_dir="${PWD}/${name}_build"
 on_dir_name="${name}_${os_version}"
 off_dir_name="${name}_${os_version}_offline"
-echo $on_dir_name
-echo $off_dir_name
 on_dir="${PWD}/../${on_dir_name}"
 off_dir="${PWD}/../${off_dir_name}"
 if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
