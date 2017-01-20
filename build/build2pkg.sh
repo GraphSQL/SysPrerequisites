@@ -103,7 +103,9 @@ LOG="${PWD}/build.log"
 if [ -f "$LOG" ]; then
   echo '' > "$LOG"
 fi 
-OS=$(get_os)
+OSG=$(get_os)
+OS=$(echo $OSG | cut -d' ' -f1)
+os_version=$(echo $OSG | cut -d' ' -f2)
 
 if [ "Q$OS" = "QRHEL" ]; then
   if ! rpm -q tar >/dev/null 2>&1; then
@@ -116,7 +118,6 @@ else
   fi
   name="ubuntu"
 fi
-os_version=10
 build_dir="${PWD}/${name}_build"
 on_dir_name="${name}_${os_version}"
 off_dir_name="${name}_${os_version}_offline"

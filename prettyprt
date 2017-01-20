@@ -48,4 +48,5 @@ get_os(){
     warn "Unknown OS. Please contact GraphSQL support."
     exit 2
   fi
+  echo "$os_version"
 }

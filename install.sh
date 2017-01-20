@@ -120,7 +120,9 @@ done
 
 # check os version, fail if not supported
 LOG=${LOG:-/dev/null}
-OS=$(get_os)
+OSG=$(get_os)
+OS=$(echo $OSG | cut -d' ' -f1)
+os_version=$(echo $OSG | cut -d' ' -f2)
 notice "Welcome to GraphSQL System Prerequisite Installer"
 
 # ask for input if not specify username, input path, retrieve path if default
@@ -176,7 +178,6 @@ fi
 
 # setup repo, online or offline according to options or internet connection
 progress "Setting up software package repository ..."
-os_version="10"
 if [ "Q$OS" = "QRHEL" ]; then
   off_repo_dir="${PWD}/centos_${os_version}_offline"
 else 
