@@ -54,6 +54,9 @@ download_deb(){
   if ! dpkg -s apt-rdepends 2>&1 | grep -q 'install ok installed'; then
     apt-get -y install apt-rdepends 1>>"$LOG" 2>&1
   fi
+  if ! dpkg -s aptitude 2>&1 | grep -q 'install ok installed'; then
+    apt-get -y install aptitude 1>>"$LOG" 2>&1
+  fi
   pkgs=$(apt-rdepends ${pkg_name} | grep -v "^ ")
   t_pkgs=""
   for pkg in $pkgs; do
