@@ -231,8 +231,8 @@ elif [ "$ONLINE" = true ]; then
       apt-get -y install tar 1>>"$LOG" 2>&1
     fi
   fi
-  url="baseurl=http://service.graphsql.com/repo/centos"
-  newsource="deb http://service.graphsql.com/repo/ubuntu ./"
+  url="baseurl=http://service.graphsql.com/repo/centos_${os_version}"
+  newsource="deb http://service.graphsql.com/repo/ubuntu_${os_version} ./"
   title="${pkg_name}-Remote"
 fi
 
