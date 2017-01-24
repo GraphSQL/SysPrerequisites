@@ -138,7 +138,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 trap cleanup INT TERM EXIT
-
+GSQL_USER_PWD=""
 while getopts ":hdr:u:on" opt; do
   case $opt in
     h|H)
@@ -154,7 +154,9 @@ while getopts ":hdr:u:on" opt; do
       GSQL_USER=$OPTARG
       ;;
     d|D)
-      DEFAULT_INSTALL=true
+      GSQL_USER="graphsql"
+      DATA_PATH="/home/graphsql/graphsql"
+      GSQL_USER_PWD="graphsql"
       ;;
     o|O)
       OFFLINE=true
@@ -199,8 +201,12 @@ else
     warn "Failed to create user ${GSQL_USER}. Program terminated."
     exit 2
   fi
-  progress "Setting password for user ${GSQL_USER}"
-  passwd ${GSQL_USER} < /dev/tty
+  if [ "Q${GSQL_USER_PWD}" = "Q" ]; then
+    progress "Setting password for user ${GSQL_USER}"
+    passwd ${GSQL_USER} < /dev/tty
+  else 
+    passwd ${GSQL_USER} < $GSQL_USER_PWD
+  fi
 fi
 
 USER_HOME=$(eval echo ~$GSQL_USER)
