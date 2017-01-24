@@ -1,7 +1,52 @@
 #!/bin/bash
 
 cd `dirname $0`
-source prettyprt
+
+txtbld=$(tput bold)             # Bold
+bldred=${txtbld}$(tput setaf 1) # red
+bldgre=${txtbld}$(tput setaf 2) # green
+bldblu=${txtbld}$(tput setaf 4) # blue
+txtrst=$(tput sgr0)             # Reset
+
+warn(){
+  echo "${bldred}Warning: $* $txtrst" | tee -a $LOG
+}
+
+notice(){
+  echo "${bldblu}$* $txtrst" | tee -a $LOG
+}
+
+progress(){
+  echo "${bldgre}*** $* ...$txtrst" | tee -a $LOG
+}
+
+get_os(){
+  if [ -f "/etc/apt/sources.list" ]
+  then
+    os_version=$(cat /etc/lsb-release | grep  "DISTRIB_RELEASE" | cut -d= -f2 |cut -d. -f1)
+    if [ "$os_version" -lt 12 ]
+    then
+      warn "Unsupported OS. Please upgrade to Ubuntu 12.x or above."
+      exit 2
+    else
+      echo UBUNTU
+    fi
+  elif [ -d "/etc/yum.repos.d" ]
+  then
+    os_version="$(cat /etc/system-release | grep -o ' [0-9]')"
+    if [ "$os_version" -lt 6 ]
+    then
+      warn "Unsupported OS. Please upgrade to RHEL or CentOS 6.x or above."
+      exit 2
+    else
+      echo RHEL
+    fi
+  else
+    warn "Unknown OS. Please contact GraphSQL support."
+    exit 2
+  fi
+  echo "$os_version"
+}
 
 help(){
   echo "`basename $0` [-h] [-d] [-r <graphsql_root_dir>] [-u <user>] [-o] [-n]"
@@ -83,6 +128,8 @@ cleanup(){
     sed -i '$ d' /etc/apt/sources.list
   fi
 }
+
+pkg_name="GraphSQL"
 
 ## Main ##
 if [[ $EUID -ne 0 ]]; then

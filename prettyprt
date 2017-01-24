@@ -6,7 +6,6 @@ bldred=${txtbld}$(tput setaf 1) # red
 bldgre=${txtbld}$(tput setaf 2) # green
 bldblu=${txtbld}$(tput setaf 4) # blue
 txtrst=$(tput sgr0)             # Reset
-os_version="test"
 
 warn()
 {
