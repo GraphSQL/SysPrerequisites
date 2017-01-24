@@ -14,8 +14,8 @@ if [ ! -f "../${name}_${os_version}.tar.gz" ]; then
   warn "Online repo file does not exist"
   exit 3
 fi
-scp -i gsql_east.pem "../${name}_${os_version}.tar.gz"  ubuntu@54.83.18.80:/var/www/html/repo
-ssh -i gsql_east.pem ubuntu@54.83.18.80 << EOF
+scp -i ../../gsql_east.pem "../${name}_${os_version}.tar.gz"  ubuntu@54.83.18.80:/var/www/html/repo
+ssh -i ../../gsql_east.pem ubuntu@54.83.18.80 << EOF
   cd /var/www/html/repo;
   rm -rf ${name}_${os_version}
   tar xzf ${name}_${os_version}.tar.gz
