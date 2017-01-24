@@ -26,7 +26,7 @@ create_rpm(){
   fi
 
   echo "%_topdir $build_dir" > ~/.rpmmacros
-  rpmbuild -ba "${build_dir}/SPECS/${pkg_name}.spec" 1>>"$LOG" 2>&1  
+  rpmbuild -ba "${build_dir}/SPECS/${pkg_name}_${os_version}.spec" 1>>"$LOG" 2>&1  
 
   progress "generating the ${pkg_name} package"
   mkdir -p "$on_dir"
