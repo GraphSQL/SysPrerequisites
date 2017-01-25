@@ -1,9 +1,7 @@
 #!/bin/bash
 
 cleanup(){
-  rm -rf "$on_dir"
-  rm -rf "$off_dir"
-  rm -f "$off_repo"
+  rm -rf "$on_dir" "$off_dir" "$off_repo"
   if [[ $OS == "UBUNTU" ]] && cat /etc/apt/sources.list | grep "$newsource"; then
     sed -i '$ d' /etc/apt/sources.list      
   fi
@@ -67,8 +65,6 @@ download_deb(){
     then t_pkgs="$t_pkgs $pkg"
     fi
   done
-
-  echo $t_pkgs
 }
 
 
@@ -140,7 +136,6 @@ cd "$off_dir/../"
 tar czf "${off_dir_name}.tar.gz" "${off_dir_name}/"
 cd "$on_dir/../"
 tar czf "${on_dir_name}.tar.gz" "${on_dir_name}/"
-rm -rf "$off_dir"
-rm -rf "$on_dir"
+rm -rf "$off_dir" "$on_dir"
 progress "created repository successfully"
   

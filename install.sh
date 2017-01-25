@@ -122,8 +122,7 @@ set_etcHosts(){
 }
 
 cleanup(){
-  rm -rf "$off_repo_dir"
-  rm -f "$off_repo"
+  rm -rf "$off_repo_dir" "$off_repo"
   if [[ $OS == "UBUNTU" ]] && cat /etc/apt/sources.list | grep "$newsource"; then
     sed -i '$ d' /etc/apt/sources.list
   fi
