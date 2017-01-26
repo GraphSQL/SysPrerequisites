@@ -4,3 +4,4 @@ build/rpmbuild/*
 ubuntu_*.tar.gz
 centos_*.tar.gz
 gsql_east.pem
+*.swp
