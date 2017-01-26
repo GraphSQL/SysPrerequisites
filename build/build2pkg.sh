@@ -43,6 +43,8 @@ create_rpm(){
   if ! rpm -q yum-utils >/dev/null 2>&1; then
     yum -y install yum-utils 1>>"$LOG" 2>&1
   fi
+  mkdir -p "$off_dir"
+  cp "${build_dir}/RPMS/x86_64"/*.rpm "$off_dir" >/dev/null 2>&1
   repotrack -a x86_64 -p "$off_dir" "${pkg_name}"
   rm -f "$off_dir"/*.i686.rpm 
   createrepo "$off_dir" 1>>"$LOG" 2>&1
