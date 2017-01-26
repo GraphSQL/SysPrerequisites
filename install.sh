@@ -121,6 +121,20 @@ set_etcHosts(){
   done
 }
 
+set_libjvm(){
+  jvm=$(find /usr -type f -name libjvm.so|grep server | head -1)
+  if [ "J$jvm" = 'J' ]; then
+    echo "WARNING: Cannot find libjvm.so. Gpath will not work without this file."
+  else
+    if which apt-get >/dev/null 2>&1
+    then
+      ln -sf $jvm /usr/lib/libjvm.so
+    else
+      ln -sf $jvm /lib64/libjvm.so
+    fi
+  fi
+}
+
 cleanup(){
   rm -rf "$off_repo_dir" "$off_repo"
   if [[ $OS == "UBUNTU" ]] && cat /etc/apt/sources.list | grep "$newsource"; then
@@ -332,5 +346,5 @@ set_sysctl ${USER_HOME}/graphsql_coredump  # leave core dumps at home
 
 progress "Updating /etc/hosts"
 set_etcHosts
-
+set_libjvm
 progress "Install Success !"
