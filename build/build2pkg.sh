@@ -67,6 +67,7 @@ download_deb(){
     then t_pkgs="$t_pkgs $pkg"
     fi
   done
+  echo $t_pkgs
 }
 
 
