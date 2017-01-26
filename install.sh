@@ -318,7 +318,11 @@ fi
 # install rpm
 progress "Installing required system software packages ..."
 if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
-  yum install -y ${pkg_name}
+  if [ "$OFFLINE" = true ]; then
+    yum --disablerepo=* --enablerepo=GraphSQL-Local install -y ${pkg_name}
+  else
+    yum install -y ${pkg_name}
+  fi
   if [ $? -ne 0 ]; then
     warn "Installation fails"
     exit 2
@@ -330,7 +334,11 @@ if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
     echo "export X_SCLS=\"\`scl enable devtoolset-2 'echo \$X_SCLS'\`\"" >> /etc/profile.d/enableGcc11.sh
   fi  
 else
-  apt-get install -y --force-yes ${pkg_name}
+  if [ "$OFFLINE" = true ]; then
+    apt-get install -y --force-yes ${pkg_name}  
+  else
+    apt-get install -y --force-yes ${pkg_name}
+  fi 
   if [ $? -ne 0 ]; then
     warn "Installation fails"
     exit 2
