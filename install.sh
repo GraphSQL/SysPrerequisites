@@ -100,14 +100,19 @@ set_limits(){
 set_sysctl(){
   coreLocation=$1
   sysctl_file=/etc/sysctl.conf # use /etc/sysctl.d/98-graphsql.conf for newer OS
+  if [ ! -f sysctl_file ]; then
+    sysctl_file=/etc/sysctl.d/98-graphsql.conf
+  fi  
+  
+  if [ -f sysctl_file ]; then
+    sed -i -e 's/^net.core.somaxconn/#net.core.somaxconn/' $sysctl_file 
+    echo "net.core.somaxconn = 10240" >> $sysctl_file
 
-  sed -i -e 's/^net.core.somaxconn/#net.core.somaxconn/' $sysctl_file 
-  echo "net.core.somaxconn = 10240" >> $sysctl_file
+    sed -i -e 's/^kernel.core_pattern/#kernel.core_pattern/' $sysctl_file
+    echo "kernel.core_pattern=${coreLocation}/core-%e-%s-%p.%t" >> $sysctl_file
 
-  sed -i -e 's/^kernel.core_pattern/#kernel.core_pattern/' $sysctl_file
-  echo "kernel.core_pattern=${coreLocation}/core-%e-%s-%p.%t" >> $sysctl_file
-
-  sysctl -p > /dev/null 2>&1
+    sysctl -p > /dev/null 2>&1
+  fi
 }
 
 set_etcHosts(){
@@ -351,8 +356,11 @@ rm -rf "$off_repo_dir"
 progress "Configuring system ..."
 set_limits ${GSQL_USER} ${DATA_PATH}
 set_sysctl ${USER_HOME}/graphsql_coredump  # leave core dumps at home
-
 progress "Updating /etc/hosts"
 set_etcHosts
 set_libjvm
-progress "Install Success !"
+if [ $? -ne 0 ]; then
+  warn 'Configure fails'
+  exit 3  
+fi
+progress "Install Competely !"
