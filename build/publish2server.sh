@@ -35,7 +35,15 @@ ssh -i "../gsql_east.pem" ubuntu@54.83.18.80 1>/dev/null << EOF
   tar xzf ${name}_${os_version}.tar.gz
   rm -f ${name}_${os_version}.tar.gz
 EOF
+if [ $? -ne 0 ]; then
+  warn 'remote operation error'
+  exit 3
+fi 
 scp -i "../gsql_east.pem" "install.sh" ubuntu@54.83.18.80:/var/www/html/${REPO_DIR}
 fn="GraphSQL-${name}-${os_version}-syspreq.tar.gz"
 tar czf "$fn"  "install.sh" "${name}_${os_version}_offline.tar.gz"
 scp -i "../gsql_east.pem" "$fn" ubuntu@54.83.18.80:/var/www/html/${REPO_DIR}
+if [ $? -ne 0 ]; then
+  warn 'scp error'
+  exit 3
+fi
