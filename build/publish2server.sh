@@ -1,6 +1,15 @@
 #!/bin/bash
 
 cd `dirname $0` 
+REPO_DIR="test"
+while getopts ":r" opt; do
+  case $opt in
+    r|R)
+      REPO_DIR="repo"
+      ;;
+  esac
+done
+
 source ../prettyprt
 OSG=$(get_os)
 OS=$(echo $OSG | cut -d' ' -f1)
@@ -19,14 +28,14 @@ if [ ! -f "${name}_${os_version}_offline.tar.gz" ]; then
   warn "Offline repo file does not exist"
   exit 3
 fi
-scp -i "../gsql_east.pem" "${name}_${os_version}.tar.gz"  ubuntu@54.83.18.80:/var/www/html/repo
+scp -i "../gsql_east.pem" "${name}_${os_version}.tar.gz"  ubuntu@54.83.18.80:/var/www/html/${REPO_DIR}
 ssh -i "../gsql_east.pem" ubuntu@54.83.18.80 << EOF
-  cd /var/www/html/repo;
+  cd /var/www/html/${dir};
   rm -rf ${name}_${os_version}
   tar xzf ${name}_${os_version}.tar.gz
   rm -f ${name}_${os_version}.tar.gz
 EOF
-scp -i "../gsql_east.pem" "install.sh" ubuntu@54.83.18.80:/var/www/html/download
+scp -i "../gsql_east.pem" "install.sh" ubuntu@54.83.18.80:/var/www/html/${REPO_DIR}
 fn="GraphSQL-${name}-${os_version}-syspreq.tar.gz"
 tar czf "$fn"  "install.sh" "${name}_${os_version}_offline.tar.gz"
-scp -i "../gsql_east.pem" "$fn" ubuntu@54.83.18.80:/var/www/html/download
+scp -i "../gsql_east.pem" "$fn" ubuntu@54.83.18.80:/var/www/html/${REPO_DIR}

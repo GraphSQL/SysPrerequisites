@@ -156,7 +156,8 @@ fi
 
 trap cleanup INT TERM EXIT
 GSQL_USER_PWD=""
-while getopts ":hdr:u:on" opt; do
+REPO_DIR="repo"
+while getopts ":hdr:u:ont" opt; do
   case $opt in
     h|H)
       help
@@ -180,6 +181,9 @@ while getopts ":hdr:u:on" opt; do
       ;;
     n|N)
       ONLINE=true
+      ;;
+    t|T)
+      REPO_DIR="test"
       ;;
   esac
 done
@@ -303,8 +307,8 @@ elif [ "$ONLINE" = true ]; then
       apt-get -y install tar 1>>"$LOG" 2>&1
     fi
   fi
-  url="baseurl=http://service.graphsql.com/repo/centos_${os_version}"
-  newsource="deb http://service.graphsql.com/repo/ubuntu_${os_version} ./"
+  url="baseurl=http://service.graphsql.com/${REPO_DIR}/centos_${os_version}"
+  newsource="deb http://service.graphsql.com/${REPO_DIR}/ubuntu_${os_version} ./"
   title="${pkg_name}-Remote"
 fi
 
