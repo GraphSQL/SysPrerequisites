@@ -29,8 +29,8 @@ if [ ! -f "${name}_${os_version}_offline.tar.gz" ]; then
   exit 3
 fi
 scp -i "../gsql_east.pem" "${name}_${os_version}.tar.gz"  ubuntu@54.83.18.80:/var/www/html/${REPO_DIR}
-ssh -i "../gsql_east.pem" ubuntu@54.83.18.80 << EOF
-  cd /var/www/html/${dir};
+ssh -i "../gsql_east.pem" ubuntu@54.83.18.80 1>/dev/null << EOF
+  cd /var/www/html/${REPO_DIR}
   rm -rf ${name}_${os_version}
   tar xzf ${name}_${os_version}.tar.gz
   rm -f ${name}_${os_version}.tar.gz
