@@ -1,11 +1,12 @@
 #!/bin/bash
 
 cd `dirname $0` 
-REPO_DIR="test"
+REPO_NAME="test"
+PUBLISH=false
 while getopts ":r" opt; do
   case $opt in
     r|R)
-      REPO_DIR="repo"
+      REPO_NAME="repo"
       ;;
   esac
 done
@@ -19,6 +20,7 @@ if [ "$OS" = "RHEL" ]; then
 else 
   name="ubuntu"
 fi
+
 cd ../
 if [ ! -f "${name}_${os_version}.tar.gz" ]; then
   warn "Online repo file does not exist"
@@ -28,9 +30,15 @@ if [ ! -f "${name}_${os_version}_offline.tar.gz" ]; then
   warn "Offline repo file does not exist"
   exit 3
 fi
-scp -i "../gsql_east.pem" "${name}_${os_version}.tar.gz"  ubuntu@54.83.18.80:/var/www/html/${REPO_DIR}
-ssh -i "../gsql_east.pem" ubuntu@54.83.18.80 1>/dev/null << EOF
-  cd /var/www/html/${REPO_DIR}
+
+key="../gsql_east.pem"
+server_addr="ubuntu@54.83.18.80"
+repo_dir="/var/www/html/${REPO_NAME}"
+server_dir="${server_addr}:${repo_dir}"
+
+scp -i "$key" "${name}_${os_version}.tar.gz"  "$server_dir"
+ssh -i "$key" "$server_addr" 1>/dev/null << EOF
+  cd $repo_dir
   rm -rf ${name}_${os_version}
   tar xzf ${name}_${os_version}.tar.gz
   rm -f ${name}_${os_version}.tar.gz
@@ -39,10 +47,11 @@ if [ $? -ne 0 ]; then
   warn 'remote operation error'
   exit 3
 fi 
-scp -i "../gsql_east.pem" "install.sh" ubuntu@54.83.18.80:/var/www/html/${REPO_DIR}
+
+scp -i "$key" "install.sh" "$server_dir"
 fn="GraphSQL-${name}-${os_version}-syspreq.tar.gz"
 tar czf "$fn"  "install.sh" "${name}_${os_version}_offline.tar.gz"
-scp -i "../gsql_east.pem" "$fn" ubuntu@54.83.18.80:/var/www/html/${REPO_DIR}
+scp -i "$key" "$fn" "$server_dir"
 if [ $? -ne 0 ]; then
   warn 'scp error'
   exit 3
