@@ -17,8 +17,14 @@ OS=$(echo $OSG | cut -d' ' -f1)
 os_version=$(echo $OSG | cut -d' ' -f2)
 if [ "$OS" = "RHEL" ]; then
   name="centos"
+  if ! rpm -q openssh >/dev/null 2>&1; then
+    yum -y install openssh >/dev/null 2>&1
+  fi
 else 
   name="ubuntu"
+  if ! dpkg -s openssh >/dev/null 2>&1; then
+    apt-get -y install openssh >dev/null 2>&1
+  fi
 fi
 
 cd ../
@@ -37,7 +43,7 @@ repo_dir="/var/www/html/${REPO_NAME}"
 server_dir="${server_addr}:${repo_dir}"
 
 scp -i "$key" "${name}_${os_version}.tar.gz"  "$server_dir"
-ssh -i "$key" "$server_addr" 1>/dev/null << EOF
+ssh -i "$key" "$server_addr" >/dev/null << EOF
   cd $repo_dir
   rm -rf ${name}_${os_version}
   tar xzf ${name}_${os_version}.tar.gz
