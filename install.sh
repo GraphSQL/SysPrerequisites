@@ -131,8 +131,7 @@ set_libjvm(){
   if [ "J$jvm" = 'J' ]; then
     echo "WARNING: Cannot find libjvm.so. Gpath will not work without this file."
   else
-    if which apt-get >/dev/null 2>&1
-    then
+    if [ "$OS" = "UBUNTU" ]; then
       ln -sf $jvm /usr/lib/libjvm.so
     else
       ln -sf $jvm /lib64/libjvm.so
