@@ -37,7 +37,7 @@ if [ ! -f "${name}_${os_version}_offline.tar.gz" ]; then
   exit 3
 fi
 
-key="gsql_east.pem"
+key="../gsql_east.pem"
 server_addr="ubuntu@54.83.18.80"
 repo_dir="/var/www/html/${REPO_NAME}"
 server_dir="${server_addr}:${repo_dir}"
