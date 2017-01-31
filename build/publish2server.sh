@@ -1,12 +1,17 @@
 #!/bin/bash
 
 cd `dirname $0` 
-REPO_NAME="test"
+test_dir="test"
+release_dir="repo"
+IF_TEST=true
 PUBLISH=false
-while getopts ":r" opt; do
+while getopts ":rp" opt; do
   case $opt in
     r|R)
-      REPO_NAME="repo"
+      IF_TEST=false
+      ;;
+    p|P)
+      PUBLISH=true
       ;;
   esac
 done
@@ -39,10 +44,23 @@ fi
 
 key="../gsql_east.pem"
 server_addr="ubuntu@54.83.18.80"
-repo_dir="/var/www/html/${REPO_NAME}"
+html_dir="/var/www/html"
+if [ "$IF_TEST" = true ]; then
+  repo_dir="${html_dir}/${test_dir}"
+else
+  repo_dir="${html_dir}/${release_dir}"
+fi
 server_dir="${server_addr}:${repo_dir}"
 
-cat "$key"
+if [ "$PUBLISH" = true ]; then
+  ssh -o "StrictHostKeyChecking no" -i "$key" "$server_addr" >/dev/null <<< "
+    cd ${html_dir}/${test_dir}
+    cp  * ../${release_dir}
+  "  
+  progress 'already publish'
+  exit 0
+fi
+
 scp -o "StrictHostKeyChecking no" -i "$key" "${name}_${os_version}.tar.gz"  "$server_dir"
 ssh -o "StrictHostKeyChecking no" -i "$key" "$server_addr" >/dev/null << EOF
   cd $repo_dir
