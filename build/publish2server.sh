@@ -17,13 +17,13 @@ OS=$(echo $OSG | cut -d' ' -f1)
 os_version=$(echo $OSG | cut -d' ' -f2)
 if [ "$OS" = "RHEL" ]; then
   name="centos"
-  if ! rpm -q openssh-client >/dev/null 2>&1; then
-    yum -y install openssh-client >/dev/null 2>&1
+  if ! rpm -q openssh-clients >/dev/null 2>&1; then
+    yum -y install openssh-clients 
   fi
 else 
   name="ubuntu"
   if ! dpkg -s openssh-client >/dev/null 2>&1; then
-    apt-get -y install openssh-client >dev/null 2>&1
+    apt-get -y install openssh-client
   fi
 fi
 
