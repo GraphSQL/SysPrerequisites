@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd `dirname $0`
+
 txtbld=$(tput bold)             # Bold
 bldred=${txtbld}$(tput setaf 1) # red
 bldgre=${txtbld}$(tput setaf 2) # green
@@ -144,6 +146,7 @@ cleanup(){
   fi
 }
 
+pkg_name="GraphSQL"
 
 ## Main ##
 if [[ $EUID -ne 0 ]]; then
@@ -151,10 +154,7 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-cd `dirname $0`
 trap cleanup INT TERM EXIT
-
-pkg_name="GraphSQL"
 GSQL_USER_PWD=""
 REPO_DIR="repo"
 while getopts ":hdr:u:ont" opt; do
@@ -356,10 +356,9 @@ if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
   fi
   rm -f "$off_repo"
   if gcc --version | grep "4.4.7"; then
-    gccf="/etc/profile.d/enableGcc11.sh"
-    echo "#!/bin/bash" > $gccf
-    echo "source /opt/rh/devtoolset-2/enable" >> $gccf
-    echo "export X_SCLS=\"\`scl enable devtoolset-2 'echo \$X_SCLS'\`\"" >> $gccf 
+    echo "#!/bin/bash" > /etc/profile.d/enableGcc11.sh
+    echo "source /opt/rh/devtoolset-2/enable" >> /etc/profile.d/enableGcc11.sh
+    echo "export X_SCLS=\"\`scl enable devtoolset-2 'echo \$X_SCLS'\`\"" >> /etc/profile.d/enableGcc11.sh
   fi  
 else
   if [ "$OFFLINE" = true ]; then

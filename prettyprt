@@ -7,18 +7,15 @@ bldgre=${txtbld}$(tput setaf 2) # green
 bldblu=${txtbld}$(tput setaf 4) # blue
 txtrst=$(tput sgr0)             # Reset
 
-warn()
-{
+warn(){
   echo "${bldred}Warning: $* $txtrst" | tee -a $LOG
 }
 
-notice()
-{
+notice(){
   echo "${bldblu}$* $txtrst" | tee -a $LOG
 }
 
-progress()
-{
+progress(){
   echo "${bldgre}*** $* ...$txtrst" | tee -a $LOG
 }
 

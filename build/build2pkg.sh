@@ -1,16 +1,5 @@
 #!/bin/bash
 
-cleanup(){
-  rm -rf "$on_dir" "$off_dir" "$off_repo"
-  if [[ $OS == "UBUNTU" ]] && cat /etc/apt/sources.list | grep "$newsource"; then
-    sed -i '$ d' /etc/apt/sources.list      
-  fi
-}
-
-cd `dirname $0`
-source ../prettyprt
-trap cleanup INT EXIT TERM
-
 create_rpm(){
   progress "generating .rpm file"
   if ! rpm -q rpm-build >/dev/null 2>&1; then
@@ -70,7 +59,6 @@ download_deb(){
   echo $t_pkgs
 }
 
-
 create_deb(){
   apt-get update
 
@@ -98,15 +86,29 @@ create_deb(){
   sed -i '$ d' /etc/apt/sources.list
 }
 
+cleanup(){
+  rm -rf "$on_dir" "$off_dir" "$off_repo"
+  if [[ $OS == "UBUNTU" ]] && cat /etc/apt/sources.list | grep "$newsource"; then
+    sed -i '$ d' /etc/apt/sources.list
+  fi
+}
 
+
+## Main ##
 if [[ $EUID -ne 0 ]]; then
   warn "Sudo or root rights are requqired to install prerequsites for ${pkg_name} software."
   exit 1
 fi
+
+cd `dirname $0`
+source ../prettyprt
+trap cleanup INT EXIT TERM
+
 LOG="${PWD}/build.log"
 if [ -f "$LOG" ]; then
   echo '' > "$LOG"
 fi 
+
 OSG=$(get_os)
 OS=$(echo $OSG | cut -d' ' -f1)
 os_version=$(echo $OSG | cut -d' ' -f2)
@@ -127,6 +129,7 @@ on_dir_name="${name}_${os_version}"
 off_dir_name="${name}_${os_version}_offline"
 on_dir="${PWD}/../${on_dir_name}"
 off_dir="${PWD}/../${off_dir_name}"
+
 if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
   off_repo="/etc/yum.repos.d/${pkg_name}_build.repo"
   create_rpm
