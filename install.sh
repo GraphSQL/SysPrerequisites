@@ -90,10 +90,10 @@ set_limits(){
 
   if [ -f /etc/pam.d/common-session ]
   then
-       if ! grep pam_limits /etc/pam.d/common-session >/dev/null 2>&1
-       then
-           echo "session required        pam_limits.so" >> /etc/pam.d/common-session
-       fi
+    if ! grep pam_limits /etc/pam.d/common-session >/dev/null 2>&1
+    then
+      echo "session required pam_limits.so" >> /etc/pam.d/common-session
+    fi
   fi
 }
 
@@ -267,45 +267,65 @@ if [[ ! $ONLINE && ! $OFFLINE ]]; then
   fi
 fi 
 
+if [ "Q$OS" = "QRHEL" ]; then
+  declare -a arr=("tar" "iputils")
+  for i in "${arr[@]}"
+  do
+    if ! rpm -q "${arr[$i]}" >/dev/null 2>&1; then
+      if [ "$OFFLINE" = true ]; then
+        warn "${arr[$i]} should be installed before GraphSQL installation. Program terminated."
+        exit 3
+      else
+        yum -y install "${arr[$i]}" 1>>"$LOG" 2>&1 
+        if [ "$?" -ne "0" ]; then
+          warn "No Internet connection. Program terminated"
+          exit 3 
+        fi
+      fi
+    fi
+  done
+else
+  declare -a arr=("tar" "iputils-ping")
+  for i in "${arr[@]}"
+  do
+    if ! dpkg -s ${arr[$i]} 2>&1 | grep -q 'install ok installed'; then
+      if [ "$OFFLINE" = true ]; then
+        warn "${arr[$i]} should be installed before GraphSQL installation. Program terminated."
+        exit 3
+      else
+        apy-get -y install "${arr[$i]}" 1>>"$LOG" 2>&1
+        if [ "$?" -ne "0" ]; then
+          warn "No Internet connection. Program terminated"
+          exit 3
+        fi
+      fi
+    fi
+  done
+fi
+
 if [ "$OFFLINE" = true ]; then
   if [ ! -f "${off_repo_dir}.tar.gz" ]; then
     warn "No offline installation repository. Program terminated."
     exit 3
   fi
-  if [ "Q$OS" = "QRHEL" ]; then
-    if ! rpm -q tar >/dev/null 2>&1; then
-      warn "Tar should be installed before GraphSQL installation. Program terminated."
-      exit 3
-    fi
-  else
-    if ! dpkg -s tar 2>&1 | grep -q 'install ok installed'; then
-      warn "Tar should be installed before GraphSQL installation. Program terminated."
-      exit 3
-    fi
-  fi
-  tar -xzf "${off_repo_dir}.tar.gz"
-  url="baseurl=file://${off_repo_dir// /%20}"
-  newsource="deb file://${off_repo_dir// /%20}/ ./"
-  title="${pkg_name}-Local"
 elif [ "$ONLINE" = true ]; then
   if ! has_internet; then
     warn "No Internet connection. Program terminated"
     exit 3
   fi
-  if [ "Q$OS" = "QRHEL" ]; then
-    if ! rpm -q tar >/dev/null 2>&1; then
-      yum -y install tar 1>>"$LOG" 2>&1
+fi
+
+if [ "$OFFLINE" = true ]; then
+  tar -xzf "${off_repo_dir}.tar.gz"
+  url="baseurl=file://${off_repo_dir// /%20}"
+  newsource="deb file://${off_repo_dir// /%20}/ ./"
+  title="${pkg_name}-Local"
+elif [ "$ONLINE" = true ]; then
+  if [ "Q$OS" = "QRHEL" ] && [ "$os_version" -lt 7 ]; then
+    if ! rpm -q wget >/dev/null 2>&1; then
+      yum -y install wget 1>>"$LOG" 2>&1
     fi
-    if [ "$os_version" -lt 7 ]; then
-      if ! rpm -q wget >/dev/null 2>&1; then
-        yum -y install wget 1>>"$LOG" 2>&1
-      fi
-      wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo  
-    fi
-  else
-    if ! dpkg -s tar 2>&1 | grep -q 'install ok installed'; then
-      apt-get -y install tar 1>>"$LOG" 2>&1
-    fi
+    wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo  
   fi
   url="baseurl=http://service.graphsql.com/${REPO_DIR}/centos_${os_version}"
   newsource="deb http://service.graphsql.com/${REPO_DIR}/ubuntu_${os_version} ./"
@@ -323,7 +343,6 @@ else
   apt-get update 1>/dev/null
 fi
   
-# install rpm
 progress "Installing required system software packages ..."
 if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
   if [ "$OFFLINE" = true ]; then
