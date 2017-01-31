@@ -42,6 +42,7 @@ server_addr="ubuntu@54.83.18.80"
 repo_dir="/var/www/html/${REPO_NAME}"
 server_dir="${server_addr}:${repo_dir}"
 
+echo "$key"
 scp -i "$key" "${name}_${os_version}.tar.gz"  "$server_dir"
 ssh -i "$key" "$server_addr" >/dev/null << EOF
   cd $repo_dir
