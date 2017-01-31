@@ -55,18 +55,19 @@ server_dir="${server_addr}:${repo_dir}"
 if [ "$PUBLISH" = true ]; then
   ssh -o "StrictHostKeyChecking no" -i "$key" "$server_addr" >/dev/null <<< "
     cd ${html_dir}/${test_dir}
-    cp  * ../${release_dir}
+    cp -rf * ../${release_dir}
   "  
   progress 'already publish'
   exit 0
 fi
 
-scp -o "StrictHostKeyChecking no" -i "$key" "${name}_${os_version}.tar.gz"  "$server_dir"
+tarf="${name}_${os_version}"
+scp -o "StrictHostKeyChecking no" -i "$key" "${tarf}.tar.gz"  "$server_dir"
 ssh -o "StrictHostKeyChecking no" -i "$key" "$server_addr" >/dev/null << EOF
   cd $repo_dir
-  rm -rf ${name}_${os_version}
-  tar xzf ${name}_${os_version}.tar.gz
-  rm -f ${name}_${os_version}.tar.gz
+  rm -rf $tarf
+  tar xzf ${tarf}.tar.gz
+  rm -f ${tarf}.tar.gz
 EOF
 if [ $? -ne 0 ]; then
   warn 'remote operation error'
@@ -74,9 +75,12 @@ if [ $? -ne 0 ]; then
 fi 
 
 scp -o "StrictHostKeyChecking no" -i "$key" "install.sh" "$server_dir"
-fn="GraphSQL-${name}-${os_version}-syspreq.tar.gz"
-tar czf "$fn"  "install.sh" "${name}_${os_version}_offline.tar.gz"
-scp -o "StrictHostKeyChecking no" -i "$key" "$fn" "$server_dir"
+fn="GraphSQL-${name}-${os_version}-syspreq"
+mkdir "$fn"
+cp "install.sh" "${fn}/"
+cp "${tarf}_offline.tar.gz" "${fn}/"
+tar czf "${fn}.tar.gz" "$fn"
+scp -o "StrictHostKeyChecking no" -i "$key" "${fn}.tar.gz" "$server_dir"
 if [ $? -ne 0 ]; then
   warn 'scp error'
   exit 3
