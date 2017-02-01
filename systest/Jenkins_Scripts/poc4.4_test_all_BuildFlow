@@ -1,0 +1,12 @@
+###########################################################################
+##                      buildFlow script                                 ##
+## Trigger by build_syspreq project. To test if Syspre package is        ##
+## complete. If it works fine, then release the packages to public.      ##
+## Author: dadong.wang@graphsql.com                                      ##
+## Date: Jan 31, 2017                                                    ##
+###########################################################################
+
+def OS = ["centos6.6", "centos6.8", "centos7", "ubuntu14.04", "ubuntu16.04"]
+for (os in OS) {
+    build("poc4.4_test", os: os)
+}

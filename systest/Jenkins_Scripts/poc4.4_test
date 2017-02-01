@@ -1,0 +1,15 @@
+###########################################################################
+##                      build Execute shell                              ##
+## Controlled by poc4.4_test_all_BuildFlow, test the whole installaton.  ##
+## Author: dadong.wang@graphsql.com                                      ##
+## Date: Jan 31, 2017                                                    ##
+###########################################################################
+
+echo "os: ${os}"
+mv "${os}" Dockerfile
+docker build -t "${os}:graphsql" .
+containerID="$(docker run -t -d -u 995:993 -u graphsql --ulimit nofile=100000:100000 -w /var/lib/jenkins/workspace/poc4.4_test -v /var/lib/jenkins/workspace/poc4.4_test:/var/lib/jenkins/workspace/poc4.4_test:rw -v /var/lib/jenkins/workspace/poc4.4_test@tmp:/var/lib/jenkins/workspace/poc4.4_test@tmp:rw --entrypoint cat ${os}:graphsql)"
+echo $containerID
+docker exec "${containerID}" bash graphsql.sh
+docker rm "${containerID}" -f
+mv Dockerfile "${os}"

@@ -1,0 +1,8 @@
+## build a images with Syspre installed
+
+FROM ubuntu:14.04
+RUN apt-get update
+RUN apt-get install curl -y
+RUN curl -L http://service.graphsql.com/test/install.sh -o install.sh
+RUN bash install.sh -t -n -d
+#USER graphsql
