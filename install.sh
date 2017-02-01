@@ -233,7 +233,7 @@ else
     progress "Setting password for user ${GSQL_USER}"
     passwd ${GSQL_USER} < /dev/tty
   else 
-    echo "$GSQL_USER_PWD" | passwd ${GSQL_USER} --stdin
+    echo "${GSQL_USER}:${GSQL_USER_PWD}" | chpasswd
   fi
 fi
 
