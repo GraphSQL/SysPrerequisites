@@ -1,3 +1,10 @@
+# Copyright (c) 2016-2017, GraphSQL Inc.
+# All rights reserved.
+#
+# Project: System Prerequisite
+# Authors: Yun Peng, Dadong Wang, Justin Li
+#
+
 node {
   def OS = ["centos:6.6", "centos:7", "ubuntu:14.04"]
   for (os in OS) {
