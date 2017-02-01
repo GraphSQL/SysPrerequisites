@@ -11,7 +11,7 @@ curl -H "Authorization: token $GIT_TOKEN" -L https://api.github.com/repos/GraphS
 tar xzf gium.tar.gz
 cd GraphSQL-gium*
 pwd
-./install.sh
+bash install.sh
 source /home/graphsql/.bashrc
 cd ..
 rm -rf GraphSQL-gium*
