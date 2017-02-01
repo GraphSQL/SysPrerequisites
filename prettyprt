@@ -1,4 +1,12 @@
 #!/bin/bash
+
+# Copyright (c) 2016-2017, GraphSQL Inc.
+# All rights reserved.
+#
+# Project: System Prerequisite
+# Authors: Yun Peng, Justin Li
+#
+
 pkg_name="GraphSQL"
 
 txtbld=$(tput bold)             # Bold

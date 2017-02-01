@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# Copyright (c) 2016-2017, GraphSQL Inc.
-# All rights reserved.
-#
-# Project: System Prerequisite
-# Authors: Yun Peng, Justin Li
-#
-
 txtbld=$(tput bold)             # Bold
 bldred=${txtbld}$(tput setaf 1) # red
 bldgre=${txtbld}$(tput setaf 2) # green

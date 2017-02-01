@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Copyright (c) 2016-2017, GraphSQL Inc.
+# All rights reserved.
+#
+# Project: System Prerequisite
+# Authors: Yun Peng, Justin Li
+#
+
 create_rpm(){
   progress "generating .rpm file"
   if ! rpm -q rpm-build >/dev/null 2>&1; then

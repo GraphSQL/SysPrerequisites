@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Copyright (c) 2016-2017, GraphSQL Inc.
+# All rights reserved.
+#
+# Project: System Prerequisite
+# Authors: Yun Peng, Justin Li
+#
+
 cd `dirname $0` 
 test_dir="test"
 release_dir="repo"
