@@ -278,14 +278,14 @@ if [ "Q$OS" = "QRHEL" ]; then
   declare -a arr=("tar" "iputils")
   for i in "${arr[@]}"
   do
-    if ! rpm -q "${arr[$i]}" >/dev/null 2>&1; then
+    if ! rpm -q "$i" >/dev/null 2>&1; then
       if [ "$OFFLINE" = true ]; then
-        warn "${arr[$i]} should be installed before GraphSQL installation. Program terminated."
+        warn "$i should be installed before GraphSQL installation. Program terminated."
         exit 3
       else 
-        yum -y install "${arr[$i]}" 1>>"$LOG" 2>&1
+        yum -y install "$i" 1>>"$LOG" 2>&1
         if [ "$?" -ne "0" ]; then
-          warn "Installing ${arr[$i]} fails. Program terminated."
+          warn "Installing $i fails. Program terminated."
           exit 3
         fi
       fi
@@ -295,14 +295,14 @@ else
   declare -a arr=("tar" "iputils-ping")
   for i in "${arr[@]}"
   do
-    if ! dpkg -s ${arr[$i]} 2>&1 | grep -q 'install ok installed'; then
+    if ! dpkg -s $i 2>&1 | grep -q 'install ok installed'; then
       if [ "$OFFLINE" = true ]; then
-        warn "${arr[$i]} should be installed before GraphSQL installation. Program terminated."
+        warn "$i should be installed before GraphSQL installation. Program terminated."
         exit 3
       else
-        apy-get -y install "${arr[$i]}" 1>>"$LOG" 2>&1
+        apy-get -y install "$i" 1>>"$LOG" 2>&1
         if [ "$?" -ne "0" ]; then 
-          warn "Installing ${arr[$i]} fails. Program terminated"
+          warn "Installing $i fails. Program terminated"
           exit 3
         fi
       fi
