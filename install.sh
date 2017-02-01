@@ -313,12 +313,12 @@ fi
 if [ "$OFFLINE" = true ]; then
   if [ ! -f "${off_repo_dir}.tar.gz" ]; then
     warn "No offline installation repository. Program terminated."
-    exit 3
+    exit 4
   fi
 elif [ "$ONLINE" = true ]; then
   if ! has_internet; then
     warn "No Internet connection. Program terminated"
-    exit 3
+    exit 4
   fi
 fi
 

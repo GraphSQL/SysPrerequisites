@@ -87,6 +87,7 @@ mkdir "$fn"
 cp "install.sh" "${fn}/"
 cp "${tarf}_offline.tar.gz" "${fn}/"
 tar czf "${fn}.tar.gz" "$fn"
+rm -rf "$fn"
 scp -o "StrictHostKeyChecking no" -i "$key" "${fn}.tar.gz" "$server_dir"
 if [ $? -ne 0 ]; then
   warn 'scp error'
