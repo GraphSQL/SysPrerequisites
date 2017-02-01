@@ -285,6 +285,7 @@ if [ "Q$OS" = "QRHEL" ]; then
       else
         yum -y install "${arr[$i]}" 1>>"$LOG" 2>&1 
         if [ "$?" -ne "0" ]; then
+          echo "${arr[$i]}"
           warn "No Internet connection. Program terminated"
           exit 3 
         fi
@@ -300,7 +301,7 @@ else
         warn "${arr[$i]} should be installed before GraphSQL installation. Program terminated."
         exit 3
       else
-        apy-get -y install "${arr[$i]}" 1>>"$LOG" 2>&1
+        apy-get -y install "${arr[$i]}" 
         if [ "$?" -ne "0" ]; then
           warn "No Internet connection. Program terminated"
           exit 3
