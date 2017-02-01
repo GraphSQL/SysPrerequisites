@@ -5,7 +5,9 @@ cp poc4.4_base-1-9-2017.bin ~/
 cp graph_schema_test.gsql ~/
 cp test.csv ~/
 cd /home/graphsql
-curl -H 'Authorization: token 84d37c434950e7e54339057e93af72de79728ba7' -L https://api.github.com/repos/GraphSQL/gium/tarball/4.4_install > gium.tar.gz
+TOKEN='C79E7B2816A0D51F6933D1E8B8EE6F457F4A7E06'
+GIT_TOKEN=$(echo $TOKEN |tr '97531' '13579' |tr 'FEDCBA' 'abcdef')
+curl -H "Authorization: token $GIT_TOKEN" -L https://api.github.com/repos/GraphSQL/gium/tarball/4.4_install > gium.tar.gz
 tar xzf gium.tar.gz
 cd GraphSQL-gium*
 pwd
