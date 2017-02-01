@@ -1,0 +1,15 @@
+###########################################################################
+##                      build Execute shell                              ##
+## Release system prerequisite packages to public.                       ##
+## Author: dadong.wang@graphsql.com                                      ##
+## Date: Jan 31, 2017                                                    ##
+###########################################################################
+
+if [ ! -d SysPrerequisites ]; then
+  git clone https://GraphTester:740bd6bdc2ae12610ddd66361e624bf6ee9409cf@github.com/GraphSQL/SysPrerequisites.git
+fi
+cd SysPrerequisites
+git pull
+git checkout plat_0.8
+cd build
+bash publish2server.sh -p
