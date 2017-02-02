@@ -1,6 +1,6 @@
 ## build a images with Syspre installed
 
-FROM centos:centos6.6
+FROM centos6.6_test:latest
 RUN yum install which -y
 RUN curl -L http://service.graphsql.com/test/install.sh -o install.sh
 # -t: test, -n: online, -d: default

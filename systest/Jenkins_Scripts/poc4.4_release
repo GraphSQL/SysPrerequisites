@@ -10,6 +10,6 @@ if [ ! -d SysPrerequisites ]; then
 fi
 cd SysPrerequisites
 git pull
-git checkout plat_0.8
+git checkout 4.4
 cd build
 bash publish2server.sh -p

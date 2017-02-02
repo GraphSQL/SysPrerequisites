@@ -13,7 +13,7 @@ node {
     fi
     cd SysPrerequisites
     git pull
-    git checkout plat_0.8
+    git checkout 4.4
     cd build
     chmod -R 755 ubuntu_build/
   '''
