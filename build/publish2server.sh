@@ -27,28 +27,8 @@ source ../prettyprt
 OSG=$(get_os)
 OS=$(echo $OSG | cut -d' ' -f1)
 os_version=$(echo $OSG | cut -d' ' -f2)
-if [ "$OS" = "RHEL" ]; then
-  name="centos"
-  if ! rpm -q openssh-clients >/dev/null 2>&1; then
-    yum -y install openssh-clients 
-  fi
-else 
-  name="ubuntu"
-  if ! dpkg -s openssh-client >/dev/null 2>&1; then
-    apt-get -y install openssh-client
-  fi
-fi
 
 cd ../
-if [ ! -f "${name}_${os_version}.tar.gz" ]; then
-  warn "Online repo file does not exist"
-  exit 3
-fi
-if [ ! -f "${name}_${os_version}_offline.tar.gz" ]; then
-  warn "Offline repo file does not exist"
-  exit 3
-fi
-
 key="../gsql_east.pem"
 server_addr="ubuntu@54.83.18.80"
 html_dir="/var/www/html"
@@ -63,9 +43,30 @@ if [ "$PUBLISH" = true ]; then
   ssh -o "StrictHostKeyChecking no" -i "$key" "$server_addr" >/dev/null <<< "
     cd ${html_dir}/${test_dir}
     cp -rf * ../${release_dir}
-  "  
+  "
   progress 'already publish'
   exit 0
+fi
+
+if [ "$OS" = "RHEL" ]; then
+  name="centos"
+  if ! rpm -q openssh-clients >/dev/null 2>&1; then
+    yum -y install openssh-clients 
+  fi
+else 
+  name="ubuntu"
+  if ! dpkg -s openssh-client >/dev/null 2>&1; then
+    apt-get -y install openssh-client
+  fi
+fi
+
+if [ ! -f "${name}_${os_version}.tar.gz" ]; then
+  warn "Online repo file does not exist"
+  exit 3
+fi
+if [ ! -f "${name}_${os_version}_offline.tar.gz" ]; then
+  warn "Offline repo file does not exist"
+  exit 3
 fi
 
 tarf="${name}_${os_version}"
