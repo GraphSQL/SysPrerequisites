@@ -1,3 +1,8 @@
-# ignore offline RPMs and Debs
-Packages
-Packages/*
+*.log
+build/rpmbuild/*
+!build/rpmbuild/SPECS/
+ubuntu_*.tar.gz
+centos_*.tar.gz
+GraphSQL*.tar.gz
+gsql_east.pem
+*.swp
