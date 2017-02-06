@@ -84,6 +84,7 @@ fi
 
 scp -o "StrictHostKeyChecking no" -i "$key" "install.sh" "$server_dir"
 fn="GraphSQL-${name}-${os_version}-syspreq"
+rm -rf "$fn"
 mkdir "$fn"
 cp "install.sh" "${fn}/"
 cp "${tarf}_offline.tar.gz" "${fn}/"
