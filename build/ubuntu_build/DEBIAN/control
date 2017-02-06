@@ -2,7 +2,7 @@ Package: GraphSQL
 Version: 0.8
 Section: Commercial
 Priority: optional
-Depends: curl, openjdk-7-jdk, gcc, cpp, g++, pkg-config, make, libtool, patch, gettext, openssh-client, libssl-dev, ntp, cron, iproute
+Depends: curl, openjdk-7-jdk, gcc = 4.8.2, cpp = 4.8.2, g++ = 4.8.2, pkg-config, make, libtool, patch, gettext, openssh-client, libssl-dev, ntp, cron, iproute
 Architecture: amd64
 Maintainer: Justin
 Provide: GraphSQL
