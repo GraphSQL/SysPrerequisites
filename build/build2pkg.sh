@@ -7,15 +7,21 @@
 # Authors: Yun Peng, Justin Li
 #
 
+install_pkg(){
+  pkg=$1
+  if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
+      yum -y install $pkg 1>>"$LOG" 2>&1
+  else
+      apt-get -y install $pkg 1>>"$LOG" 2>&1
+  fi
+}
+
+
 create_rpm(){
   progress "generating .rpm file"
-  if ! rpm -q rpm-build >/dev/null 2>&1; then
-    yum -y install rpm-build 1>>"$LOG" 2>&1
-  fi
+  install_pkg 'rpm-build'
   if [ "$os_version" -lt 7 ]; then
-    if ! rpm -q wget >/dev/null 2>&1; then
-      yum -y install wget 1>>"$LOG" 2>&1
-    fi
+    install_pkg 'wget'
     wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
   fi
 
@@ -24,9 +30,7 @@ create_rpm(){
 
   progress "generating the ${pkg_name} package"
   mkdir -p "$on_dir"
-  if ! rpm -q createrepo >/dev/null 2>&1; then
-    yum -y install createrepo 1>>"$LOG" 2>&1
-  fi
+  install_pkg 'createrepo'
   echo "[${pkg_name}-build]" > $off_repo
   echo "name=${pkg_name}-build" >> $off_repo
   echo "baseurl=file://${on_dir// /%20}" >> $off_repo
@@ -36,9 +40,7 @@ create_rpm(){
   createrepo "$on_dir" 1>>"$LOG" 2>&1
 
   progress "generating the ${pkg_name} package with all dependencies"
-  if ! rpm -q yum-utils >/dev/null 2>&1; then
-    yum -y install yum-utils 1>>"$LOG" 2>&1
-  fi
+  install_pkg 'yum-utils'
   mkdir -p "$off_dir"
   cp "${build_dir}/RPMS/x86_64"/*.rpm "$off_dir" >/dev/null 2>&1
   repotrack -a x86_64 -p "$off_dir" "${pkg_name}"
@@ -49,12 +51,8 @@ create_rpm(){
 }
 
 download_deb(){
-  if ! dpkg -s apt-rdepends 2>&1 | grep -q 'install ok installed'; then
-    apt-get -y install apt-rdepends 1>>"$LOG" 2>&1
-  fi
-  if ! dpkg -s aptitude 2>&1 | grep -q 'install ok installed'; then
-    apt-get -y install aptitude 1>>"$LOG" 2>&1
-  fi
+  install_pkg 'apt-rdepends'
+  install_pkg 'aptitude'
   pkgs=$(apt-rdepends ${pkg_name} | grep -v "^ ")
   t_pkgs=""
   for pkg in $pkgs; do
@@ -74,9 +72,7 @@ create_deb(){
   dpkg -b "${build_dir}" "${on_dir}/${pkg_name}.deb" 1>>"$LOG" 2>&1
 
   progress "generating the ${pkg_name} package"  
-  if ! dpkg -s dpkg-dev 2>&1 | grep -q 'install ok installed'; then
-    apt-get -y install dpkg-dev 1>>"$LOG" 2>&1
-  fi
+  install_pkg 'dpkg-dev'
   echo "$newsource" >> /etc/apt/sources.list
   cd "$on_dir"
   dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
@@ -121,16 +117,12 @@ OS=$(echo $OSG | cut -d' ' -f1)
 os_version=$(echo $OSG | cut -d' ' -f2)
 
 if [ "Q$OS" = "QRHEL" ]; then
-  if ! rpm -q tar >/dev/null 2>&1; then
-    yum -y install tar 1>>"$LOG" 2>&1
-  fi
   name="centos"
 else 
-  if ! dpkg -s tar 2>&1 | grep -q 'install ok installed'; then
-    apt-get -y install tar 1>>"$LOG" 2>&1
-  fi
   name="ubuntu"
 fi
+install_pkg 'tar'
+
 build_dir="${PWD}/${name}_build"
 on_dir_name="${name}_${os_version}"
 off_dir_name="${name}_${os_version}_offline"

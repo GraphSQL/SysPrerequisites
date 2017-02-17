@@ -151,6 +151,14 @@ cleanup(){
   fi
 }
 
+install_pkg(){
+  pkg=$1
+  if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
+      yum -y install $pkg 1>>"$LOG" 2>&1
+  else
+      apt-get -y install $pkg 1>>"$LOG" 2>&1
+  fi
+}
 
 ## Main ##
 if [[ $EUID -ne 0 ]]; then
@@ -329,9 +337,7 @@ if [ "$OFFLINE" = true ]; then
   title="${pkg_name}-Local"
 elif [ "$ONLINE" = true ]; then
   if [ "Q$OS" = "QRHEL" ] && [ "$os_version" -lt 7 ]; then
-    if ! rpm -q wget >/dev/null 2>&1; then
-      yum -y install wget 1>>"$LOG" 2>&1
-    fi
+    install_pkg 'wget'
     wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo  
   fi
   url="baseurl=http://service.graphsql.com/${REPO_DIR}/centos_${os_version}"
