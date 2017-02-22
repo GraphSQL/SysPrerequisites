@@ -28,8 +28,8 @@ create_rpm(){
     wget https://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm
   fi
   rpm -ivh mysql57-community-release*.rpm
-  sed '27s/enabled=0/enabled=1/' /etc/yum.repos.d/mysql-community.repo
-  sed '34s/enabled=1/enabled=0/' /etc/yum.repos.d/mysql-community.repo
+  sed -i '27s/enabled=0/enabled=1/' /etc/yum.repos.d/mysql-community.repo
+  sed -i '34s/enabled=1/enabled=0/' /etc/yum.repos.d/mysql-community.repo
 
   echo "%_topdir $build_dir" > ~/.rpmmacros
   rpmbuild -ba "${build_dir}/SPECS/${pkg_name}_${os_version}.spec" 1>>"$LOG" 2>&1  
