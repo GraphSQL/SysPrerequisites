@@ -65,7 +65,7 @@ download_deb(){
 }
 
 create_deb(){
-  apt-get update
+  apt-get  update
 
   progress "generating .deb file"
   mkdir -p "$on_dir"
@@ -75,15 +75,34 @@ create_deb(){
   install_pkg 'dpkg-dev'
   echo "$newsource" >> /etc/apt/sources.list
   cd "$on_dir"
-  dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
-  apt-get update 
+
+  if [ ${os_version} -ge 16 ]; then
+    apt-ftparchive packages . > Packages
+    gzip -c Packages > Packages.gz
+
+    apt-ftparchive release . > Release
+    gpg --clearsign -o InRelease Release
+    gpg -abs -o Release.gpg Release
+  else
+    dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
+  fi
+  apt-get  update 
  
   progress "generating the ${pkg_name} package with all dependencies"
   mkdir -p "$off_dir"   
   cd "$off_dir"
+
+  if [ ${os_version} -ge 16 ]; then
+    setfacl -m u:_apt:rwx "${off_dir}"
+  fi
   apt-get download $(download_deb)
   cp "${on_dir}/${pkg_name}.deb" "$off_dir"
-  dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz 
+  if [ ${os_version} -ge 16 ]; then
+    apt-ftparchive packages . > Packages
+    gzip -c Packages > Packages.gz
+  else
+    dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz 
+  fi
   apt-get update
 
   sed -i '$ d' /etc/apt/sources.list

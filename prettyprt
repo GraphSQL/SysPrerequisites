@@ -7,7 +7,7 @@
 # Authors: Yun Peng, Justin Li
 #
 
-pkg_name="GraphSQL"
+pkg_name="graphsql"
 
 txtbld=$(tput bold)             # Bold
 bldred=${txtbld}$(tput setaf 1) # red

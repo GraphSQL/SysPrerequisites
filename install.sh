@@ -169,7 +169,7 @@ fi
 cd `dirname $0`
 trap cleanup INT TERM EXIT
 
-pkg_name="GraphSQL"
+pkg_name="graphsql"
 GSQL_USER_PWD=""
 REPO_DIR="repo"
 while getopts ":hdr:u:ont" opt; do
@@ -353,6 +353,9 @@ if [ "Q$OS" = "QRHEL" ]; then
   echo "enabled=1" >> $off_repo
 else
   echo "$newsource" >> /etc/apt/sources.list
+  if [ ${os_version} -ge 16 ]; then
+    add-apt-repository ppa:openjdk-r/ppa -y
+  fi
   apt-get update 1>/dev/null
 fi
   
