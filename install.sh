@@ -344,8 +344,8 @@ elif [ "$ONLINE" = true ]; then
       wget https://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm
     fi
     rpm -ivh mysql57-community-release*.rpm
-    sed '27s/enabled=0/enabled=1/' /etc/yum.repos.d/mysql-community.repo
-    sed '34s/enabled=1/enabled=0/' /etc/yum.repos.d/mysql-community.repo
+    sed -i '27s/enabled=0/enabled=1/' /etc/yum.repos.d/mysql-community.repo
+    sed -i '34s/enabled=1/enabled=0/' /etc/yum.repos.d/mysql-community.repo
   else 
     export DEBIAN_FRONTEND=noninteractive
     debconf-set-selections <<< "mysql-server mysql-server/root_password password root"
