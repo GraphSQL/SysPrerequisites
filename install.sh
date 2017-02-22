@@ -283,7 +283,7 @@ if [[ ! $ONLINE && ! $OFFLINE ]]; then
 fi 
 
 if [ "Q$OS" = "QRHEL" ]; then
-  declare -a arr=("tar" "iputils")
+  declare -a arr=("tar" "iputils" "wget")
   for i in "${arr[@]}"
   do
     if ! rpm -q "$i" >/dev/null 2>&1; then
@@ -300,7 +300,7 @@ if [ "Q$OS" = "QRHEL" ]; then
     fi
   done
 else
-  declare -a arr=("tar" "iputils-ping")
+  declare -a arr=("tar" "iputils-ping" "debconf-utils" "wget")
   for i in "${arr[@]}"
   do
     if ! dpkg -s $i 2>&1 | grep -q 'install ok installed'; then
@@ -336,9 +336,20 @@ if [ "$OFFLINE" = true ]; then
   newsource="deb file://${off_repo_dir// /%20}/ ./"
   title="${pkg_name}-Local"
 elif [ "$ONLINE" = true ]; then
-  if [ "Q$OS" = "QRHEL" ] && [ "$os_version" -lt 7 ]; then
-    install_pkg 'wget'
-    wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo  
+  if [ "Q$OS" = "QRHEL" ]; then
+    if [ "$os_version" -lt 7 ]; then
+      wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo  
+      wget https://dev.mysql.com/get/mysql57-community-release-el6-9.noarch.rpm
+    else 
+      wget https://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm
+    fi
+    rpm -ivh mysql57-community-release*.rpm
+    sed '27s/enabled=0/enabled=1/' /etc/yum.repos.d/mysql-community.repo
+    sed '34s/enabled=1/enabled=0/' /etc/yum.repos.d/mysql-community.repo
+  else 
+    export DEBIAN_FRONTEND=noninteractive
+    debconf-set-selections <<< "mysql-server mysql-server/root_password password root"
+    debconf-set-selections <<< "mysql-server mysql-server/root_password_again password root"
   fi
   url="baseurl=http://service.graphsql.com/${REPO_DIR}/centos_${os_version}"
   newsource="deb http://service.graphsql.com/${REPO_DIR}/ubuntu_${os_version} ./"
@@ -374,6 +385,15 @@ if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
     echo "source /opt/rh/devtoolset-2/enable" >> $gccf
     echo "export X_SCLS=\"\`scl enable devtoolset-2 'echo \$X_SCLS'\`\"" >> $gccf 
   fi  
+  mysql_secure_installation <<< "
+
+  y
+  root
+  root
+  y
+  n
+  y
+  "
 else
   if [ "$OFFLINE" = true ]; then
     apt-get install -y --force-yes ${pkg_name}  

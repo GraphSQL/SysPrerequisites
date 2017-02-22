@@ -23,7 +23,13 @@ create_rpm(){
   if [ "$os_version" -lt 7 ]; then
     install_pkg 'wget'
     wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
+    wget https://dev.mysql.com/get/mysql57-community-release-el6-9.noarch.rpm
+  else
+    wget https://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm
   fi
+  rpm -ivh mysql57-community-release*.rpm
+  sed '27s/enabled=0/enabled=1/' /etc/yum.repos.d/mysql-community.repo
+  sed '34s/enabled=1/enabled=0/' /etc/yum.repos.d/mysql-community.repo
 
   echo "%_topdir $build_dir" > ~/.rpmmacros
   rpmbuild -ba "${build_dir}/SPECS/${pkg_name}_${os_version}.spec" 1>>"$LOG" 2>&1  
