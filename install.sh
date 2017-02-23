@@ -308,7 +308,7 @@ else
         warn "$i should be installed before GraphSQL installation. Program terminated."
         exit 3
       else
-        apy-get -y install "$i" 1>>"$LOG" 2>&1
+        apt-get -y install "$i" 1>>"$LOG" 2>&1
         if [ "$?" -ne "0" ]; then 
           warn "Installing $i fails. Program terminated"
           exit 3
