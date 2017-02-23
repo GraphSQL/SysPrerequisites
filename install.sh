@@ -344,6 +344,7 @@ elif [ "$ONLINE" = true ]; then
       wget https://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm
     fi
     rpm -ivh mysql57-community-release*.rpm
+    rm -rf mysql57-community-release*
     sed -i '27s/enabled=0/enabled=1/' /etc/yum.repos.d/mysql-community.repo
     sed -i '34s/enabled=1/enabled=0/' /etc/yum.repos.d/mysql-community.repo
   else 
@@ -388,7 +389,7 @@ if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
     echo "source /opt/rh/devtoolset-2/enable" >> $gccf
     echo "export X_SCLS=\"\`scl enable devtoolset-2 'echo \$X_SCLS'\`\"" >> $gccf 
   fi  
-  service mysql start
+  service mysqld start
   mysql_secure_installation <<< "
 
   y
