@@ -390,15 +390,15 @@ if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
     echo "export X_SCLS=\"\`scl enable devtoolset-2 'echo \$X_SCLS'\`\"" >> $gccf 
   fi  
   service mysqld start
-  mysql_secure_installation <<< "
+  mysql_secure_installation << EOF
 
-  y
-  root
-  root
-  y
-  n
-  y
-  "
+y
+root
+root
+y
+n
+y
+EOF
 else
   if [ "$OFFLINE" = true ]; then
     apt-get install -y --force-yes ${pkg_name}  
