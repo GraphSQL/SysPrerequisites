@@ -388,6 +388,7 @@ if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
     echo "source /opt/rh/devtoolset-2/enable" >> $gccf
     echo "export X_SCLS=\"\`scl enable devtoolset-2 'echo \$X_SCLS'\`\"" >> $gccf 
   fi  
+  service mysql start
   mysql_secure_installation <<< "
 
   y
@@ -408,6 +409,7 @@ else
     exit 2
   fi
   sed -i '$ d' /etc/apt/sources.list
+  service mysql start
 fi
 rm -rf "$off_repo_dir"
 
