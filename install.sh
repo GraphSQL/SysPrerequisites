@@ -81,7 +81,7 @@ set_limits(){
   [ "$core" -gt $maxCore ] && core=$maxCore
 
   limit_file=/etc/security/limits.d/98-graphsql.conf
-  echo "$limit_user soft nofile $noFile" > $limit_file
+  echo "$limit_user soft nofile $noFile" >> $limit_file
   echo "$limit_user hard nofile $noFile" >> $limit_file
   echo "$limit_user soft nproc $noProc" >> $limit_file
   echo "$limit_user hard nproc $noProc" >> $limit_file
