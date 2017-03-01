@@ -427,4 +427,4 @@ if [ $? -ne 0 ]; then
   warn 'Configure fails'
   exit 3  
 fi
-progress "Install Competely !"
+progress "System-prerequsite Install Competely !"
