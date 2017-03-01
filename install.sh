@@ -367,6 +367,8 @@ else
   echo "$newsource" >> /etc/apt/sources.list
   if [ ${os_version} -ge 16 ]; then
     add-apt-repository ppa:openjdk-r/ppa -y
+    wget -O - http://service.graphsql.com/${REPO_DIR}/ubuntu_${os_version}/graphsql_ubuntu1604_key \
+		| sudo apt-key add -
   fi
   apt-get update 1>/dev/null
 fi

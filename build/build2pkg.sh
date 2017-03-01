@@ -71,6 +71,12 @@ download_deb(){
   echo $t_pkgs
 }
 
+prepare_repo_key_file(){
+  key_file=./graphsql_ubuntu1604_key
+  key=$(sudo gpg --list-keys | grep "pub  " | cut -d '/' -f2 | cut -d ' ' -f1)
+  sudo gpg --output ${key_file} --armor --export ${key}
+}
+
 create_deb(){
   apt-get  update
 
@@ -90,6 +96,9 @@ create_deb(){
     apt-ftparchive release . > Release
     gpg --clearsign -o InRelease Release
     gpg -abs -o Release.gpg Release
+
+    # prepare the public_key file
+    prepare_repo_key_file
   else
     dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
   fi
