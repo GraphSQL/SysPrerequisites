@@ -88,6 +88,7 @@ create_deb(){
   echo "$newsource" >> /etc/apt/sources.list
   cd "$on_dir"
 
+  apt-get install -y dpkg-dev gzip
   if [ ${os_version} -ge 16 ]; then
     apt-ftparchive packages . > Packages
     gzip -c Packages > Packages.gz

@@ -300,7 +300,7 @@ if [ "Q$OS" = "QRHEL" ]; then
     fi
   done
 else
-  declare -a arr=("tar" "iputils-ping" "debconf-utils" "wget")
+  declare -a arr=("tar" "iputils-ping" "debconf-utils" "wget" "software-properties-common")
   for i in "${arr[@]}"
   do
     if ! dpkg -s $i 2>&1 | grep -q 'install ok installed'; then
@@ -427,4 +427,4 @@ if [ $? -ne 0 ]; then
   warn 'Configure fails'
   exit 3  
 fi
-progress "Install Competely !"
+progress "System-prerequsite Install Competely !"
