@@ -72,7 +72,6 @@ download_deb(){
 }
 
 prepare_repo_key_file(){
-  key_file=./graphsql_ubuntu1604_key
   key=$(sudo gpg --list-keys | grep "pub  " | cut -d '/' -f2 | cut -d ' ' -f1)
   sudo gpg --output ${key_file} --armor --export ${key}
 }
@@ -99,6 +98,7 @@ create_deb(){
 
     # prepare the public_key file
     prepare_repo_key_file
+    cat ${key_file} | sudo apt-key add -
   else
     dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
   fi
@@ -163,6 +163,7 @@ on_dir_name="${name}_${os_version}"
 off_dir_name="${name}_${os_version}_offline"
 on_dir="${PWD}/../${on_dir_name}"
 off_dir="${PWD}/../${off_dir_name}"
+key_file="${on_dir}/graphsql_ubuntu1604_key"
 
 if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
   off_repo="/etc/yum.repos.d/${pkg_name}_build.repo"
