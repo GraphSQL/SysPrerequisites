@@ -283,7 +283,8 @@ if [[ ! $ONLINE && ! $OFFLINE ]]; then
 fi 
 
 if [ "Q$OS" = "QRHEL" ]; then
-  declare -a arr=("tar" "iputils" "wget")
+  #declare -a arr=("tar" "iputils" "wget")
+  declare -a arr=("tar")
   for i in "${arr[@]}"
   do
     if ! rpm -q "$i" >/dev/null 2>&1; then
@@ -378,7 +379,9 @@ progress "Installing required system software packages ..."
 if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
   yum remove -y graphsql
   if [ "$OFFLINE" = true ]; then
-    yum --disablerepo=* --enablerepo=GraphSQL-Local install -y ${pkg_name}
+    yum --disablerepo=* --enablerepo=graphsql-Local install -y ${pkg_name}
+    java_package=$(yum --disablerepo=* --enablerepo=graphsql-Local list | grep java | grep 1.7 | grep -v devel | cut -d ' ' -f1)
+    yum --disablerepo=* --enablerepo=graphsql-Local install -y ${java_package}
   else
     yum install -y ${pkg_name}
   fi

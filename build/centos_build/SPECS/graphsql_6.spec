@@ -7,7 +7,7 @@ Group:    System
 License:  Commercial
 URL:    http://www.graphsql.com/
 
-Requires: curl, java, gcc, gcc-c++, pkgconfig, make, libtool, patch, gettext, openssh-clients, openssl-devel, ntp, cronie, iproute, devtoolset-2-gcc, devtoolset-2-binutils, devtoolset-2-gcc-c++, mysql-server
+Requires: curl, java, gcc, gcc-c++, pkgconfig, make, libtool, patch, gettext, openssh-server, audit, libss, e2fsprogs, openssh-clients, openssl-devel, ntp, cronie, iproute, devtoolset-2-toolchain, mysql-server, zip, tzdata, setools-libs-python, sinjdoc, zlib-devel, scl-utils
 
 %description
 GraphSQL System prerequisites.
