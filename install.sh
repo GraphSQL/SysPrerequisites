@@ -376,6 +376,7 @@ fi
   
 progress "Installing required system software packages ..."
 if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
+  yum remove -y graphsql
   if [ "$OFFLINE" = true ]; then
     yum --disablerepo=* --enablerepo=GraphSQL-Local install -y ${pkg_name}
   else
@@ -403,6 +404,7 @@ n
 y
 EOF
 else
+  apt-get remove -y graphsql
   if [ "$OFFLINE" = true ]; then
     apt-get install -y --force-yes ${pkg_name}  
   else
