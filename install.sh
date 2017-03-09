@@ -338,6 +338,7 @@ if [ "$OFFLINE" = true ]; then
 elif [ "$ONLINE" = true ]; then
   if [ "Q$OS" = "QRHEL" ]; then
     if [ "$os_version" -lt 7 ]; then
+      install_pkg openssl
       wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo  
       wget https://dev.mysql.com/get/mysql57-community-release-el6-9.noarch.rpm
     else 
