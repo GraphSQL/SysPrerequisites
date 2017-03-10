@@ -283,8 +283,12 @@ if [[ ! $ONLINE && ! $OFFLINE ]]; then
 fi 
 
 if [ "Q$OS" = "QRHEL" ]; then
-  #declare -a arr=("tar" "iputils" "wget")
-  declare -a arr=("tar")
+  declare -a arr=()
+  if [ "$OFFLINE" = true ]; then
+    arr=("tar")
+  else
+    arr=("tar" "iputils" "wget")
+  fi
   for i in "${arr[@]}"
   do
     if ! rpm -q "$i" >/dev/null 2>&1; then
