@@ -54,11 +54,12 @@ get_os(){
 }
 
 help(){
-  echo "`basename $0` [-h] [-d] [-r <graphsql_root_dir>] [-u <user>] [-o] [-n]"
+  echo "`basename $0` [-h] [-d] [-r <graphsql_root_dir>] [-u <user>] [-p <password>] [-o] [-n]"
   echo "  -h  --  show this message"
-  echo "  -d  --  use default config, GraphSQL user: graphsql, GraphSQL root dir: /home/graphsql/graphsql"
+  echo "  -d  --  use default config, GraphSQL user: graphsql, password: graphsql, GraphSQL root dir: /home/graphsql"
   echo "  -r  --  GraphSQL.Root.Dir"
   echo "  -u  --  GraphSQL user"
+  echo "  -p  --  GraphSQL user password"
   echo "  -o  --  Enforce offline install"
   echo "  -n  --  Enforce online install, if no internet access, it will fail"
   exit 0
@@ -81,12 +82,12 @@ set_limits(){
   [ "$core" -gt $maxCore ] && core=$maxCore
 
   limit_file=/etc/security/limits.d/98-graphsql.conf
-  grep -q -F "$limit_user soft nofile $noFile" || echo "$limit_user soft nofile $noFile" >> $limit_file
-  grep -q -F "$limit_user hard nofile $noFile" || echo "$limit_user hard nofile $noFile" >> $limit_file
-  grep -q -F "$limit_user soft nproc $noProc" || echo "$limit_user soft nproc $noProc" >> $limit_file
-  grep -q -F "$limit_user hard nproc $noProc" || echo "$limit_user hard nproc $noProc" >> $limit_file
-  grep -q -F "$limit_user soft core $core" || echo "$limit_user soft core $core" >> $limit_file
-  grep -q -F "$limit_user hard core $core" || echo "$limit_user hard core $core" >> $limit_file
+  grep -q "$limit_user soft nofile $noFile" $limit_file || echo "$limit_user soft nofile $noFile" >> $limit_file
+  grep -q "$limit_user hard nofile $noFile" $limit_file || echo "$limit_user hard nofile $noFile" >> $limit_file
+  grep -q "$limit_user soft nproc $noProc" $limit_file || echo "$limit_user soft nproc $noProc" >> $limit_file
+  grep -q "$limit_user hard nproc $noProc" $limit_file || echo "$limit_user hard nproc $noProc" >> $limit_file
+  grep -q "$limit_user soft core $core" $limit_file || echo "$limit_user soft core $core" >> $limit_file
+  grep -q "$limit_user hard core $core" $limit_file || echo "$limit_user hard core $core" >> $limit_file
 
   if [ -f /etc/profile ]  # this is often seen on ubuntu system
   then
@@ -172,7 +173,7 @@ trap cleanup INT TERM EXIT
 pkg_name="graphsql"
 GSQL_USER_PWD=""
 REPO_DIR="repo"
-while getopts ":hdr:u:ont" opt; do
+while getopts ":hdr:u:p:ont" opt; do
   case $opt in
     h|H)
       help
@@ -186,9 +187,12 @@ while getopts ":hdr:u:ont" opt; do
     u|U)
       GSQL_USER=$OPTARG
       ;;
+    p|P)
+      GSQL_USER_PWD=$OPTARG
+      ;;
     d|D)
       GSQL_USER="graphsql"
-      DATA_PATH="/home/graphsql/graphsql"
+      DATA_PATH="/home/graphsql"
       GSQL_USER_PWD="graphsql"
       ;;
     o|O)
@@ -255,14 +259,14 @@ if [ "D${DATA_PATH}" = "D" ]; then
   DATA_PATH=${DATA_PATH:-${USER_HOME}}
 fi
 
-if [ -d ${DATA_PATH} ]; then
+if [ -d $DATA_PATH ]; then
   notice "Folder ${DATA_PATH} already exists"
   # notice "You may need to run command \"chown -R ${GSQL_USER} ${DATA_PATH}\" "
-  chown -R "$GSQL_USER" "$DATA_PATH"
+  chown -R $GSQL_USER:$GSQL_USER $DATA_PATH
 else
   progress "Creating folder ${DATA_PATH}"
   mkdir -p ${DATA_PATH}
-  chown -R ${GSQL_USER} ${DATA_PATH}
+  chown -R $GSQL_USER:$GSQL_USER $DATA_PATH
 fi
 
 # setup repo, online or offline according to options or internet connection
