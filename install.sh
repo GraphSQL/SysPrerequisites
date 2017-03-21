@@ -243,7 +243,9 @@ else
   fi
   if [ "Q${GSQL_USER_PWD}" = "Q" ]; then
     progress "Setting password for user ${GSQL_USER}"
-    passwd ${GSQL_USER} < /dev/tty
+    read GSQL_USER_PWD < /dev/tty
+    GSQL_USER_PWD=${GSQL_USER_PWD:-graphsql}
+    passwd ${GSQL_USER} $GSQL_USER_PWD
   else 
     echo "${GSQL_USER}:${GSQL_USER_PWD}" | chpasswd
   fi
@@ -404,16 +406,14 @@ if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
     echo "source /opt/rh/devtoolset-2/enable" >> $gccf
     echo "export X_SCLS=\"\`scl enable devtoolset-2 'echo \$X_SCLS'\`\"" >> $gccf 
   fi  
-  service mysqld start
-  mysql_secure_installation << EOF
-
-y
-root
-root
-y
-n
-y
-EOF
+  if [ "$os_version" -eq 6 ]; then
+    service mysqld start
+    chkconfig --levels 235 mysqld on
+  elif [ "$os_version" -eq 7 ]; then 
+    systemctl start mysqld.service
+    systemctl enable mysqld.service
+  fi
+  mysql -u root -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');" >/dev/null 2>&1
 else
   apt-get remove -y graphsql
   if [ "$OFFLINE" = true ]; then
