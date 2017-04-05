@@ -441,4 +441,11 @@ if [ $? -ne 0 ]; then
   warn 'Configure fails'
   exit 3  
 fi
+if [ -f tsar.tar.gz ]; then
+  tar xzf tsar.tar.gz
+  cd tsar
+  make install 1>>$LOG 2>&1
+  cd ..
+  rm -rf tsar
+fi
 progress "System-prerequsite Install Competely !"
