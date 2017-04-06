@@ -441,6 +441,9 @@ if [ $? -ne 0 ]; then
   warn 'Configure fails'
   exit 3  
 fi
+if [ "$ONLINE" = true -a ! -f tsar.tar.gz ]; then
+  curl http://service.graphsql.com/download/tsar.tar.gz -o tsar.tar.gz
+fi  
 if [ -f tsar.tar.gz ]; then
   tar xzf tsar.tar.gz
   cd tsar
