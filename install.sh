@@ -436,6 +436,7 @@ set_limits ${GSQL_USER} ${DATA_PATH}
 set_sysctl ${USER_HOME}/graphsql_coredump  # leave core dumps at home
 progress "Updating /etc/hosts"
 set_etcHosts
+progress "Seting libjvm"
 set_libjvm
 if [ $? -ne 0 ]; then
   warn 'Configure fails'
