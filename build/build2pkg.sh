@@ -174,8 +174,8 @@ else
   create_deb
 fi
 
-cp ../tsar.tar.gz "$off_dir/"
 cd "$off_dir/../"
+cp tsar.tar.gz "$off_dir/"
 tar czf "${off_dir_name}.tar.gz" "${off_dir_name}/"
 cd "$on_dir/../"
 tar czf "${on_dir_name}.tar.gz" "${on_dir_name}/"
