@@ -82,7 +82,7 @@ set_limits(){
   [ "$core" -gt $maxCore ] && core=$maxCore
 
   limit_file=/etc/security/limits.d/98-graphsql.conf
-  grep -q "$limit_user soft nofile $noFile" $limit_file || echo "$limit_user soft nofile $noFile" >> $limit_file
+  grep "$limit_user soft nofile $noFile" $limit_file >/dev/null 2>&1 || echo "$limit_user soft nofile $noFile" >> $limit_file
   grep -q "$limit_user hard nofile $noFile" $limit_file || echo "$limit_user hard nofile $noFile" >> $limit_file
   grep -q "$limit_user soft nproc $noProc" $limit_file || echo "$limit_user soft nproc $noProc" >> $limit_file
   grep -q "$limit_user hard nproc $noProc" $limit_file || echo "$limit_user hard nproc $noProc" >> $limit_file
@@ -133,7 +133,7 @@ set_etcHosts(){
 }
 
 set_libjvm(){
-  jvm=$(find /usr -type f -name libjvm.so|grep server | head -1)
+  jvm=$(find /usr -type f -name libjvm.so 2>/dev/null | grep server | head -1)
   if [ "J$jvm" = 'J' ]; then
     echo "WARNING: Cannot find libjvm.so. Gpath will not work without this file."
   else
