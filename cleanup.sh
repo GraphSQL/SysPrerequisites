@@ -1,3 +1,3 @@
 #!/bin/bash
 
-rm *.tar.gz
+ls *.tar.gz | grep tsar -v | xargs rm
