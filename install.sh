@@ -303,10 +303,6 @@ if [ "Q$OS" = "QRHEL" ]; then
         exit 3
       else 
         yum -y install "$i" 1>>"$LOG" 2>&1
-        if [ "$?" -ne "0" ]; then
-          warn "Installing $i fails. Program terminated."
-          exit 3
-        fi
       fi
     fi
   done
@@ -320,10 +316,6 @@ else
         exit 3
       else
         apt-get -y install "$i" 1>>"$LOG" 2>&1
-        if [ "$?" -ne "0" ]; then 
-          warn "Installing $i fails. Program terminated"
-          exit 3
-        fi
       fi
     fi
   done
