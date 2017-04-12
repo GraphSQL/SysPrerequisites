@@ -243,9 +243,7 @@ else
   fi
   if [ "Q${GSQL_USER_PWD}" = "Q" ]; then
     progress "Setting password for user ${GSQL_USER}"
-    read GSQL_USER_PWD < /dev/tty
-    GSQL_USER_PWD=${GSQL_USER_PWD:-graphsql}
-    passwd ${GSQL_USER} $GSQL_USER_PWD
+    passwd ${GSQL_USER} < /dev/tty
   else 
     echo "${GSQL_USER}:${GSQL_USER_PWD}" | chpasswd
   fi
