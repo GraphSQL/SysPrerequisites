@@ -303,6 +303,10 @@ if [ "Q$OS" = "QRHEL" ]; then
         exit 3
       else 
         yum -y install "$i" 1>>"$LOG" 2>&1
+        if ! rpm -q "$i" >/dev/null 2>&1; then
+          warn "online install $i failed. program terminated."
+          exit 3 
+        fi
       fi
     fi
   done
@@ -316,6 +320,10 @@ else
         exit 3
       else
         apt-get -y install "$i" 1>>"$LOG" 2>&1
+        if ! dpkg -s $i 2>&1 | grep -q 'install ok installed'; then
+          warn "online install $i failed. program terminated."
+          exit 3
+        fi
       fi
     fi
   done
