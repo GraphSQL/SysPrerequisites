@@ -428,6 +428,16 @@ else
 fi
 rm -rf "$off_repo_dir"
 
+if [ "$ONLINE" = true -a ! -f tsar.tar.gz ]; then
+  curl http://service.graphsql.com/download/tsar.tar.gz -o tsar.tar.gz
+fi  
+if [ -f tsar.tar.gz ]; then
+  tar xzf tsar.tar.gz
+  cd tsar
+  make install 1>>$LOG 2>&1
+  cd ..
+  rm -rf tsar
+fi
 # config system, this should be defined in a separate shell file for easy extensibility
 progress "Configuring system ..."
 set_limits ${GSQL_USER} ${DATA_PATH}
@@ -439,15 +449,5 @@ set_libjvm
 if [ $? -ne 0 ]; then
   warn 'Configure fails'
   exit 3  
-fi
-if [ "$ONLINE" = true -a ! -f tsar.tar.gz ]; then
-  curl http://service.graphsql.com/download/tsar.tar.gz -o tsar.tar.gz
-fi  
-if [ -f tsar.tar.gz ]; then
-  tar xzf tsar.tar.gz
-  cd tsar
-  make install 1>>$LOG 2>&1
-  cd ..
-  rm -rf tsar
 fi
 progress "System-prerequsite Install Competely !"
