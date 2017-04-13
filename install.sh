@@ -269,6 +269,16 @@ else
   chown -R $GSQL_USER:$GSQL_USER $DATA_PATH
 fi
 
+size=$(df -Pk $DATA_PATH | tail -1 | awk '{print $4}')
+let "size_GB = size / 1024 / 1024"
+minimum=20
+if [ $size_GB -lt $minimum ]; then
+  echo "${bldred}NOT enough available disk space: $size_GB GB, required at least $minimum GB $txtrst"
+  exit 1
+else
+  echo "${bldblu}Available disk space: $size_GB GB [ok] $txtrst"
+fi
+
 # setup repo, online or offline according to options or internet connection
 progress "Setting up software package repository ..."
 if [ "Q$OS" = "QRHEL" ]; then
