@@ -29,9 +29,9 @@ get_os(){
   if [ -f "/etc/apt/sources.list" ]
   then
     os_version=$(cat /etc/lsb-release | grep  "DISTRIB_RELEASE" | cut -d= -f2 |cut -d. -f1)
-    if [ "$os_version" -lt 12 ]
+    if [ "$os_version" -lt 14 ]
     then
-      warn "Unsupported OS. Please upgrade to Ubuntu 12.x or above."
+      warn "Unsupported OS. Please upgrade to Ubuntu 14.x or above."
       exit 2
     else
       echo UBUNTU
@@ -39,9 +39,10 @@ get_os(){
   elif [ -d "/etc/yum.repos.d" ]
   then
     os_version="$(cat /etc/system-release | grep -o ' [0-9]')"
-    if [ "$os_version" -lt 6 ]
+    os_version_full="$(cat /etc/system-release | grep -o '[0-9]\.[0-9]')"
+    if [[ "$os_version_full" < "6.5" ]]
     then
-      warn "Unsupported OS. Please upgrade to RHEL or CentOS 6.x or above."
+      warn "Unsupported OS. Please upgrade to RHEL or CentOS 6.5 or above."
       exit 2
     else
       echo RHEL
