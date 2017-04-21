@@ -320,6 +320,7 @@ if [ "Q$OS" = "QRHEL" ]; then
     fi
   done
 else
+  apt-get update
   declare -a arr=("tar" "iputils-ping" "debconf-utils" "wget" "software-properties-common")
   for i in "${arr[@]}"
   do
