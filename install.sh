@@ -388,7 +388,7 @@ if [ "Q$OS" = "QRHEL" ]; then
 else
   echo "$newsource" >> /etc/apt/sources.list
   if [ ${os_version} -eq 16 ]; then
-    apt-get install software-properties-common
+    apt-get install software-properties-common -y
     add-apt-repository -y ppa:ondrej/mysql-5.6
     add-apt-repository ppa:openjdk-r/ppa -y
     wget -O - http://service.graphsql.com/${REPO_DIR}/ubuntu_${os_version}/graphsql_ubuntu1604_key \
