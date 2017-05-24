@@ -248,6 +248,7 @@ else
   else 
     echo "${GSQL_USER}:${GSQL_USER_PWD}" | chpasswd
   fi
+  pkill -U $GSQL_USER
 fi
 
 USER_HOME=$(eval echo ~$GSQL_USER)
