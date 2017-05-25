@@ -63,6 +63,7 @@ help(){
   echo "  -p  --  GraphSQL user password"
   echo "  -o  --  Enforce offline install"
   echo "  -n  --  Enforce online install, if no internet access, it will fail"
+  echo "  -f  --  suppress prompts, and continue install when meet warnings"
   exit 0
 }
 
@@ -168,12 +169,16 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
+E_disk_space=11
+E_legacy_process=22
+
 cd `dirname $0`
 trap cleanup INT TERM EXIT
 
 pkg_name="graphsql"
 GSQL_USER_PWD=""
 REPO_DIR="repo"
+FORCE=false
 while getopts ":hdr:u:p:ont" opt; do
   case $opt in
     h|H)
@@ -204,6 +209,13 @@ while getopts ":hdr:u:p:ont" opt; do
       ;;
     t|T)
       REPO_DIR="test"
+      ;;
+    f|F)
+      FORCE=true
+      ;;
+    *)
+      echo "${bldred}Invalid option, the correct usage is described below: $txtrst"
+      help
       ;;
   esac
 done
@@ -248,7 +260,24 @@ else
   else 
     echo "${GSQL_USER}:${GSQL_USER_PWD}" | chpasswd
   fi
-  pkill -U $GSQL_USER
+  if [ "$(ps -u $GSQL_USER 2>/dev/null | wc -l)" != 0 ]; then
+    warn "There is legacy processes exist under user ($GSQL_USER), need to be killed before continue"
+    echo -n "${bldred}Continue to install (if yes, all processes of user: $GSQL_USER would be killed)? (y/N): $txtrst"
+    if ! $FORCE; then 
+      read answer
+      if [ "C$answer" = "Cy" -o "C$answer" = "CY" ]; then
+        pkill -9 -U $GSQL_USER
+        echo "Killed all processes of user: $GSQL_USER"
+      else
+        echo "Aborted by user"
+        echo "You may use command \"pkill -9 -U $GSQL_USER\" to kill all processes of user: $GSQL_USER"
+        exit $E_legacy_process
+      fi
+    else
+      pkill -9 -U $GSQL_USER
+      echo "-f (FORCE) option used, killed all processes of user: $GSQL_USER"
+    fi
+  fi
 fi
 
 USER_HOME=$(eval echo ~$GSQL_USER)
@@ -276,7 +305,11 @@ let "size_GB = size / 1024 / 1024"
 minimum=20
 if [ $size_GB -lt $minimum ]; then
   echo "${bldred}NOT enough available disk space: $size_GB GB, required at least $minimum GB $txtrst"
-  exit 1
+  if ! $FORCE; then
+    echo "To setup root dir, you may add -r option"
+    help
+    exit $E_disk_space
+  fi
 else
   echo "${bldblu}Available disk space: $size_GB GB [ok] $txtrst"
 fi
