@@ -161,6 +161,11 @@ install_pkg(){
   else
       apt-get -y install $pkg 1>>"$LOG" 2>&1
   fi
+  code=$?
+  if [ $code != 0 ]; then
+    warn "Failed to install $pkg"
+    exit $code
+  fi
 }
 
 ## Main ##
@@ -225,6 +230,24 @@ LOG=${LOG:-/dev/null}
 OSG=$(get_os)
 OS=$(echo $OSG | cut -d' ' -f1)
 os_version=$(echo $OSG | cut -d' ' -f2)
+
+if [ "Q$OS" = "QRHEL" ]; then
+  install_pkg "which"
+fi
+
+if ! which "uname" >/dev/null 2>&1; then
+  install_pkg "coreutils"
+fi
+
+if ! which "grep" >/dev/null 2>&1; then
+  install_pkg "grep"
+fi
+
+if ! uname -a | grep -q  _64; then
+  warn "Not supported OS architeture, required 64-bit OS"
+  exit 1
+fi
+
 notice "Welcome to GraphSQL System Prerequisite Installer"
 
 # ask for input if not specify username, input path, retrieve path if default
