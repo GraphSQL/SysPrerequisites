@@ -55,7 +55,7 @@ get_os(){
 }
 
 help(){
-  echo "`basename $0` [-h] [-d] [-r <graphsql_root_dir>] [-u <user>] [-p <password>] [-o] [-n]"
+  echo "`basename $0` [-h] [-d] [-r <graphsql_root_dir>] [-u <user>] [-p <password>] [-o] [-n] [-f]"
   echo "  -h  --  show this message"
   echo "  -d  --  use default config, GraphSQL user: graphsql, password: graphsql, GraphSQL root dir: /home/graphsql"
   echo "  -r  --  GraphSQL.Root.Dir"
@@ -179,7 +179,7 @@ pkg_name="graphsql"
 GSQL_USER_PWD=""
 REPO_DIR="repo"
 FORCE=false
-while getopts ":hdr:u:p:ont" opt; do
+while getopts ":hdr:u:p:ontf" opt; do
   case $opt in
     h|H)
       help
