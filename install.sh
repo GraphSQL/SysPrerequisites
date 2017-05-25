@@ -260,7 +260,7 @@ else
   else 
     echo "${GSQL_USER}:${GSQL_USER_PWD}" | chpasswd
   fi
-  if [ "$(ps -u $GSQL_USER 2>/dev/null | wc -l)" != 0 ]; then
+  if [ "$(ps -u $GSQL_USER 2>/dev/null | wc -l)" -gt 1 ]; then
     warn "There is legacy processes exist under user ($GSQL_USER), need to be killed before continue"
     echo -n "${bldred}Continue to install (if yes, all processes of user: $GSQL_USER would be killed)? (y/N): $txtrst"
     if ! $FORCE; then 
