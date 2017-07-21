@@ -135,15 +135,28 @@ set_etcHosts(){
 }
 
 set_libjvm(){
-  jvm=$(find /usr -type f -name libjvm.so 2>/dev/null | grep server | head -1)
-  if [ "J$jvm" = 'J' ]; then
-    echo "WARNING: Cannot find libjvm.so. Gpath will not work without this file."
-  else
-    if [ "$OS" = "UBUNTU" ]; then
-      ln -sf $jvm /usr/lib/libjvm.so
-    else
-      ln -sf $jvm /lib64/libjvm.so
+  if [ "Q$OS" == "QRHEL" ]; then
+    if [ "$os_version" = 6 ]; then
+      jvm=$(find /usr/lib/jvm -name libjvm.so | grep 1.7.0 | head -1)
+    else 
+      jvm=$(find /usr/lib/jvm -name libjvm.so | grep 1.8.0 | head -1)
     fi
+  else
+    jvm=$(find /usr/lib/jvm -name libjvm.so | grep java-8-openjdk | head -1)
+  fi
+  if [ -f $jvm ]; then
+    if [ "Q$OS" == "QRHEL" ]; then
+      ln -sf $jvm /lib64/libjvm.so
+    else
+      ln -sf $jvm /usr/lib/libjvm.so
+    fi
+  else
+    echo "Can not find libjvm.so"
+    exit 3
+  fi
+  if [ "$os_version" != 6 ]; then
+    update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-amd64/bin/javac
+    update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
   fi
 }
 
@@ -444,10 +457,10 @@ if [ "Q$OS" = "QRHEL" ]; then
   echo "enabled=1" >> $off_repo
 else
   echo "$newsource" >> /etc/apt/sources.list
+  apt-get install software-properties-common -y
+  add-apt-repository ppa:openjdk-r/ppa -y
   if [ ${os_version} -eq 16 ]; then
-    apt-get install software-properties-common -y
     add-apt-repository -y ppa:ondrej/mysql-5.6
-    add-apt-repository ppa:openjdk-r/ppa -y
     wget -O - http://service.graphsql.com/${REPO_DIR}/ubuntu_${os_version}/graphsql_ubuntu1604_key \
 		| sudo apt-key add -
   fi
