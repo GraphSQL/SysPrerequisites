@@ -155,8 +155,8 @@ set_libjvm(){
     exit 3
   fi
   if [ "$os_version" != 6 ]; then
-    update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-amd64/bin/javac
-    update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
+    update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-amd64/bin/javac >/dev/null 2>&1
+    update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java >/dev/null 2>&1
   fi
 }
 
@@ -533,8 +533,4 @@ progress "Updating /etc/hosts"
 set_etcHosts
 progress "Seting libjvm"
 set_libjvm
-if [ $? -ne 0 ]; then
-  warn 'Configure fails'
-  exit 3  
-fi
 progress "System-prerequsite Install Competely !"
