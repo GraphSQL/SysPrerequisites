@@ -20,8 +20,8 @@ install_pkg(){
 create_rpm(){
   progress "generating .rpm file"
   install_pkg 'rpm-build'
+  install_pkg 'wget'
   if [ "$os_version" -lt 7 ]; then
-    install_pkg 'wget'
     wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
     wget https://dev.mysql.com/get/mysql57-community-release-el6-9.noarch.rpm
   else
@@ -72,8 +72,8 @@ download_deb(){
 }
 
 prepare_repo_key_file(){
-  key=$(sudo gpg --list-keys | grep "pub  " | cut -d '/' -f2 | cut -d ' ' -f1)
-  sudo gpg --output ${key_file} --armor --export ${key}
+  key=$(gpg --list-keys | grep "pub  " | cut -d '/' -f2 | cut -d ' ' -f1)
+  gpg --output ${key_file} --armor --export ${key}
 }
 
 create_deb(){
@@ -88,7 +88,7 @@ create_deb(){
   echo "$newsource" >> /etc/apt/sources.list
   cd "$on_dir"
 
-  apt-get install -y dpkg-dev gzip
+  apt-get install -y dpkg-dev gzip apt-utils
   if [ ${os_version} -ge 16 ]; then
     apt-ftparchive packages . > Packages
     gzip -c Packages > Packages.gz
@@ -99,7 +99,7 @@ create_deb(){
 
     # prepare the public_key file
     prepare_repo_key_file
-    cat ${key_file} | sudo apt-key add -
+    cat ${key_file} | apt-key add -
   else
     dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
   fi
@@ -135,7 +135,7 @@ cleanup(){
 
 ## Main ##
 if [[ $EUID -ne 0 ]]; then
-  warn "Sudo or root rights are requqired to install prerequsites for ${pkg_name} software."
+  echo "Sudo or root rights are requqired to install prerequsites for ${pkg_name} software."
   exit 1
 fi
 
