@@ -20,8 +20,8 @@ install_pkg(){
 create_rpm(){
   progress "generating .rpm file"
   install_pkg 'rpm-build'
+  install_pkg 'wget'
   if [ "$os_version" -lt 7 ]; then
-    install_pkg 'wget'
     wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
     wget https://dev.mysql.com/get/mysql57-community-release-el6-9.noarch.rpm
   else
