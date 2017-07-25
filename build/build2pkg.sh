@@ -135,7 +135,7 @@ cleanup(){
 
 ## Main ##
 if [[ $EUID -ne 0 ]]; then
-  warn "Sudo or root rights are requqired to install prerequsites for ${pkg_name} software."
+  echo "Sudo or root rights are requqired to install prerequsites for ${pkg_name} software."
   exit 1
 fi
 
