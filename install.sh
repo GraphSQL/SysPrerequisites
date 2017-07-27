@@ -475,11 +475,19 @@ if [ "Q$OS" = "QRHEL" ]; then  # Redhat or CentOS
     echo "source /opt/rh/devtoolset-2/enable" >> $gccf
     echo "export X_SCLS=\"\`scl enable devtoolset-2 'echo \$X_SCLS'\`\"" >> $gccf 
   fi  
+  my_cnf=/etc/my.cnf
+  if [ -f $my_cnf ]; then
+    if ! grep -q 'port=' $my_cnf; then
+      sed -i '/\[mysqld\]/a port=23306' $my_cnf
+    else
+      sed -i -e 's/port=.*/port=23306/g' $my_cnf
+    fi
+  fi
   if [ "$os_version" -eq 6 ]; then
-    service mysqld start
+    service mysqld restart
     chkconfig --levels 235 mysqld on
   elif [ "$os_version" -eq 7 ]; then 
-    systemctl start mysqld.service
+    systemctl restart mysqld.service
     systemctl enable mysqld.service
   fi
   mysql -u root -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');" >/dev/null 2>&1
@@ -495,7 +503,11 @@ else
     exit 2
   fi
   sed -i '$ d' /etc/apt/sources.list
-  service mysql start
+  my_cnf=/etc/mysql/my.cnf
+  if [ -f $my_cnf ]; then
+    sed -i -e 's/port\s*=[0-9]*.*/port            =23306/g' $my_cnf
+  fi
+  service mysql restart
   if [ "$os_version" -eq 16 ]; then
     mysql -u root -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');" >/dev/null 2>&1
   fi
