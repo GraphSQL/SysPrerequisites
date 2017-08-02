@@ -85,10 +85,10 @@ create_deb(){
 
   progress "generating the ${pkg_name} package"  
   install_pkg 'dpkg-dev'
+  apt-get install -y gzip apt-utils
   echo "$newsource" >> /etc/apt/sources.list
   cd "$on_dir"
 
-  apt-get install -y dpkg-dev gzip apt-utils
   if [ ${os_version} -ge 16 ]; then
     apt-ftparchive packages . > Packages
     gzip -c Packages > Packages.gz
