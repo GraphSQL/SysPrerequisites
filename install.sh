@@ -155,8 +155,17 @@ set_libjvm(){
     exit 3
   fi
   if [ "$os_version" != 6 ]; then
-    update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-amd64/bin/javac >/dev/null 2>&1
-    update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java >/dev/null 2>&1
+    if [ "$os_version" = 7 ]; then
+      java_path=$(find /usr/lib/jvm -name java | grep 1.8.0 | head -1)
+    else
+      java_path=$(find /usr/lib/jvm -name java | grep java-8-openjdk | head -1)
+    fi
+    if [ ! -f $java_path ]; then
+      echo "Can not find java 1.8.0"
+      exit 4
+    fi
+    #update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-amd64/bin/javac >/dev/null 2>&1
+    update-alternatives --set $java_path >/dev/null 2>&1
   fi
 }
 
@@ -194,6 +203,7 @@ cd `dirname $0`
 trap cleanup INT TERM EXIT
 
 pkg_name="graphsql"
+src_url="http://service.graphsql.com/builder"
 GSQL_USER_PWD=""
 REPO_DIR="repo"
 FORCE=false
@@ -465,6 +475,13 @@ else
 		| sudo apt-key add -
   fi
   apt-get update 1>/dev/null
+  if [ ${os_version} -eq 14 ]; then
+    local ca_cert_file=ca-certificates-java_20170531+nmu1_all.deb
+    wget $src_url/$ca_cert_file
+    dpkg -i $ca_cert_file 1>>$LOG 2>&1
+    apt-get -f install 1>>$LOG 2>&1
+    rm -rf $ca_cert_file
+  fi
 fi
   
 progress "Installing required system software packages ..."
@@ -516,7 +533,7 @@ fi
 rm -rf "$off_repo_dir"
 
 if [ "$ONLINE" = true -a ! -f tsar.tar.gz ]; then
-  curl http://service.graphsql.com/download/tsar.tar.gz -o tsar.tar.gz
+  curl $src_url/tsar.tar.gz -o tsar.tar.gz
 fi  
 if [ -f tsar.tar.gz ]; then
   tar xzf tsar.tar.gz
