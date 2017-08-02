@@ -7,7 +7,7 @@ Group:    System
 License:  Commercial
 URL:    http://www.graphsql.com/
 
-Requires: curl, java-1.7.0-openjdk, gcc, gcc-c++, pkgconfig, make, libtool, patch, gettext, openssh-clients, openssl-devel, ntp, cronie, iproute, libstdc++-static, mysql-server
+Requires: curl, java-1.8.0-openjdk, gcc, gcc-c++, pkgconfig, make, libtool, patch, gettext, openssh-clients, openssl-devel, ntp, cronie, iproute, libstdc++-static, mysql-server
 
 
 %description

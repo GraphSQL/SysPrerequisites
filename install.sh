@@ -135,15 +135,37 @@ set_etcHosts(){
 }
 
 set_libjvm(){
-  jvm=$(find /usr -type f -name libjvm.so 2>/dev/null | grep server | head -1)
-  if [ "J$jvm" = 'J' ]; then
-    echo "WARNING: Cannot find libjvm.so. Gpath will not work without this file."
-  else
-    if [ "$OS" = "UBUNTU" ]; then
-      ln -sf $jvm /usr/lib/libjvm.so
-    else
-      ln -sf $jvm /lib64/libjvm.so
+  if [ "Q$OS" == "QRHEL" ]; then
+    if [ "$os_version" = 6 ]; then
+      jvm=$(find /usr/lib/jvm -name libjvm.so | grep 1.7.0 | head -1)
+    else 
+      jvm=$(find /usr/lib/jvm -name libjvm.so | grep 1.8.0 | head -1)
     fi
+  else
+    jvm=$(find /usr/lib/jvm -name libjvm.so | grep java-8-openjdk | head -1)
+  fi
+  if [ -f $jvm ]; then
+    if [ "Q$OS" == "QRHEL" ]; then
+      ln -sf $jvm /lib64/libjvm.so
+    else
+      ln -sf $jvm /usr/lib/libjvm.so
+    fi
+  else
+    echo "Can not find libjvm.so"
+    exit 3
+  fi
+  if [ "$os_version" != 6 ]; then
+    if [ "$os_version" = 7 ]; then
+      java_path=$(find /usr/lib/jvm -name java | grep 1.8.0 | head -1)
+    else
+      java_path=$(find /usr/lib/jvm -name java | grep java-8-openjdk | head -1)
+    fi
+    if [ ! -f $java_path ]; then
+      echo "Can not find java 1.8.0"
+      exit 4
+    fi
+    #update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-amd64/bin/javac >/dev/null 2>&1
+    update-alternatives --set $java_path >/dev/null 2>&1
   fi
 }
 
@@ -181,6 +203,7 @@ cd `dirname $0`
 trap cleanup INT TERM EXIT
 
 pkg_name="graphsql"
+src_url="http://service.graphsql.com/builder"
 GSQL_USER_PWD=""
 REPO_DIR="repo"
 FORCE=false
@@ -444,14 +467,21 @@ if [ "Q$OS" = "QRHEL" ]; then
   echo "enabled=1" >> $off_repo
 else
   echo "$newsource" >> /etc/apt/sources.list
+  apt-get install software-properties-common -y
+  add-apt-repository ppa:openjdk-r/ppa -y
   if [ ${os_version} -eq 16 ]; then
-    apt-get install software-properties-common -y
     add-apt-repository -y ppa:ondrej/mysql-5.6
-    add-apt-repository ppa:openjdk-r/ppa -y
     wget -O - http://service.graphsql.com/${REPO_DIR}/ubuntu_${os_version}/graphsql_ubuntu1604_key \
 		| sudo apt-key add -
   fi
   apt-get update 1>/dev/null
+  if [ ${os_version} -eq 14 ]; then
+    local ca_cert_file=ca-certificates-java_20170531+nmu1_all.deb
+    wget $src_url/$ca_cert_file
+    dpkg -i $ca_cert_file 1>>$LOG 2>&1
+    apt-get -f install 1>>$LOG 2>&1
+    rm -rf $ca_cert_file
+  fi
 fi
   
 progress "Installing required system software packages ..."
@@ -503,7 +533,7 @@ fi
 rm -rf "$off_repo_dir"
 
 if [ "$ONLINE" = true -a ! -f tsar.tar.gz ]; then
-  curl http://service.graphsql.com/download/tsar.tar.gz -o tsar.tar.gz
+  curl $src_url/tsar.tar.gz -o tsar.tar.gz
 fi  
 if [ -f tsar.tar.gz ]; then
   tar xzf tsar.tar.gz
@@ -520,8 +550,4 @@ progress "Updating /etc/hosts"
 set_etcHosts
 progress "Seting libjvm"
 set_libjvm
-if [ $? -ne 0 ]; then
-  warn 'Configure fails'
-  exit 3  
-fi
 progress "System-prerequsite Install Competely !"
