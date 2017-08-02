@@ -72,8 +72,8 @@ download_deb(){
 }
 
 prepare_repo_key_file(){
-  key=$(sudo gpg --list-keys | grep "pub  " | cut -d '/' -f2 | cut -d ' ' -f1)
-  sudo gpg --output ${key_file} --armor --export ${key}
+  key=$(gpg --list-keys | grep "pub  " | cut -d '/' -f2 | cut -d ' ' -f1)
+  gpg --output ${key_file} --armor --export ${key}
 }
 
 create_deb(){
@@ -85,10 +85,10 @@ create_deb(){
 
   progress "generating the ${pkg_name} package"  
   install_pkg 'dpkg-dev'
+  apt-get install -y gzip apt-utils
   echo "$newsource" >> /etc/apt/sources.list
   cd "$on_dir"
 
-  apt-get install -y dpkg-dev gzip
   if [ ${os_version} -ge 16 ]; then
     apt-ftparchive packages . > Packages
     gzip -c Packages > Packages.gz
@@ -99,7 +99,7 @@ create_deb(){
 
     # prepare the public_key file
     prepare_repo_key_file
-    cat ${key_file} | sudo apt-key add -
+    cat ${key_file} | apt-key add -
   else
     dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
   fi
