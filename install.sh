@@ -157,15 +157,17 @@ set_libjvm(){
   if [ "$os_version" != 6 ]; then
     if [ "$os_version" = 7 ]; then
       java_path=$(find /usr/lib/jvm -name java | grep 1.8.0 | head -1)
+      javac_path=$(find /usr/lib/jvm -name javac | grep 1.8.0 | head -1)
     else
       java_path=$(find /usr/lib/jvm -name java | grep java-8-openjdk | head -1)
+      javac_path=$(find /usr/lib/jvm -name javac | grep java-8-openjdk | head -1)
     fi
     if [ ! -f $java_path ]; then
       echo "Can not find java 1.8.0"
       exit 4
     fi
-    #update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-amd64/bin/javac >/dev/null 2>&1
-    update-alternatives --set $java_path >/dev/null 2>&1
+    update-alternatives --set java $java_path >/dev/null 2>&1
+    update-alternatives --set javac $javac_path >/dev/null 2>&1
   fi
 }
 
