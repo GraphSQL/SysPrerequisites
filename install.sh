@@ -142,7 +142,7 @@ set_libjvm(){
       jvm=$(find /usr/lib/jvm -name libjvm.so | grep 1.8.0 | head -1)
     fi
   else
-    jvm=$(find /usr/lib/jvm -name libjvm.so | grep java-8-openjdk | head -1)
+    jvm=$(find /usr/lib/jvm -name libjvm.so | grep java-8 | head -1)
   fi
   if [ -f $jvm ]; then
     if [ "Q$OS" == "QRHEL" ]; then
@@ -159,8 +159,8 @@ set_libjvm(){
       java_path=$(find /usr/lib/jvm -name java | grep 1.8.0 | head -1)
       javac_path=$(find /usr/lib/jvm -name javac | grep 1.8.0 | head -1)
     else
-      java_path=$(find /usr/lib/jvm -name java | grep java-8-openjdk | head -1)
-      javac_path=$(find /usr/lib/jvm -name javac | grep java-8-openjdk | head -1)
+      java_path=$(find /usr/lib/jvm -name java | grep java-8 | head -1)
+      javac_path=$(find /usr/lib/jvm -name javac | grep java-8 | head -1)
     fi
     if [ ! -f $java_path ]; then
       echo "Can not find java 1.8.0"
